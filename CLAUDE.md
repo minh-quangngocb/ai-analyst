@@ -93,6 +93,7 @@ condition matches -- you do not need to be asked.
 | Patterns | `.claude/skills/patterns/skill.md` | Detecting recurring analytical patterns across analyses |
 | Semantic Validation | `.claude/skills/semantic-validation/skill.md` | After validation agent — semantic cross-checks on findings |
 | Archive Analysis | `.claude/skills/archive-analysis/skill.md` | End of pipeline — archive analysis results to .knowledge/ |
+| Architect | `.claude/skills/architect/skill.md` | Invoked as `/architect` — multi-persona planning methodology to produce a master plan for a new project or feature |
 
 **How skills work:** Read the skill file when triggered and follow its instructions. Multiple skills can apply at once (e.g., Visualization Patterns + Triangulation).
 
