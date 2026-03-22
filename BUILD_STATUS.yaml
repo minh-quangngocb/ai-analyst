@@ -304,10 +304,10 @@ tasks:
       - W0B.8
       - W0B.9
     output_files:
-      - .claude/skills/knowledge-bootstrap/skill.md
-      - .claude/skills/run-pipeline/skill.md
-      - .claude/skills/datasets/skill.md
-      - .claude/skills/metric-spec/skill.md
+      - .github/skills/knowledge-bootstrap/SKILL.md
+      - .github/skills/run-pipeline/SKILL.md
+      - .github/skills/datasets/SKILL.md
+      - .github/skills/metric-spec/SKILL.md
       - agents/source-tieout.md
       - agents/deck-creator.md
       - helpers/chart_helpers.py
@@ -357,7 +357,7 @@ tasks:
       - W0B.11
       - W0B.12
     output_files:
-      - .claude/skills/setup/skill.md
+      - .github/skills/setup/SKILL.md
     agent_type: builder
     parallel_group: "W1-A"
     session: null
@@ -372,7 +372,7 @@ tasks:
       - W0B.11
       - W0B.12
     output_files:
-      - .claude/skills/first-run-welcome/skill.md
+      - .github/skills/first-run-welcome/SKILL.md
     agent_type: builder
     parallel_group: "W1-A"
     session: null
@@ -398,7 +398,7 @@ tasks:
     depends_on:
       - W1.1
     output_files:
-      - .claude/skills/setup/skill.md
+      - .github/skills/setup/SKILL.md
     agent_type: builder
     parallel_group: "W1-B"
     session: null
@@ -538,7 +538,7 @@ tasks:
       - W2.5
       - W1.3
     output_files:
-      - .claude/skills/knowledge-bootstrap/skill.md
+      - .github/skills/knowledge-bootstrap/SKILL.md
     agent_type: builder
     parallel_group: "W2-B"
     session: null
@@ -796,7 +796,7 @@ tasks:
     depends_on:
       - W2.3
     output_files:
-      - .claude/skills/feedback-capture/skill.md
+      - .github/skills/feedback-capture/SKILL.md
     agent_type: builder
     parallel_group: "W3-A"
     session: null
@@ -809,7 +809,7 @@ tasks:
     depends_on:
       - W2.2
     output_files:
-      - .claude/skills/log-correction/skill.md
+      - .github/skills/log-correction/SKILL.md
     agent_type: builder
     parallel_group: "W3-A"
     session: null
@@ -822,7 +822,7 @@ tasks:
     depends_on:
       - W2.4
     output_files:
-      - .claude/skills/archaeology/skill.md
+      - .github/skills/archaeology/SKILL.md
     agent_type: builder
     parallel_group: "W3-A"
     session: null
@@ -836,7 +836,7 @@ tasks:
       - W3.1
       - W1.1
     output_files:
-      - .claude/skills/question-router/skill.md
+      - .github/skills/question-router/SKILL.md
     agent_type: builder
     parallel_group: "W3-B"
     session: null
@@ -866,9 +866,9 @@ tasks:
     depends_on:
       - W2.3
     output_files:
-      - .claude/skills/question-framing/skill.md
-      - .claude/skills/visualization-patterns/skill.md
-      - .claude/skills/stakeholder-communication/skill.md
+      - .github/skills/question-framing/SKILL.md
+      - .github/skills/visualization-patterns/SKILL.md
+      - .github/skills/stakeholder-communication/SKILL.md
     agent_type: builder
     parallel_group: "W3-A"
     session: null
@@ -988,7 +988,7 @@ tasks:
       - W3.10
       - W3.3
     output_files:
-      - .claude/skills/archive-analysis/skill.md
+      - .github/skills/archive-analysis/SKILL.md
     agent_type: builder
     parallel_group: "W3-C"
     session: null
@@ -1005,7 +1005,7 @@ tasks:
     depends_on:
       - W2.6
     output_files:
-      - .claude/skills/run-pipeline/skill.md
+      - .github/skills/run-pipeline/SKILL.md
       - agents/registry.yaml
     agent_type: builder
     parallel_group: "W4-A"
@@ -1019,7 +1019,7 @@ tasks:
     depends_on:
       - W4.1
     output_files:
-      - .claude/skills/run-pipeline/skill.md
+      - .github/skills/run-pipeline/SKILL.md
       - agents/registry.yaml
     agent_type: builder
     parallel_group: "W4-B"
@@ -1033,7 +1033,7 @@ tasks:
     depends_on:
       - W4.2
     output_files:
-      - .claude/skills/run-pipeline/skill.md
+      - .github/skills/run-pipeline/SKILL.md
     agent_type: builder
     parallel_group: "W4-C"
     session: null
@@ -1048,8 +1048,8 @@ tasks:
       - W0B.11
       - W0B.12
     output_files:
-      - .claude/skills/run-pipeline/skill.md
-      - .claude/skills/resume-pipeline/skill.md
+      - .github/skills/run-pipeline/SKILL.md
+      - .github/skills/resume-pipeline/SKILL.md
     agent_type: builder
     parallel_group: "W4-A"
     session: null
@@ -1095,7 +1095,7 @@ tasks:
     depends_on:
       - W4.4
     output_files:
-      - .claude/skills/runs/skill.md
+      - .github/skills/runs/SKILL.md
     agent_type: builder
     parallel_group: "W4-B"
     session: null
@@ -1108,7 +1108,7 @@ tasks:
     depends_on:
       - W4.6
     output_files:
-      - .claude/skills/resume-pipeline/skill.md
+      - .github/skills/resume-pipeline/SKILL.md
     agent_type: builder
     parallel_group: "W4-E"
     session: null
@@ -1134,7 +1134,7 @@ tasks:
     depends_on:
       - W4.6
     output_files:
-      - .claude/skills/run-pipeline/skill.md
+      - .github/skills/run-pipeline/SKILL.md
     agent_type: builder
     parallel_group: "W4-E"
     session: null
@@ -1269,7 +1269,7 @@ tasks:
     depends_on:
       - W1.1
     output_files:
-      - .claude/skills/setup-dev-context/skill.md
+      - .github/skills/setup-dev-context/SKILL.md
     agent_type: builder
     parallel_group: "W6-A"
     session: null
@@ -1283,7 +1283,7 @@ tasks:
       - W1.5
       - W3.9
     output_files:
-      - .claude/skills/business/skill.md
+      - .github/skills/business/SKILL.md
     agent_type: builder
     parallel_group: "W6-A"
     session: null
@@ -1296,7 +1296,7 @@ tasks:
     depends_on:
       - W2.4
     output_files:
-      - .claude/skills/notion-ingest/skill.md
+      - .github/skills/notion-ingest/SKILL.md
     agent_type: builder
     parallel_group: "W6-A"
     session: null

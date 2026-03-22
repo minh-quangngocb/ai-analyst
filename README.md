@@ -2,12 +2,11 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Claude Code Required](https://img.shields.io/badge/requires-Claude%20Code-blueviolet.svg)](https://claude.ai/code)
 [![Tests](https://img.shields.io/badge/tests-606%20passing-brightgreen.svg)](#)
 
-An AI product analyst built on Claude Code. You ask a business question, it runs a pipeline of 18 agents that frame the question, explore your data, find the root cause, build a narrative, and hand you a validated slide deck with speaker notes. Minutes, not weeks.
+An AI product analyst that works with any AI coding agent (VS Code Copilot, Claude Code, etc.). You ask a business question, it runs a pipeline of 18 agents that frame the question, explore your data, find the root cause, build a narrative, and hand you a validated slide deck with speaker notes. Minutes, not weeks.
 
-**18** specialized agents | **39** auto-applied skills | **20** slash commands | DAG-based parallel execution | PDF + HTML export
+**18** specialized agents | **22** auto-applied instructions | **17** reusable prompts | DAG-based parallel execution | PDF + HTML export
 
 ---
 
@@ -25,29 +24,10 @@ Don't hand this to someone who can't validate the output. Don't run it on data y
 
 **Bring your own data.** No bundled datasets. Connect your CSVs, local databases, or cloud warehouse with `/connect-data` and start analyzing.
 
----
-
-## What's New in V2
-
-V2 is a ground-up rebuild of the intelligence layer. The pipeline and agents from V1 still work the same way — you won't notice a difference in how you use it. What changed is everything underneath.
-
-| Area | V1 | V2 |
-|------|----|----|
-| **Data** | Bundled NovaMart e-commerce dataset | Bring your own — CSV, DuckDB, Postgres, BigQuery, Snowflake |
-| **Onboarding** | Manual setup, read the docs | `/setup` interview learns your role, data, and business context |
-| **Memory** | Stateless across sessions | Knowledge system persists corrections, learnings, query patterns, business glossary |
-| **Self-learning** | None | Captures feedback, logs corrections, retrieves proven SQL patterns — never repeats the same mistake |
-| **Theming** | Hardcoded chart style | YAML-based theme system with brand colors, WCAG-compliant palettes |
-| **Business context** | None | Organization knowledge base — glossary, metrics, products, teams. Notion ingest. |
-| **Pipeline** | Single run, restart on failure | Run tracking (`/runs`), reliable resume, comms drafter for Slack/email output |
-| **Testing** | Minimal | 606 tests with synthetic fixtures, no external data dependencies |
-| **Dataset coupling** | NovaMart table names hardcoded in agents | Fully dataset-agnostic — agents resolve from active manifest and schema |
-
----
 
 ## Don't Know What to Do? Just Ask.
 
-Claude knows the entire system — every agent, skill, command, and dataset. If you're stuck, ask it:
+The assistant knows the entire system — every agent, instruction, prompt, and dataset. If you're stuck, ask it:
 
 ```
 What can I do with this data?
@@ -57,19 +37,13 @@ Which agents handle root cause analysis?
 Re-run just the chart maker and deck creator.
 ```
 
-Claude will tell you the exact command. You don't need to memorize anything in this README. Think of it as a reference — Claude is the guide.
+It will tell you the exact command. You don't need to memorize anything in this README. Think of it as a reference — the assistant is the guide.
 
 ---
 
 ## Quick Start
 
-**1. Install Claude Code** (requires a [Claude Pro subscription](https://claude.ai/pro))
-
-```bash
-npm install -g @anthropic-ai/claude-code
-```
-
-**2. Clone and set up**
+**1. Clone and set up**
 
 ```bash
 git clone https://github.com/ai-analyst-lab/ai-analyst.git
@@ -77,22 +51,24 @@ cd ai-analyst
 pip install -e ".[dev]"
 ```
 
-**3. Start Claude Code**
+**2. Open in VS Code** (or use Claude Code CLI)
 
 ```bash
-claude
+code .
 ```
 
-**4. Connect your data and go**
+In VS Code, the `@analyst` agent mode activates automatically via
+`.github/agents/analyst.agent.md`. Skills are loaded from
+`.github/skills/{name}/SKILL.md`.
+
+For Claude Code CLI, run `claude` — it reads from `CLAUDE.md`.
+
+**3. Connect your data and go**
+
+Use the `connect-data` prompt, or skip the wizard and just ask:
 
 ```
-/connect-data
-```
-
-Or skip the wizard and just ask a question with your data in a directory:
-
-```
-/run-pipeline data_path=data/my_csvs/ question="Why is conversion dropping?"
+run-pipeline data_path=data/my_csvs/ question="Why is conversion dropping?"
 ```
 
 For full setup details: [docs/setup-guide.md](docs/setup-guide.md)
@@ -347,12 +323,13 @@ working/                                # Intermediate files (safe to delete)
 
 | Want to... | Do this |
 |-----------|---------|
-| Change how Claude thinks | Edit `CLAUDE.md` (the AI's persona, rules, workflow) |
-| Add a new skill | Create `.claude/skills/my-skill/skill.md`, reference it in `CLAUDE.md` |
+| Change the AI persona | Edit `.github/copilot-instructions.md` (VS Code) or `CLAUDE.md` (Claude Code) |
+| Add a new skill | Create `.github/skills/my-skill/SKILL.md` with YAML frontmatter, reference it in `copilot-instructions.md` |
+| Add a new slash command | Create `.github/skills/my-command/SKILL.md` with `disable-model-invocation: true` |
 | Add a new agent | Create `agents/my-agent.md` using `agents/CONTRACT_TEMPLATE.md` as a starting point |
 | Change the slide theme | Create a YAML theme in `themes/brands/` (see [docs/theming.md](docs/theming.md)) |
 | Add deck components | Edit `templates/marp_components.md` (snippet library) |
-| Modify the pipeline | Edit `.claude/skills/run-pipeline/skill.md` (rules, checkpoints, execution) |
+| Modify the pipeline | Edit `.github/skills/run-pipeline/SKILL.md` (rules, checkpoints, execution) |
 | Add to the agent DAG | Edit `agents/registry.yaml` (dependencies, execution order) |
 
 ---
@@ -360,7 +337,7 @@ working/                                # Intermediate files (safe to delete)
 <details>
 <summary><strong>All 18 Agents</strong> (click to expand)</summary>
 
-Agents are markdown prompt templates in the `agents/` directory. Each defines a multi-step workflow with `{{VARIABLES}}` that get filled in at runtime. To invoke one, ask Claude to run it or use `/run-pipeline` to orchestrate all of them.
+Agents are markdown prompt templates in the `agents/` directory. Each defines a multi-step workflow with `{{VARIABLES}}` that get filled in at runtime. Ask the assistant to run one, or use the `run-pipeline` prompt to orchestrate all of them.
 
 ### Framing
 
@@ -415,15 +392,15 @@ Agents are markdown prompt templates in the `agents/` directory. Each defines a 
 ---
 
 <details>
-<summary><strong>All 39 Skills</strong> (click to expand)</summary>
+<summary><strong>All Instructions & Prompts</strong> (click to expand)</summary>
 
-Skills are instruction files in `.claude/skills/` that Claude follows automatically when a trigger condition matches. You don't invoke them manually. When you ask for a chart, the Visualization Patterns skill activates. When you start an analysis, the Data Quality Check skill runs.
+Skills are files in `.github/skills/{name}/SKILL.md` that the assistant follows automatically when a trigger condition matches, or invokes via `/` slash commands. When you ask for a chart, the Visualization Patterns skill activates. When you start an analysis, the Data Quality Check skill runs.
 
-### Always Active
+### Always Active Instructions
 
-These skills shape every interaction:
+These instructions shape every interaction:
 
-| Skill | What It Does |
+| Instruction | What It Does |
 |-------|-------------|
 | analysis-design-spec | Ensures every analysis starts with a plan: question, decision, data needed, success criteria |
 | close-the-loop | Every recommendation gets a decision owner, success metric, follow-up date, and fallback plan |
@@ -443,11 +420,11 @@ These skills shape every interaction:
 | visualization-patterns | Ensures every chart follows SWD design standards |
 | archaeology | Retrieves proven SQL patterns from query archaeology before writing new queries |
 
-### On-Demand (Slash Commands)
+### On-Demand (Prompts)
 
-These activate when you use a command:
+These activate when you invoke a prompt:
 
-| Skill | Command | What It Does |
+| Prompt | Command | What It Does |
 |-------|---------|-------------|
 | run-pipeline | `/run-pipeline` | End-to-end analysis with DAG execution, checkpoints, and export |
 | resume-pipeline | `/resume-pipeline` | Resume interrupted work from last completed agent |
@@ -472,7 +449,7 @@ These activate when you use a command:
 
 ### Presentation & Knowledge
 
-| Skill | What It Does |
+| Instruction | What It Does |
 |-------|-------------|
 | presentation-themes | Theme standards for slide decks: layouts, typography, color palettes |
 | archive-analysis | Saves completed analyses to the knowledge system for future recall |
@@ -558,9 +535,8 @@ Python modules in `helpers/` that agents call during execution:
 ## Requirements
 
 - **Python 3.10+**
-- **Node.js 18+** (for Claude Code)
-- **Claude Code** with a [Claude Pro subscription](https://claude.ai/pro) ($20/month)
-- **Internet connection** (for Claude API and optional MotherDuck)
+- **VS Code** with Copilot (or any AI coding agent), or **Claude Code CLI**
+- **Internet connection** (for LLM API and optional MotherDuck)
 
 ---
 

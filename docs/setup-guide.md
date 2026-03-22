@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - **Python 3.10+** with pip
-- **Claude Code** CLI installed ([docs](https://docs.anthropic.com/en/docs/claude-code))
+- **VS Code** with Copilot (or any AI coding agent), or **Claude Code CLI**
 - Your data in CSV, DuckDB, or a supported warehouse (Postgres, BigQuery, Snowflake)
 
 ## Quick Start
@@ -16,15 +16,18 @@ cd ai-analyst
 pip install -e ".[dev]"
 ```
 
-### 2. Launch Claude Code
+### 2. Open in your editor
 
+**VS Code:** Open the folder — the `@analyst` agent mode loads automatically.
+
+**Claude Code CLI:**
 ```bash
 claude
 ```
 
 ### 3. Connect your data
 
-On first launch, Claude will detect a fresh install and start the interactive
+On first launch, the assistant will detect a fresh install and start the interactive
 setup interview. It walks you through:
 
 1. **Your role and team** -- so Claude adapts its communication style
@@ -91,13 +94,14 @@ python -m pytest tests/ -v
 
 ```
 ai-analyst/
-  .claude/skills/     -- Claude skill definitions (auto-applied behaviors)
-  .knowledge/         -- Knowledge system (populated by setup and usage)
-  agents/             -- Agent prompt templates (multi-step workflows)
-  helpers/            -- Python utility modules
-  tests/              -- Pytest test suite
-  data/               -- Your datasets (gitignored)
-  docs/               -- Documentation
+  .github/skills/        -- Agent Skills (auto-applied + slash commands)
+  .github/agents/        -- VS Code agent mode definitions
+  .knowledge/            -- Knowledge system (populated by setup and usage)
+  agents/                -- Agent prompt templates (multi-step workflows)
+  helpers/               -- Python utility modules
+  tests/                 -- Pytest test suite
+  data/                  -- Your datasets (gitignored)
+  docs/                  -- Documentation
   outputs/            -- Analysis outputs (charts, decks, narratives)
   working/            -- Intermediate work files
 ```

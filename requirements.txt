@@ -5,3 +5,10 @@ numpy>=1.24
 scipy>=1.10
 duckdb>=0.9
 pyyaml>=6.0
+google-cloud-bigquery==3.5.0
+google-cloud-firestore==2.9.1
+google-cloud-logging==3.5.0
+google-cloud-storage==2.7.0
+google-cloud-pubsub==2.14.0
+pandas
+db-dtypes

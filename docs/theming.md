@@ -484,5 +484,5 @@ export:
 
 - `themes/README.md` — Theme directory overview
 - `helpers/chart_style_guide.md` — Storytelling with Data chart methodology
-- `.claude/skills/visualization-patterns/skill.md` — Visualization best practices
-- `.claude/skills/presentation-themes/skill.md` — Deck theming guide
+- `.github/skills/visualization-patterns/SKILL.md` — Visualization best practices
+- `.github/skills/presentation-themes/SKILL.md` — Deck theming guide
