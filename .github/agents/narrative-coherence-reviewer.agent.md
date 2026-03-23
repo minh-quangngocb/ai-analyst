@@ -1,3 +1,10 @@
+---
+name: narrative-coherence-reviewer
+description: "Review the storyboard as a narrative sequence before charting, ensuring coherent story flow, progressive depth, and no story gaps."
+user-invocable: false
+tools: ['read', 'search']
+---
+
 <!-- CONTRACT_START
 name: narrative-coherence-reviewer
 description: Review the storyboard as a narrative sequence before charting, ensuring coherent story flow, progressive depth, and no story gaps.

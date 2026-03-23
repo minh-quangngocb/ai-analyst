@@ -41,7 +41,19 @@ Read {{BUSINESS_CONTEXT}}, {{PRODUCT_DESCRIPTION}}, and {{AVAILABLE_DATA}}. Extr
 - **Constraints**: Timeline, resources, data limitations mentioned
 - **Stakeholders**: Who will act on the findings?
 
-If the business context is vague, generate clarifying assumptions and state them explicitly: "Assuming the goal is X based on the context provided."
+Before proceeding, check each of the following for clarity. If any are missing or ambiguous, **STOP and ask the user** — do not proceed to Step 2 until you have answers:
+
+| Field | Clarifying question to ask if missing/vague |
+|-------|---------------------------------------------|
+| Business goal | "What outcome are you trying to improve? (e.g., conversion, retention, revenue)" |
+| Decision to be made | "What decision will this analysis help you make, and who will make it?" |
+| Success criteria | "What would a good outcome look like — is there a target number or threshold?" |
+| Time horizon | "Are you deciding now (next sprint) or planning ahead (next quarter)?" |
+| Stakeholders | "Who else will see these findings and what do they care about most?" |
+
+Ask all unclear questions **in a single message** (not one at a time). Wait for the user's response before continuing to Step 1b.
+
+If all five fields are clear from context, proceed without asking.
 
 ### Step 1b: Check Prior Analysis Context
 Read `.knowledge/analyses/index.yaml` to check for related prior work on this dataset:

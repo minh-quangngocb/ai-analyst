@@ -1,3 +1,10 @@
+---
+name: source-tieout
+description: "Verify data loading integrity by comparing pandas direct-read vs DuckDB SQL on foundational metrics. HALT on mismatch."
+user-invocable: false
+tools: ['read', 'search', 'edit', 'terminalLastCommand']
+---
+
 <!-- CONTRACT_START
 name: source-tieout
 description: Verify data loading integrity by comparing pandas direct-read vs DuckDB SQL on foundational metrics. HALT on mismatch.

@@ -141,6 +141,46 @@ Organize query cells by **analytical theme**, not raw query order. Between query
 - Create the notebook using `create_file` with raw `.ipynb` JSON — do not use notebook cell-editing tools for initial creation.
 - Display DataFrames directly (put `df` as last line in cell) rather than wrapping in `print()`.
 
+## Analysis & Visualization Section (after data export)
+
+When the notebook includes an analysis/visualization section (charts + findings), follow these rules strictly:
+
+### Problem Decomposition
+
+Break the analysis into clear, layered parts that progressively narrow scope. A proven pattern:
+
+1. **Company-level performance** — How does the segment perform relative to the entire business? Show absolute metrics and company-wide shares for all segments side-by-side.
+2. **Within-category performance** — How does the segment perform relative to its peers? For example, show tablet app performance within the "App" category and within the "Tablet" category separately. This reveals whether a segment is small because its *category* is small, or because *it specifically* underperforms.
+3. **Trends** — Is the segment growing, flat, or declining? Weekly trends over 13+ weeks.
+4. **Period-over-period momentum** — Current period vs prior period change to confirm or challenge the trend.
+5. **Summary scorecard** — One consolidated comparison table pulling from all prior sections.
+
+Each part gets its own markdown header, charts, and a dedicated **findings markdown cell** at the end.
+
+### Findings in Markdown Blocks — Not in Chart Titles
+
+- **Never embed analytical conclusions in chart titles or subtitles.** Chart titles should be neutral and descriptive (e.g., "Sessions by segment (last 28 days)"), not opinionated (e.g., "Android Tablet App: only 25K sessions").
+- **All analysis and interpretation goes in dedicated markdown cells** placed after the chart(s) they reference. Format findings as:
+  - A markdown header (e.g., `### Part 1 — Findings`)
+  - Bullet points organized by metric, each stating what the data shows and why it matters
+  - A brief summary sentence at the end of each findings block
+- This separation keeps charts reusable and lets the narrative be reviewed/edited independently.
+
+### Data-Driven Visualizations — No Static Values
+
+- **Always pull values from the DataFrame columns** when building charts, labels, annotations, and summary tables. Never hardcode numbers into visualization code.
+- For bar labels: read from the DataFrame row, e.g., `df.loc[df["segment"] == seg, "sessions"].values[0]`.
+- For summary scorecards: build the metrics dictionary by indexing into DataFrames, e.g., `a_sess["visit_share_vs_all"]`, not `0.14`.
+- For formatting: use helper functions that format from the raw value (e.g., `f"€{val/1e3:.0f}K"`), never pre-formatted static strings.
+- **Why:** Static values break when data refreshes, create maintenance burden, and risk presenting stale numbers. DataFrame-driven values guarantee the chart always matches the underlying data.
+
+### Chart Style Rules
+
+- Use SWD (Storytelling with Data) principles: gray everything, highlight only the focus segment(s) with color.
+- Use `ax.set_title()` with `loc="left"` for chart titles — keep them short and factual.
+- Direct-label bars instead of using legends. Bold the highlighted segment labels.
+- Remove unnecessary chart elements: top/right spines, x-axis on horizontal bar charts, gridlines.
+
 ## Output Format
 - Provide created/updated notebook path.
 - Provide list of SQL files used (not just created — include pre-existing ones).

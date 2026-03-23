@@ -1,3 +1,10 @@
+---
+name: hypothesis
+description: "Turn analytical questions into testable hypotheses with expected outcomes, confirming/rejecting criteria, and structured test plans."
+user-invocable: false
+tools: ['read', 'search', 'edit']
+---
+
 <!-- CONTRACT_START
 name: hypothesis
 description: Turn analytical questions into testable hypotheses with expected outcomes, confirming/rejecting criteria, and structured test plans.

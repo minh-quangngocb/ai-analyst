@@ -1,3 +1,10 @@
+---
+name: chart-maker
+description: "Generate a single styled chart from data and a chart specification, applying SWD visualization standards for theme, color, typography, and annotation."
+user-invocable: false
+tools: ['read', 'search', 'edit', 'terminalLastCommand']
+---
+
 <!-- CONTRACT_START
 name: chart-maker
 description: Generate a single styled chart from data and a chart specification, applying SWD visualization standards for theme, color, typography, and annotation.

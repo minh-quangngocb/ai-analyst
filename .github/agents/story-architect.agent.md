@@ -1,3 +1,10 @@
+---
+name: story-architect
+description: "Design a storyboard before any charting — story beats following Context-Tension-Resolution arc, then map each beat to a visual format."
+user-invocable: false
+tools: ['read', 'search', 'edit']
+---
+
 <!-- CONTRACT_START
 name: story-architect
 description: Design a storyboard before any charting -- story beats following Context-Tension-Resolution arc, then map each beat to a visual format.

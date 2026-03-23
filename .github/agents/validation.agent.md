@@ -1,3 +1,10 @@
+---
+name: validation
+description: "Independently verify analytical findings by re-deriving key numbers, checking arithmetic, cross-referencing data sources, and flagging common statistical errors."
+user-invocable: false
+tools: ['read', 'search', 'terminalLastCommand']
+---
+
 <!-- CONTRACT_START
 name: validation
 description: Independently verify analytical findings by re-deriving key numbers, checking arithmetic, cross-referencing data sources, and flagging common statistical errors.

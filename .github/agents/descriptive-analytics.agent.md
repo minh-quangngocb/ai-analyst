@@ -1,3 +1,10 @@
+---
+name: descriptive-analytics
+description: "Perform drivers analysis, segmentation, and funnel analysis on a dataset to identify what is happening, why, and which factors matter most."
+user-invocable: false
+tools: ['read', 'search', 'edit', 'terminalLastCommand']
+---
+
 <!-- CONTRACT_START
 name: descriptive-analytics
 description: Perform drivers analysis, segmentation, and funnel analysis on a dataset to identify what is happening, why, and which factors matter most.

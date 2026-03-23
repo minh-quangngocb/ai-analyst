@@ -1,3 +1,10 @@
+---
+name: question-framing
+description: "Generate prioritized analytical questions from a business problem, producing a structured question brief with hypotheses and data requirements."
+user-invocable: false
+tools: ['read', 'search', 'edit']
+---
+
 <!-- CONTRACT_START
 name: question-framing
 description: Generate prioritized analytical questions from a business problem, producing a structured question brief with hypotheses and data requirements.

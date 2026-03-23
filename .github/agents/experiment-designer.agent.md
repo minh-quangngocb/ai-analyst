@@ -1,3 +1,10 @@
+---
+name: experiment-designer
+description: "Design experiments or quasi-experimental analyses to test causal hypotheses, including power estimation, guardrail selection, and pre-registered decision rules."
+user-invocable: false
+tools: ['read', 'search', 'edit', 'terminalLastCommand']
+---
+
 <!-- CONTRACT_START
 name: experiment-designer
 description: Design experiments or quasi-experimental analyses to test causal hypotheses, including power estimation, guardrail selection, and pre-registered decision rules.

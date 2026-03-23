@@ -1,3 +1,10 @@
+---
+name: data-explorer
+description: "Discover what data exists in a source, profile its quality and completeness, identify tracking gaps, and recommend supported analyses."
+user-invocable: false
+tools: ['read', 'search', 'edit', 'terminalLastCommand']
+---
+
 <!-- CONTRACT_START
 name: data-explorer
 description: Discover what data exists in a source, profile its quality and completeness, identify tracking gaps, and recommend supported analyses.

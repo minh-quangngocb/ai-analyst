@@ -1,3 +1,10 @@
+---
+name: comms-drafter
+description: "Draft stakeholder communications from completed analysis results, adapting format and tone to user preferences and audience."
+user-invocable: false
+tools: ['read', 'search', 'edit']
+---
+
 <!-- CONTRACT_START
 name: comms-drafter
 description: Draft stakeholder communications from completed analysis results, adapting format and tone to user preferences and audience.

@@ -1,3 +1,10 @@
+---
+name: visual-design-critic
+description: "Review generated chart images against the SWD checklist and advanced technique standards, producing specific fix reports with actionable code-level fixes."
+user-invocable: false
+tools: ['read', 'search']
+---
+
 <!-- CONTRACT_START
 name: visual-design-critic
 description: Review generated chart images against the SWD checklist and advanced technique standards, producing specific fix reports with actionable code-level fixes.

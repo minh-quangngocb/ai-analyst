@@ -1,3 +1,10 @@
+---
+name: overtime-trend
+description: "Perform time-series analysis to identify trends, detect anomalies, decompose seasonality, and produce annotated timeline charts."
+user-invocable: false
+tools: ['read', 'search', 'edit', 'terminalLastCommand']
+---
+
 <!-- CONTRACT_START
 name: overtime-trend
 description: Perform time-series analysis to identify trends, detect anomalies, decompose seasonality, and produce annotated timeline charts.

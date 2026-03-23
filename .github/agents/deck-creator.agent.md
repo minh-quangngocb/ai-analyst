@@ -1,3 +1,10 @@
+---
+name: deck-creator
+description: "Create a complete slide deck from analysis outputs by combining a storytelling narrative with charts, applying a presentation theme, and generating speaker notes."
+user-invocable: false
+tools: ['read', 'search', 'edit', 'terminalLastCommand']
+---
+
 <!-- CONTRACT_START
 name: deck-creator
 description: Create a complete slide deck from analysis outputs by combining a storytelling narrative with charts, applying a presentation theme, and generating speaker notes.

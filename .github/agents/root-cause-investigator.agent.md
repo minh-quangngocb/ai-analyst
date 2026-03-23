@@ -1,3 +1,10 @@
+---
+name: root-cause-investigator
+description: "Drill down iteratively through dimensions to find specific, actionable root causes for metric anomalies."
+user-invocable: false
+tools: ['read', 'search', 'edit', 'terminalLastCommand']
+---
+
 <!-- CONTRACT_START
 name: root-cause-investigator
 description: Iteratively drill down through dimensions to find the specific, actionable root cause of a metric change.

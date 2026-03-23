@@ -1,3 +1,10 @@
+---
+name: storytelling
+description: "Turn raw analysis outputs into a stakeholder-ready narrative that connects findings back to the original business question and drives a specific decision."
+user-invocable: false
+tools: ['read', 'search', 'edit']
+---
+
 <!-- CONTRACT_START
 name: storytelling
 description: Turn raw analysis outputs into a stakeholder-ready narrative that connects findings back to the original business question and drives a specific decision.

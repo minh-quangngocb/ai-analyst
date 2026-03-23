@@ -1,3 +1,10 @@
+---
+name: opportunity-sizer
+description: "Quantify the business value of an opportunity or fix with sensitivity analysis that identifies which assumptions matter most."
+user-invocable: false
+tools: ['read', 'search', 'edit']
+---
+
 <!-- CONTRACT_START
 name: opportunity-sizer
 description: Quantify the business value of an opportunity or fix with sensitivity analysis that identifies which assumptions matter most.

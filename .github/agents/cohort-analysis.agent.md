@@ -1,3 +1,10 @@
+---
+name: cohort-analysis
+description: "Perform cohort analysis — retention curves, cohort comparison, vintage analysis, and cohort LTV — to reveal how user behavior evolves over time."
+user-invocable: false
+tools: ['read', 'search', 'edit', 'terminalLastCommand']
+---
+
 <!-- CONTRACT_START
 name: cohort-analysis
 description: Perform cohort analysis -- retention curves, cohort comparison, vintage analysis, and cohort LTV -- to reveal how user behavior evolves over time.
