@@ -1,6 +1,6 @@
 ---
 name: ga4-dataset
-description: 'Schema reference for the Google Analytics 4 (GA4) dataset. Use when the user mentions "Google Analytics 4", "GA4", or references cb-data-hub-prod.google_analytics_4 tables. Provides full schema, data quirks, and query patterns for the events and sessions tables.'
+description: 'Schema reference for the Google Analytics 4 (GA4) dataset. Use when the user mentions "Google Analytics 4", "GA4", or references google_analytics_4 tables. Provides full schema, data quirks, and query patterns for the events and sessions tables.'
 user-invocable: false
 disable-model-invocation: false
 ---
@@ -11,7 +11,7 @@ disable-model-invocation: false
 
 Apply this skill when the data source involves:
 - "Google Analytics 4", "GA4", or "google_analytics_4"
-- `cb-data-hub-prod.google_analytics_4` BigQuery project
+- `{project}.google_analytics_4` BigQuery dataset
 - The `events` or `sessions` tables from GA4
 
 This skill provides pre-built schema knowledge so the data-explorer agent can
@@ -19,7 +19,7 @@ skip basic schema discovery and focus on profiling and quality assessment.
 
 ## Dataset Overview
 
-- **Project:** `cb-data-hub-prod`
+- **Project:** `{project}` (resolve from active dataset manifest)
 - **Dataset:** `google_analytics_4`
 - **Warehouse:** BigQuery
 - **Tables:** `events`, `sessions`
@@ -28,7 +28,7 @@ skip basic schema discovery and focus on profiling and quality assessment.
 
 ## Schema: `sessions`
 
-Table: `cb-data-hub-prod.google_analytics_4.sessions`
+Table: `{project}.google_analytics_4.sessions`
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
@@ -41,7 +41,7 @@ Table: `cb-data-hub-prod.google_analytics_4.sessions`
 | account_id | INT64 | YES | User account ID |
 | customer_id | INT64 | YES | Customer ID |
 | customer_type | STRING | YES | Customer type classification |
-| coolblue_cookie_id | STRING | YES | Coolblue cookie identifier |
+| cookie_id | STRING | YES | Cookie identifier |
 | user_first_touch_timestamp | INT64 | YES | First touch timestamp (micros) |
 | user_pseudo_id | STRING | YES | GA4 pseudonymized user identifier |
 | new_user | INT64 | YES | Whether this is a new user (0/1) |
@@ -184,7 +184,7 @@ order_ids[].transaction_id  INT64 — Transaction ID
 
 ## Schema: `events`
 
-Table: `cb-data-hub-prod.google_analytics_4.events`
+Table: `{project}.google_analytics_4.events`
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
@@ -215,7 +215,7 @@ Table: `cb-data-hub-prod.google_analytics_4.events`
 | account_id | INT64 | YES | User account ID |
 | user_pseudo_id | STRING | YES | GA4 pseudonymized user identifier |
 | total_session_id | STRING | YES | Session identifier — joins to sessions table |
-| coolblue_cookie_id | STRING | YES | Coolblue cookie identifier |
+| cookie_id | STRING | YES | Cookie identifier |
 | cookie_preference | STRING | YES | Cookie consent preference |
 | application | STRING | YES | Application identifier |
 | user_properties | ARRAY\<STRUCT\> | NO | User properties key-value pairs |
@@ -335,7 +335,7 @@ SELECT
   COUNTIF(add_to_cart > 0) AS added_to_cart,
   COUNTIF(checkout_page_seen > 0) AS reached_checkout,
   COUNTIF(order_placed > 0) AS converted
-FROM `cb-data-hub-prod.google_analytics_4.sessions`
+FROM `{project}.google_analytics_4.sessions`
 WHERE date BETWEEN {{start_date}} and {{end_date}}
   AND intraday = FALSE
 GROUP BY subsidiary_name
@@ -351,7 +351,7 @@ SELECT
   COUNTIF(checkout_payment_page_seen > 0) AS payment,
   COUNTIF(checkout_overview_page_seen > 0) AS overview,
   COUNTIF(checkout_thankyou_page_seen > 0) AS thankyou
-FROM `cb-data-hub-prod.google_analytics_4.sessions`
+FROM `{project}.google_analytics_4.sessions`
 WHERE date BETWEEN {{start_date}} and {{end_date}}
   AND intraday = FALSE
   AND checkout_page_seen > 0
@@ -364,7 +364,7 @@ SELECT
   event_name,
   (SELECT value FROM UNNEST(event_params) WHERE key = 'param_name') AS param_value,
   COUNT(*) AS event_count
-FROM `cb-data-hub-prod.google_analytics_4.events`
+FROM `{project}.google_analytics_4.events`
 WHERE date BETWEEN {{start_date}} and {{end_date}}
   AND intraday = FALSE
 GROUP BY 1, 2
@@ -378,7 +378,7 @@ SELECT
   ts.marketing_identifiers_flat.utm_medium,
   COUNT(DISTINCT total_session_id) AS sessions,
   COUNTIF(order_placed > 0) AS conversions
-FROM `cb-data-hub-prod.google_analytics_4.sessions`,
+FROM `{project}.google_analytics_4.sessions`,
   UNNEST(traffic_sources) AS ts
 WHERE date BETWEEN {{start_date}} and {{end_date}}
   AND intraday = FALSE

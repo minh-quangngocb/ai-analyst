@@ -130,8 +130,11 @@ agents:
     file: .github/agents/root-cause-investigator.agent.md
     pipeline_step: 6
     critical: true
-    depends_on:
+    depends_on: []
+    depends_on_any:
       - descriptive-analytics
+      - overtime-trend
+      - cohort-analysis
     inputs:
       - METRIC
       - OBSERVATION

@@ -2,7 +2,7 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-606%20passing-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/tests-625%20passing-brightgreen.svg)](#)
 
 An AI product analyst that works with any AI coding agent (VS Code Copilot, Claude Code, etc.). You ask a business question, it runs a pipeline of 18 agents that frame the question, explore your data, find the root cause, build a narrative, and hand you a validated slide deck with speaker notes. Minutes, not weeks.
 
@@ -121,7 +121,7 @@ Claude generates a chart following Storytelling with Data methodology: warm off-
 
 ## How It Works: The Pipeline
 
-When you run `/run-pipeline`, Claude orchestrates 17 agents across 4 phases:
+When you run `/run-pipeline`, Claude orchestrates 18 agents across 4 phases:
 
 ```
 1. FRAME              2. ANALYZE                          3. STORY                 4. DECK
@@ -131,7 +131,8 @@ When you run `/run-pipeline`, Claude orchestrates 17 agents across 4 phases:
 |   > Hypothesis  |   |   > Root Cause Investigator  |   |     Reviewer       |   |   > Slide Review |
 |     Generation  |   |   > Validation               |   |   > Chart Maker    |   |   > Close the    |
 |                 |-->|   > Opportunity Sizer        |-->|   > Design Critic  |-->|     Loop         |
-+-----------------+   +-----------------------------+   +--------------------+   +------------------+
++-----------------+   +-----------------------------+   +--------------------+   |   > Comms Drafter|
+                                                                                 +------------------+
 ```
 
 **Phase 1 — Frame:** Structures your business question into analytical questions with testable hypotheses. Checkpoint: review the framing before analysis begins.
@@ -140,7 +141,7 @@ When you run `/run-pipeline`, Claude orchestrates 17 agents across 4 phases:
 
 **Phase 3 — Story:** Designs a storyboard (Context-Tension-Resolution arc), generates charts with collision detection, and reviews visual quality against a 16-point checklist.
 
-**Phase 4 — Deck:** Writes a stakeholder narrative, builds a branded Marp slide deck with HTML components, reviews slide design, and ensures every recommendation has a follow-up plan. Exports to PDF and HTML.
+**Phase 4 — Deck:** Writes a stakeholder narrative, builds a branded Marp slide deck with HTML components, reviews slide design, ensures every recommendation has a follow-up plan, and drafts stakeholder communications. Exports to PDF and HTML.
 
 You don't have to run the whole thing. Five execution plans let you run just the part you need:
 
@@ -188,6 +189,8 @@ Tier 4 (sequential)           Story Architect --> Coherence Review
 Tier 5 (parallel fan-out)     Chart Maker (per beat) --> Design Critic
                                                               |
 Tier 6 (sequential)           Storytelling --> Deck Creator --> Slide Review --> Close the Loop
+                                                                                     |
+Tier 7 (non-critical)         Comms Drafter
 ```
 
 - **Parallel execution:** Agents in the same tier run concurrently (up to 3 at once). Tier 0 starts Question Framing and Data Explorer simultaneously.
@@ -350,7 +353,7 @@ Agents are markdown prompt templates in the `.github/agents/` directory. Each de
 
 | Agent | What It Does | Pipeline Step |
 |-------|-------------|---------------|
-| data-explorer | Profiles a dataset: schema, distributions, quality, gaps, supported analyses | 4 |
+| data-explorer | Profiles a dataset: schema, distributions, quality, gaps, supported analyses | 2 |
 
 ### Analysis
 
@@ -378,7 +381,7 @@ Agents are markdown prompt templates in the `.github/agents/` directory. Each de
 |-------|-------------|---------------|
 | storytelling | Converts findings into a stakeholder-ready narrative with executive summary, findings, insight, and recommendations | 15 |
 | deck-creator | Builds a branded Marp slide deck with HTML components, speaker notes, and correct theme styling | 16 |
-| comms-drafter | Generates stakeholder communications: Slack summary, email brief, exec summary | 19 |
+| comms-drafter | Generates stakeholder communications: Slack summary, email brief, exec summary | (non-critical) |
 
 ### Standalone
 

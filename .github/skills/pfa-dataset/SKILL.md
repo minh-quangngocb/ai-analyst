@@ -1,6 +1,6 @@
 ---
 name: pfa-dataset
-description: 'Schema reference for the Privacy Friendly Analytics (PFA) dataset. Use when the user mentions "Privacy Friendly Analytics", "PFA", or references cb-data-hub-prod.privacy_friendly_analytics tables. Provides full schema, data quirks, and query patterns for the events and sessions tables.'
+description: 'Schema reference for the Privacy Friendly Analytics (PFA) dataset. Use when the user mentions "Privacy Friendly Analytics", "PFA", or references privacy_friendly_analytics tables. Provides full schema, data quirks, and query patterns for the events and sessions tables.'
 user-invocable: false
 disable-model-invocation: false
 ---
@@ -11,7 +11,7 @@ disable-model-invocation: false
 
 Apply this skill when the data source involves:
 - "Privacy Friendly Analytics" or "PFA"
-- `cb-data-hub-prod.privacy_friendly_analytics` BigQuery project
+- `{project}.privacy_friendly_analytics` BigQuery dataset
 - The `events` or `sessions` tables from PFA
 
 This skill provides pre-built schema knowledge so the data-explorer agent can
@@ -19,7 +19,7 @@ skip basic schema discovery and focus on profiling and quality assessment.
 
 ## Dataset Overview
 
-- **Project:** `cb-data-hub-prod`
+- **Project:** `{project}` (resolve from active dataset manifest)
 - **Dataset:** `privacy_friendly_analytics`
 - **Warehouse:** BigQuery
 - **Tables:** `events`, `sessions`
@@ -28,7 +28,7 @@ skip basic schema discovery and focus on profiling and quality assessment.
 
 ## Schema: `events`
 
-Table: `cb-data-hub-prod.privacy_friendly_analytics.events`
+Table: `{project}.privacy_friendly_analytics.events`
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
@@ -129,7 +129,7 @@ marketing_identifiers.soluteclid STRING — Solute click ID
 
 ## Schema: `sessions`
 
-Table: `cb-data-hub-prod.privacy_friendly_analytics.sessions`
+Table: `{project}.privacy_friendly_analytics.sessions`
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
@@ -266,7 +266,7 @@ SELECT
   COUNTIF(add_to_cart > 0) AS added_to_cart,
   COUNTIF(seen_context.checkout_page > 0) AS reached_checkout,
   COUNTIF(order_placed > 0) AS converted
-FROM `cb-data-hub-prod.privacy_friendly_analytics.sessions`
+FROM `{project}.privacy_friendly_analytics.sessions`
 WHERE session_date BETWEEN {{start_date}} and {{end_date}}
   AND intraday = FALSE
   AND user_identity.is_bot = FALSE
@@ -280,7 +280,7 @@ SELECT
   st.experiment_id,
   st.variation_id,
   COUNT(DISTINCT session_id) AS sessions
-FROM `cb-data-hub-prod.privacy_friendly_analytics.sessions`,
+FROM `{project}.privacy_friendly_analytics.sessions`,
   UNNEST(split_tests) AS st
 WHERE session_date BETWEEN {{start_date}} and {{end_date}}
   AND intraday = FALSE

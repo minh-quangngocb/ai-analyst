@@ -189,7 +189,12 @@ R5 (banned words), R6 (breathing slides), R7 (chart figsize), R9 (HTML
 components), R10 (export). Deck should be 8-22 slides with speaker notes.
 Run `helpers/marp_linter.py` for automated checks.
 
-15. **Use the comms-drafter agent** as a subagent (non-critical — continue if
+15. **Use the close-the-loop skill** to ensure every recommendation from the
+    analysis has a decision owner, success metric, follow-up date, and fallback
+    plan. Read `.github/skills/close-the-loop/SKILL.md` and apply it to the
+    validated analysis results and deck.
+
+16. **Use the comms-drafter agent** as a subagent (non-critical — continue if
     it fails). Pass the narrative and analysis results for Slack/email summaries.
 
 ## NON-NEGOTIABLE RULES

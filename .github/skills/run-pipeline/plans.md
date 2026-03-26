@@ -23,6 +23,7 @@ agents:
   - deck-creator
   - visual-design-critic-slides
   - close-the-loop
+  - comms-drafter          # non-critical — pipeline continues on failure
 checkpoints: [1, 2, 2.5, 3, 4]
 ```
 

@@ -84,7 +84,7 @@ or [parent metric] = [driver 1] + [driver 2] + [driver 3] (for additive)
 4. **Always specify exclusions** — which users/events are filtered out? (test accounts, internal users, bots). Reference dataset quirks for standard filters (e.g., `intraday = FALSE`, `known_bot_session = FALSE` for PFA)
 5. **Thresholds should be based on historical data** — not gut feel. State the basis: "Based on 6-month average of 3.8% ± 0.4%"
 6. **Always cite the feasibility status** — when used in the pipeline, every data source reference must note whether it is AVAILABLE, DERIVABLE, or MISSING (with workaround) per the data feasibility report
-7. **Use fully qualified BigQuery table paths** — write `project.dataset.table` (e.g., `cb-data-hub-prod.privacy_friendly_analytics.sessions`), not generic `{schema}` placeholders
+7. **Use fully qualified BigQuery table paths** — write `project.dataset.table` (e.g., `{project}.privacy_friendly_analytics.sessions`), not generic `{schema}` placeholders
 
 ## Examples
 
@@ -267,7 +267,7 @@ After writing a metric spec, automatically register it in the metric dictionary:
 
 ## Reference Queries for Common Metrics
 
-Use these canonical SQL patterns when computing standard metrics. Replace table references with the actual BigQuery fully qualified paths from the dataset skills (e.g., `cb-data-hub-prod.privacy_friendly_analytics.sessions` for PFA, `cb-data-hub-prod.google_analytics_4.sessions` for GA4). Always include standard filters from the dataset quirks (intraday exclusion, bot exclusion, etc.).
+Use these canonical SQL patterns when computing standard metrics. Replace table references with the actual BigQuery fully qualified paths from the dataset skills (e.g., `{project}.privacy_friendly_analytics.sessions` for PFA, `{project}.google_analytics_4.sessions` for GA4). Always include standard filters from the dataset quirks (intraday exclusion, bot exclusion, etc.).
 
 ### Conversion Rate (Event-Based)
 

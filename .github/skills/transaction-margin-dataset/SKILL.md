@@ -1,6 +1,6 @@
 ---
 name: transaction-margin-dataset
-description: 'Schema reference for the Transaction Margin dataset. Use when the analysis involves transactions, margins, sales, revenue, invoices, order economics, cost breakdown, or product profitability. References coolblue-bi-platform-prod.ods.transaction_margin.'
+description: 'Schema reference for the Transaction Margin dataset. Use when the analysis involves transactions, margins, sales, revenue, invoices, order economics, cost breakdown, or product profitability. References {project}.ods.transaction_margin.'
 user-invocable: false
 disable-model-invocation: false
 ---
@@ -22,7 +22,7 @@ Apply this skill when the framed question or analysis goals involve:
 
 ## Dataset Overview
 
-- **Project:** `coolblue-bi-platform-prod`
+- **Project:** `{project}` (resolve from active dataset manifest)
 - **Dataset:** `ods`
 - **Table:** `transaction_margin`
 - **Warehouse:** BigQuery
@@ -31,7 +31,7 @@ Apply this skill when the framed question or analysis goals involve:
 
 ## Schema
 
-Table: `coolblue-bi-platform-prod.ods.transaction_margin`
+Table: `{project}.ods.transaction_margin`
 
 ### Identity & Order Columns
 
@@ -248,7 +248,7 @@ SELECT
   SUM(invoice_product_invoiced) AS revenue,
   SUM(transaction_margin) AS total_margin,
   SAFE_DIVIDE(SUM(transaction_margin), SUM(invoice_product_invoiced)) AS margin_pct
-FROM `coolblue-bi-platform-prod.ods.transaction_margin`
+FROM `{project}.ods.transaction_margin`
 WHERE invoice_date BETWEEN {{start_date}} and {{end_date}}
   AND credit_invoice_id IS NULL  -- exclude returns
 GROUP BY subsidiary_name
@@ -269,7 +269,7 @@ SELECT
   SUM(warehouse_handling_cost) AS warehouse,
   SUM(returns_handling_cost) AS returns,
   SUM(transaction_margin) AS net_margin
-FROM `coolblue-bi-platform-prod.ods.transaction_margin`
+FROM `{project}.ods.transaction_margin`
 WHERE invoice_date BETWEEN {{start_date}} and {{end_date}}
 GROUP BY order_id
 ```
@@ -282,7 +282,7 @@ SELECT
   SUM(attached_product_quantity) AS units,
   SUM(attached_product_invoiced) AS revenue,
   SUM(attached_product_margin) AS margin
-FROM `coolblue-bi-platform-prod.ods.transaction_margin`
+FROM `{project}.ods.transaction_margin`
 WHERE invoice_date BETWEEN {{start_date}} and {{end_date}}
   AND attached_product_id IS NOT NULL
   AND credit_invoice_id IS NULL
@@ -299,7 +299,7 @@ SELECT
   SUM(transaction_margin) AS margin,
   SAFE_DIVIDE(SUM(transaction_margin), SUM(invoice_product_invoiced)) AS margin_pct,
   COUNT(DISTINCT order_id) AS orders
-FROM `coolblue-bi-platform-prod.ods.transaction_margin`
+FROM `{project}.ods.transaction_margin`
 WHERE invoice_date BETWEEN {{start_date}} and {{end_date}}
   AND credit_invoice_id IS NULL
 GROUP BY product_type_name, brand_name
