@@ -95,9 +95,8 @@ python -m pytest tests/ -v
 ```
 ai-analyst/
   .github/skills/        -- Agent Skills (auto-applied + slash commands)
-  .github/agents/        -- VS Code agent mode definitions
+  .github/agents/        -- Agent prompt templates & VS Code agent mode definitions
   .knowledge/            -- Knowledge system (populated by setup and usage)
-  agents/                -- Agent prompt templates (multi-step workflows)
   helpers/               -- Python utility modules
   tests/                 -- Pytest test suite
   data/                  -- Your datasets (gitignored)

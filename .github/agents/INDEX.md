@@ -23,22 +23,22 @@
 ## Agents
 | Agent | Path | Invoke When |
 |-------|------|-------------|
-| Question Framing | `agents/question-framing.md` | User provides a business problem to analyze |
-| Hypothesis | `agents/hypothesis.md` | Questions are framed, need testable hypotheses |
-| Data Explorer | `agents/data-explorer.md` | Need to understand what data exists in a source |
-| Descriptive Analytics | `agents/descriptive-analytics.md` | Need to analyze a dataset (segmentation, funnels, drivers) |
-| Overtime / Trend | `agents/overtime-trend.md` | Need time-series analysis or trend identification |
-| Cohort Analysis | `agents/cohort-analysis.md` | Need cohort retention curves, LTV analysis, or vintage comparison |
-| Root Cause Investigator | `agents/root-cause-investigator.md` | Initial analysis found an anomaly — need to drill down iteratively to find the specific root cause |
-| Opportunity Sizer | `agents/opportunity-sizer.md` | Root cause identified or opportunity found — quantify the business impact with sensitivity analysis |
-| Experiment Designer | `agents/experiment-designer.md` | Need to test a causal hypothesis — designs A/B tests or quasi-experimental analyses with power estimation and decision rules |
-| Story Architect | `agents/story-architect.md` | Analysis is complete — designs the storyboard (narrative beats + visual mapping) before any charting. Pass `{{CONTEXT}}` for workshop/talk closing sequences. |
-| Chart Maker | `agents/chart-maker.md` | Need to generate a specific chart. |
-| Visual Design Critic | `agents/visual-design-critic.md` | After Chart Maker generates charts — reviews against SWD checklist. After Deck Creator — reviews slide-level design with `{{DECK_FILE}}` and `{{THEME}}`. |
-| Narrative Coherence Reviewer | `agents/narrative-coherence-reviewer.md` | After Story Architect produces the storyboard, before charting — reviews story flow, beat structure, and Closing beats if present |
-| Storytelling | `agents/storytelling.md` | Analysis and charts are complete, need a narrative |
-| Source Tie-Out | `agents/source-tieout.md` | After Data Explorer, before analysis — verify data loading integrity by comparing pandas direct-read vs DuckDB SQL on foundational metrics. HALT on mismatch. |
-| Validation | `agents/validation.md` | Need to verify findings before presenting |
-| Deck Creator | `agents/deck-creator.md` | Need to create a presentation from analysis. Supports `{{THEME}}` (analytics-dark) and `{{CONTEXT}}` (workshop/talk closing sequence). |
-| Comms Drafter | `agents/comms-drafter.md` | Need stakeholder communications (Slack summary, email brief, exec summary). Non-critical — pipeline continues if this fails. |
+| Question Framing | `.github/agents/question-framing.agent.md` | User provides a business problem to analyze |
+| Hypothesis | `.github/agents/hypothesis.agent.md` | Questions are framed, need testable hypotheses |
+| Data Explorer | `.github/agents/data-explorer.agent.md` | Need to understand what data exists in a source |
+| Descriptive Analytics | `.github/agents/descriptive-analytics.agent.md` | Need to analyze a dataset (segmentation, funnels, drivers) |
+| Overtime / Trend | `.github/agents/overtime-trend.agent.md` | Need time-series analysis or trend identification |
+| Cohort Analysis | `.github/agents/cohort-analysis.agent.md` | Need cohort retention curves, LTV analysis, or vintage comparison |
+| Root Cause Investigator | `.github/agents/root-cause-investigator.agent.md` | Initial analysis found an anomaly — need to drill down iteratively to find the specific root cause |
+| Opportunity Sizer | `.github/agents/opportunity-sizer.agent.md` | Root cause identified or opportunity found — quantify the business impact with sensitivity analysis |
+| Experiment Designer | `.github/agents/experiment-designer.agent.md` | Need to test a causal hypothesis — designs A/B tests or quasi-experimental analyses with power estimation and decision rules |
+| Story Architect | `.github/agents/story-architect.agent.md` | Analysis is complete — designs the storyboard (narrative beats + visual mapping) before any charting. Pass `{{CONTEXT}}` for workshop/talk closing sequences. |
+| Chart Maker | `.github/agents/chart-maker.agent.md` | Need to generate a specific chart. |
+| Visual Design Critic | `.github/agents/visual-design-critic.agent.md` | After Chart Maker generates charts — reviews against SWD checklist. After Deck Creator — reviews slide-level design with `{{DECK_FILE}}` and `{{THEME}}`. |
+| Narrative Coherence Reviewer | `.github/agents/narrative-coherence-reviewer.agent.md` | After Story Architect produces the storyboard, before charting — reviews story flow, beat structure, and Closing beats if present |
+| Storytelling | `.github/agents/storytelling.agent.md` | Analysis and charts are complete, need a narrative |
+| Validation | `.github/agents/validation.agent.md` | Need to verify findings before presenting |
+| Deck Creator | `.github/agents/deck-creator.agent.md` | Need to create a presentation from analysis. Uses `coolblue` theme by default. Supports `{{THEME}}` override and `{{CONTEXT}}` (workshop/talk closing sequence). |
+| Comms Drafter | `.github/agents/comms-drafter.agent.md` | Need stakeholder communications (Slack summary, email brief, exec summary). Non-critical — pipeline continues if this fails. |
 | BigQuery Notebook Builder | `.github/agents/bigquery-notebook-builder.agent.md` | Need to create or refactor BigQuery Jupyter notebooks so SQL lives in separate `.sql` files and notebook cells load SQL files before execution. |
+| Notebook Analyst | `.github/agents/notebook-analyst.agent.md` | End-to-end notebook-based analysis — takes Phase 1 framing, asks user for analysis type (descriptive/cohort/trend), writes SQL to working/sql/, builds a Jupyter notebook with queries + analysis + charts + validation + recommendations. |

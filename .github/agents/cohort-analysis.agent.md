@@ -5,46 +5,7 @@ user-invocable: false
 tools: ['read', 'search', 'edit', 'terminalLastCommand']
 ---
 
-<!-- CONTRACT_START
-name: cohort-analysis
-description: Perform cohort analysis -- retention curves, cohort comparison, vintage analysis, and cohort LTV -- to reveal how user behavior evolves over time.
-inputs:
-  - name: COHORT_DIMENSION
-    type: str
-    source: user
-    required: true
-  - name: RETENTION_EVENT
-    type: str
-    source: user
-    required: true
-  - name: PERIODS
-    type: str
-    source: user
-    required: true
-  - name: DATASET
-    type: str
-    source: system
-    required: true
-  - name: DATA_INVENTORY
-    type: file
-    source: agent:data-explorer
-    required: false
-outputs:
-  - path: working/cohort_analysis_{{DATASET}}.md
-    type: markdown
-  - path: working/charts/retention_heatmap.png
-    type: chart
-  - path: working/charts/retention_curves.png
-    type: chart
-  - path: working/charts/ltv_curves.png
-    type: chart
-depends_on:
-  - source-tieout
-knowledge_context:
-  - .knowledge/datasets/{active}/schema.md
-  - .knowledge/datasets/{active}/quirks.md
-pipeline_step: 5
-CONTRACT_END -->
+
 
 # Agent: Cohort Analysis
 
@@ -55,8 +16,8 @@ Perform cohort analysis on a dataset — retention curves, cohort comparison, vi
 - {{COHORT_DIMENSION}}: The column to group cohorts by (e.g., signup_date truncated to month, first_purchase_date truncated to week). This defines how users are assigned to cohorts based on their first qualifying event.
 - {{RETENTION_EVENT}}: The event that counts as "retained" in each period (e.g., purchase, login, page_view, session_start). Must map to a specific event or condition in the data.
 - {{PERIODS}}: Number of periods to track after cohort formation (e.g., 12 for 12 months, 26 for 26 weeks). The period granularity matches the cohort dimension granularity (monthly cohorts = monthly periods).
-- {{DATASET}}: Data source reference. Can be a file path (CSV, Parquet), a database table reference, or a MotherDuck/DuckDB connection string. If a Data Explorer Agent report exists, reference it for schema and quality context.
-- {{DATA_INVENTORY}}: (optional) The data inventory report from the Data Explorer Agent. If provided, use it to understand available columns, quality issues, and join relationships. Avoids redundant data profiling.
+- {{DATASET}}: Data source reference. Can be a file path (CSV, Parquet), a database table reference, or a database connection string. If a Data Explorer Agent report exists, reference it for schema and quality context.
+- {{DATA_FEASIBILITY}}: (optional) The data feasibility report from the Data Explorer Agent (`outputs/data_feasibility_{{DATE}}.md`). If provided, use it to understand which data points are AVAILABLE, DERIVABLE, or MISSING, along with dataset configuration and key filters. Avoids redundant data profiling.
 
 ## Workflow
 

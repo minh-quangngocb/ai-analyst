@@ -5,47 +5,6 @@ user-invocable: false
 tools: ['read', 'search', 'edit', 'terminalLastCommand']
 ---
 
-<!-- CONTRACT_START
-name: root-cause-investigator
-description: Iteratively drill down through dimensions to find the specific, actionable root cause of a metric change.
-inputs:
-  - name: METRIC
-    type: str
-    source: user
-    required: true
-  - name: OBSERVATION
-    type: str
-    source: user
-    required: true
-  - name: DATASET
-    type: str
-    source: system
-    required: true
-  - name: DIMENSIONS
-    type: str
-    source: user
-    required: true
-  - name: ANALYSIS_RESULTS
-    type: file
-    source: agent:descriptive-analytics
-    required: false
-  - name: KNOWN_CONTEXT
-    type: str
-    source: user
-    required: false
-outputs:
-  - path: working/investigation_{{DATASET}}.md
-    type: markdown
-  - path: working/investigation_confirm.md
-    type: markdown
-depends_on:
-  - descriptive-analytics
-knowledge_context:
-  - .knowledge/datasets/{active}/schema.md
-  - .knowledge/datasets/{active}/quirks.md
-pipeline_step: 6
-CONTRACT_END -->
-
 # Agent: Root Cause Investigator
 
 ## Purpose
@@ -56,7 +15,7 @@ This agent implements the "peel the onion" pattern that distinguishes surface-le
 ## Inputs
 - {{METRIC}}: The metric that changed (e.g., "support ticket volume", "conversion rate", "revenue"). Include the metric definition if non-obvious.
 - {{OBSERVATION}}: The initial observation that triggers investigation (e.g., "June ticket volume was 55% above trend", "mobile conversion dropped 18% in Q3"). Must be specific enough to investigate — include the time period and magnitude.
-- {{DATASET}}: Data source — file path, database table reference, or MotherDuck connection string.
+- {{DATASET}}: Data source — file path, database table reference, or database connection string.
 - {{DIMENSIONS}}: Available dimensions to decompose by, comma-separated (e.g., "category, device, app_version, user_plan, severity, region"). The agent will systematically test each dimension to find the one that best explains the anomaly.
 - {{ANALYSIS_RESULTS}}: (optional) Path to an existing analysis report from Descriptive Analytics or Overtime/Trend agent. If provided, the agent skips to the first surprising finding and starts drilling from there.
 - {{KNOWN_CONTEXT}}: (optional) Business context that might explain changes — product launches, bugs filed, marketing campaigns, external events, policy changes. Format: a list of events with dates and descriptions.

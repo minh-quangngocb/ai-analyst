@@ -1,83 +1,53 @@
 # Analytics Chart Style Guide
 
-**Internal reference for all AI Analytics for Builders course visuals.**
-Based on Cole Nussbaumer Knaflic's *Storytelling with Data* (SWD) principles.
+**Internal reference for all chart visualizations.**
+Coolblue brand standards with clean, simple design.
 
 ---
 
 ## Philosophy
 
-Every chart in this course follows one rule: **one chart, one story.**
+Every chart follows one rule: **keep it simple.**
 
-- The title states the takeaway, not a description
-- Gray everything, then highlight the one thing that matters
-- If a chart doesn't change a decision, cut it
-- Prefer text over charts for single numbers
-- Every visual element must earn its place — if it doesn't help the reader understand the story, remove it
+- Use only bar charts (horizontal/vertical) and line charts
+- Use only Coolblue brand colors
+- Background is always white
+- Title is simple and clear
+- No distracting elements — the data speaks for itself
 
 ---
 
 ## Color Palette
 
-Use gray as the default. Color is reserved for the data point that tells the story.
+Only Coolblue brand colors. No exceptions.
 
 | Name | Hex | Usage |
 |------|-----|-------|
-| **Action Amber** | `#D97706` | Primary highlight — the one thing to focus on |
-| **Accent Red** | `#DC2626` | Secondary — negative trends, declines, alerts |
-| **Gray 900** | `#1F2937` | Titles, key text |
-| **Gray 600** | `#6B7280` | Axis labels, secondary text |
-| **Gray 400** | `#9CA3AF` | Gridlines, borders (use sparingly) |
-| **Gray 200** | `#E5E7EB` | Background data — bars/lines that aren't the focus |
-| **Gray 100** | `#F3F4F6` | Subtle fills, shading |
-| **Background** | `#F7F6F2` | Chart and slide background — warm off-white |
-
-### Semantic Colors (use only when meaning is clear)
-
-| Name | Hex | Usage |
-|------|-----|-------|
-| **Success Green** | `#059669` | Positive outcomes, improvements |
-| **Warning Amber** | `#D97706` | Caution, approaching threshold |
-| **Danger Red** | `#DC2626` | Negative outcomes, failures, declines |
+| **Orange** | `#FF6600` | Most important element — primary highlight |
+| **Fact Blue** | `#285DAB` | Second most important element |
+| **Coolblue Blue** | `#0090E3` | Axis labels, tick marks |
+| **Light Blue** | `#CCE9F9` | Supporting/context data — non-highlighted bars/lines |
+| **Grey** | `#F7F6F2` | Subtle fills only (never as chart background) |
+| **White** | `#FFFFFF` | Chart background — always white |
+| **Text Dark** | `#1F2937` | Titles |
+| **Text Mid** | `#4B5563` | Axis labels |
+| **Text Light** | `#6B7280` | Tick labels |
+| **Grid** | `#E5E7EB` | Gridlines (if used) |
 
 ### Rules
 
-- **Never use more than 2 colors** in a single chart (plus gray)
-- **Never use color alone** to encode meaning — pair with labels or annotations
-- **Rainbow palettes are banned** — they create visual noise and have no natural ordering
-- Action Amber is the default highlight; only switch to red/green when the semantic meaning requires it
-- Action Amber matches the presentation theme's accent color (`--accent: #D97706`), ensuring charts integrate visually into slide decks
-
-**Theme integration:** Chart colors are derived from the Marp theme's CSS design tokens (`themes/analytics-light.css`). Background is `--bg: #F7F6F2`, spines use `--border: #E5E7EB`, labels use `--text-secondary: #4B5563`, and titles use `--text: #1F2937`. This ensures charts feel native to the slide deck, not copy-pasted.
+- **Only Coolblue colors** — no reds, greens, purples, ambers, or other colors
+- **Color hierarchy**: Orange (most important) → Fact Blue (secondary) → Light Blue (supporting)
+- **Background**: Always white (`#FFFFFF`)
+- **No semantic colors** — no red for "bad" or green for "good"
+- **Rainbow palettes are banned**
 
 ### Accessibility
 
-The Action Amber / Accent Red / Gray palette is designed for color-vision
-deficiency safety. Amber (#D97706) and red (#DC2626) remain distinguishable
-under deuteranopia and protanopia simulation. To maintain this:
+The Orange / Fact Blue / Light Blue palette provides good visual separation.
 
-- Always pair color with a second visual channel (direct labels, patterns,
-  position, or weight)
+- Always pair color with a second visual channel (direct labels, position, weight)
 - Never rely on color alone to convey meaning
-- When using Success Green (#059669) alongside Accent Red, ensure both are
-  directly labeled — green/red is the hardest pair for color-blind viewers
-
-#### Pattern & Texture Recommendations
-
-When charts may be printed in grayscale or viewed by colorblind users,
-add pattern fills as a secondary encoding channel:
-
-- **Highlighted bars:** Solid fill (Action Amber) — no pattern needed since
-  it is always paired with direct labels
-- **Comparison groups:** Use hatching patterns to distinguish groups:
-  - Group 1: solid fill
-  - Group 2: diagonal hatch (`//`)
-  - Group 3: cross hatch (`xx`)
-  - Group 4: dot pattern (`..`)
-- **Stacked bar segments:** Alternate between solid and light diagonal hatch
-  for adjacent segments when more than 2 layers are used
-- In matplotlib, add hatching via `bar(..., hatch='//')` or
-  `Rectangle(..., hatch='xx')`
 
 #### Font Size Minimums
 
@@ -151,12 +121,13 @@ Text and visual elements must meet WCAG 2.1 contrast ratios:
 | **Non-text elements** (bars, lines, data points) | 3:1 | Against adjacent elements |
 | **Heatmap cell text** | 4.5:1 | Against cell background — auto-switch white/dark |
 
-The palette is pre-validated against the `#F7F6F2` background:
-- Gray 900 (`#1F2937`) on background: ~12:1 (passes)
-- Gray 600 (`#6B7280`) on background: ~5:1 (passes)
-- Action Amber (`#D97706`) on background: ~4.6:1 (passes)
-- Gray 400 (`#9CA3AF`) on background: ~3.2:1 (passes for large text only)
-- Gray 200 (`#E5E7EB`) on background: ~1.3:1 (decorative use only — never for text)
+The palette is pre-validated against the `#FFFFFF` white background:
+- Text Dark (`#1F2937`) on white: ~16:1 (passes)
+- Text Mid (`#4B5563`) on white: ~8:1 (passes)
+- Orange (`#FF6600`) on white: ~4.6:1 (passes)
+- Fact Blue (`#285DAB`) on white: ~7:1 (passes)
+- Text Light (`#6B7280`) on white: ~5:1 (passes)
+- Light Blue (`#CCE9F9`) on white: decorative use only — never for text
 
 #### Alt Text Guidelines for Charts
 
@@ -201,7 +172,7 @@ Before finalizing any chart, remove or reduce:
 - [ ] **Rotated axis text** — if labels need rotation, switch to horizontal bars
 - [ ] **Trailing zeros** — use `$45` not `$45.00`; use `12%` not `12.0%`
 - [ ] **3D effects** — never
-- [ ] **Background color** — always `#F7F6F2` (matches slide theme)
+- [ ] **Background color** — always white (`#FFFFFF`)
 - [ ] **Redundant axis labels** — if the title says "Revenue ($M)", the y-axis doesn't need "Revenue in Millions of Dollars"
 - [ ] **Excessive tick marks** — reduce to 4-6 ticks maximum
 - [ ] **Decimal precision** — match the precision to the decision (don't show `12.347%` when `12%` suffices)
@@ -210,266 +181,82 @@ Before finalizing any chart, remove or reduce:
 
 ## Chart Type Decision Tree
 
-Choose the chart type based on the relationship you're showing:
+Choose the simplest chart type. Only bar charts and line charts are allowed.
+
+### Category Comparison → Horizontal Bar Chart (default)
+- Sort bars by value (largest at top), not alphabetically
+- Highlight the most important bar(s) in Orange (`#FF6600`), others in Light Blue (`#CCE9F9`)
+- Use direct labels at end of bars (no x-axis needed)
+
+### Few Categories → Vertical Bar Chart
+- Use when comparing ≤6 categories
+- Highlight the most important bar in Orange, rest in Light Blue
 
 ### Time Series → Line Chart
-- Highlight the one series that tells the story in Action Amber
-- Gray out all other series
-- Use direct labels at the end of each line (no legend)
-- Example: "iOS ticket volume spiked while Android remained stable"
+- For single series: use Orange (`#FF6600`)
+- For multiple series: most important in Orange, secondary in Fact Blue, rest in Light Blue
+- Use direct labels at the end of each line
 
-### Category Comparison → Horizontal Bar Chart
-- Sort bars by value (largest at top), not alphabetically
-- Highlight the bar(s) that matter in Action Amber, gray the rest
-- Use direct labels at end of bars (no x-axis needed)
-- Example: "Paid search drives 3x more conversions than social"
-
-### Funnel → Horizontal Bar or Waterfall
-- Show stages left-to-right or top-to-bottom
-- Annotate drop-off percentages between stages
-- Highlight the biggest drop in Accent Red
-- Example: "Mobile checkout is where we lose 40% of users"
-
-### Before/After or Two-Period Comparison → Slope Chart
-- Left side = before, right side = after
-- Highlight the line that changed most
-- Gray the lines that didn't change
-- Example: "NPS improved in both segments, but the mix shifted"
-
-### Part-to-Whole → Stacked Bar (horizontal)
-- Place the important segment at the baseline (bottom/left)
-- Use gray for context segments, color for the story
-- **Never use pie charts** — stacked bars are always more precise
-- Example: "Plus members now represent 60% of revenue, up from 40%"
+### Year-over-Year → YoY Line Chart
+- Each year is a separate line on ONE chart
+- Most recent year → Orange `#FF6600` (thicker, optional markers)
+- 2nd most recent → Fact Blue `#285DAB`
+- Older years → Light Blue `#CCE9F9`
+- MUST include companion DataFrame with MoM/YoY differences and % changes
+- Use `yoy_line_chart()` from `helpers/coolblue_charts.py`
 
 ### Single Number → Big Bold Text
 - Don't chart a single number — display it as large formatted text
-- Add context with a subtitle: direction, comparison, or benchmark
-- Example: **"$75"** Average Order Value (+12% vs Q1)
+- Add context: direction, comparison, or benchmark
 
-### Experiment Results → Side-by-Side Bars
-- Control (gray) vs Treatment (Action Amber)
-- Show confidence intervals as error bars
-- Annotate the lift percentage
-- Example: "Treatment increased conversion by 8% (95% CI: 3-13%)"
-
-### Distribution → Histogram
-- Use 15-25 bins for continuous data
-- Highlight a specific region if that's the story
-- Add a vertical line for mean/median with annotation
-
-### Category × Group Comparison → Grouped Bar Chart
-- Use when comparing values across categories AND groups (e.g. revenue by region per quarter)
-- If one group is the story, highlight it and gray the rest
-- Direct labels on top of each bar; keep font small (8pt) to avoid crowding
-- Limit to 4-5 groups maximum — beyond that, use small multiples instead
-
-### Two-Period Change → Slope Chart
-- Use when comparing exactly two time points across multiple items
-- Highlight the line(s) that changed most in Action Amber
-- Gray all other lines so they provide context without distraction
-- Label both endpoints with values for precise reading
-- Best for 5-15 items — fewer loses the comparison effect, more creates spaghetti
-
-### Cohort Retention → Heatmap
-- Use for retention triangles, cohort comparison matrices, or any row-by-column metric grid
-- Default colormap: red-to-green interpolation (low retention = red, high = green)
-- Alternative: `cmap="YlOrRd_r"` for warm-toned retention coloring
-- Right-censored cells (future periods) shown in Gray 100
-- Cell text is white on dark backgrounds, dark on light backgrounds
-
-### Two-Variable Sensitivity → Sensitivity Table
-- Use for stress-testing assumptions in opportunity sizing
-- Base case cell gets a bold border; break-even cell gets a dashed border
-- Color gradient: red (worst) through white (midpoint) to green (best)
-- Format cells consistently (e.g., all as `$X,XXX` or all as `X%`)
-- Label both axes with the variable name and units
-
-### Funnel Drop-Off → Funnel Waterfall
-- Use to show step-by-step conversion with explicit drop-off rates
-- Automatically highlights the step with the largest absolute drop
-- Conversion and drop-off percentages annotated between steps
-- Bars are horizontal, sorted top-to-bottom (entry at top, exit at bottom)
-- Keep step labels short and action-oriented ("Visit", "Sign Up", "Activate")
-
-### KPI Summary → Big Number Layout
-- Use when the story is a single number or 2-4 KPIs — not a data distribution
-- Big numbers use 28-36pt font depending on count (4+ metrics scale down)
-- Each metric has a label underneath in Gray 600
-- Dividers separate the metrics row from findings and recommendations
-- Include key findings as bullet points and a recommendation in Action Amber
-
-### Forecast (future) → Forecast Plot
-- Solid line for actuals, dashed line for predicted/forecast
-- Confidence interval bands as shaded regions (Alpha 0.15-0.25)
-- Use Action Amber for the forecast line, Gray 400 for actuals
-- Annotate the transition point between actual and forecast
-- Show 80% and 95% confidence bands in progressively lighter shading
+### Banned Chart Types
+All other chart types are banned. Convert them to bar or line charts:
+- Heatmap/matrix → Horizontal bar chart
+- Pie/donut → Horizontal bar chart
+- Scatter → Bar chart (grouped if needed)
+- Stacked bars → Grouped bars or separate charts
+- Area chart → Line chart
+- Waterfall → Bar chart with labels
+- Funnel → Horizontal bar chart
 
 ---
 
 ## Chart Function Style Specifications
 
-Detailed rendering specifications for each chart helper function. Use these
-when customizing or extending the chart functions.
+Rendering specs for the Coolblue chart library (`helpers/coolblue_charts.py`).
 
-### grouped_bar()
-
-| Property | Value |
-|----------|-------|
-| **Bar width** | `0.7 / n_groups` per bar |
-| **Inter-bar gap** | 10% of bar width (within a group) |
-| **Inter-group gap** | Automatic (matplotlib default tick spacing) |
-| **Label placement** | Centered above each bar, 8pt font |
-| **Highlight treatment** | Highlighted group in Action Amber (`#D97706`), others in Gray 200 (`#E5E7EB`) |
-| **Label color (highlighted)** | Gray 900 (`#1F2937`) |
-| **Label color (non-highlighted)** | Gray 400 (`#9CA3AF`) |
-| **Max groups** | 4-5 recommended; beyond that, use small multiples |
-| **Legend** | Upper right, frameless, up to 4 columns |
-
-### slope_chart()
+### bar_chart()
 
 | Property | Value |
 |----------|-------|
-| **Line thickness (highlighted)** | 2.5pt |
-| **Line thickness (background)** | 1.5pt |
-| **Endpoint dot size (highlighted)** | 60 (matplotlib scatter `s` parameter) |
-| **Endpoint dot size (background)** | 40 |
-| **Label alignment (left)** | Right-aligned, offset -0.08 from x=0 |
-| **Label alignment (right)** | Left-aligned, offset +0.08 from x=1 |
-| **Highlighted label** | 10pt, bold, Action Amber |
-| **Background label** | 9pt, regular, Gray 400 |
-| **Vertical reference lines** | Gray 200, 0.8pt, at x=0 and x=1 |
-| **Y-axis** | Hidden (values shown as endpoint labels) |
-| **Ideal item count** | 5-15 items |
+| **Bar color (highlighted)** | Orange `#FF6600` |
+| **Bar color (non-highlighted)** | Light Blue `#CCE9F9` |
+| **Sort** | By value (ascending for horizontal) |
+| **Direct labels** | 9pt, at bar end, Text Dark color |
+| **Background** | White `#FFFFFF` |
+| **Spines** | Bottom + left only |
 
-### retention_heatmap()
+### line_chart()
 
 | Property | Value |
 |----------|-------|
-| **Default colormap** | Linear interpolation: red (`#DC2626`) to green (`#059669`) |
-| **Alternative colormap** | `cmap="YlOrRd_r"` for warm-toned retention |
-| **Annotation format** | Default `"{:.0%}"` — e.g., "85%" |
-| **Cell border** | White (`#FFFFFF`), 1pt |
-| **NaN cell fill** | Gray 100 (`#F3F4F6`) |
-| **Text on dark cells** | White (`#FFFFFF`), 9pt, bold |
-| **Text on light cells** | Gray 900 (`#1F2937`), 9pt, bold |
-| **Axis label font** | 10pt, Gray 600 for tick labels; 10pt bold Gray 900 for axis titles |
-| **Axis titles** | "Period" (top) and "Cohort" (left) shown by default |
+| **Line colors** | Orange (1st), Fact Blue (2nd), Light Blue (3rd) |
+| **Line width (primary)** | 2.5pt |
+| **Line width (secondary)** | 1.8pt |
+| **Markers** | None (line is the data) |
+| **Gridlines** | Light y-axis only (Grid `#E5E7EB`, 0.5pt) |
+| **Legend** | Upper left, frameless |
 
-### sensitivity_table()
+### yoy_line_chart()
 
 | Property | Value |
 |----------|-------|
-| **Cell color gradient** | Red (`#DC2626`) → white → green (`#059669`) based on normalized value |
-| **Base case cell** | 3pt solid border in Gray 900, bold text |
-| **Break-even cell** | 2pt dashed border in Warning Amber |
-| **Default format** | `"${:,.0f}"` |
-| **Font size** | 10pt |
-| **Table scale** | 1.2x width, 1.6x height |
-| **Axis labels** | 11pt bold Gray 900, centered above (x) and rotated left (y) |
-
-### funnel_waterfall()
-
-| Property | Value |
-|----------|-------|
-| **Bar height** | 0.6 (horizontal bars) |
-| **Bar color** | Gray 200 (`#E5E7EB`) for non-highlighted steps |
-| **Highlight color** | Accent Red (`#DC2626`) for the biggest drop-off step |
-| **Count labels** | 9pt, placed at bar end + 2% padding |
-| **Conversion annotations** | 8pt, centered between steps, showing pass% and drop% |
-| **Annotation placement** | Offset 12% of max value to the right of the wider bar |
-| **Auto-highlight** | Largest absolute drop-off if `highlight_step` not specified |
-
-### big_number_layout()
-
-| Property | Value |
-|----------|-------|
-| **Big number font (2-3 metrics)** | 36pt bold |
-| **Big number font (4+ metrics)** | 28pt bold |
-| **Label font (2-3 metrics)** | 11pt Gray 600 |
-| **Label font (4+ metrics)** | 10pt Gray 600 |
-| **Title** | 18pt bold Gray 900, centered |
-| **Subtitle** | 11pt Gray 600, centered |
-| **Divider lines** | Gray 200, 1pt, spanning 10%-90% of axes width |
-| **Findings bullets** | 10pt Gray 600, prefixed with bullet character |
-| **Recommendation** | 13pt bold + 10pt body, both in Action Amber |
-| **Trend arrows** | Include directional arrows in the big_number_str (e.g., "356 ↑") |
-
-### forecast_plot() (future)
-
-| Property | Value |
-|----------|-------|
-| **Actuals line** | Solid, 2pt, Gray 400 |
-| **Forecast line** | Dashed, 2pt, Action Amber |
-| **80% confidence band** | Action Amber, alpha 0.20 |
-| **95% confidence band** | Action Amber, alpha 0.10 |
-| **Transition annotation** | Vertical dashed line at the actual/forecast boundary |
-| **End-of-line labels** | "Actual" (Gray 400) and "Forecast" (Action Amber) |
-
----
-
-## Analytical Method Chart Style Contracts
-
-Style contracts for charts commonly used in analytical method output.
-These ensure consistency across segmentation, distribution, correlation,
-and ranking analyses.
-
-### Distribution Chart (Histogram + KDE Overlay)
-
-Use for showing the shape of a single variable's distribution.
-
-| Property | Value |
-|----------|-------|
-| **Bins** | 15-25 for continuous data; auto-bin with `bins="auto"` as fallback |
-| **Bar color** | Gray 200 (`#E5E7EB`) with Gray 400 edge (`#9CA3AF`), 0.5pt |
-| **KDE overlay** | Action Amber (`#D97706`), 2pt solid line, plotted on secondary y-axis or density-scaled |
-| **Mean/median line** | Vertical dashed line, 1.5pt, Accent Red for mean, Gray 600 for median |
-| **Mean/median annotation** | 9pt, placed at top of the line with value label |
-| **Highlighted region** | `axvspan` with Action Amber, alpha 0.12 |
-| **Y-axis** | Label as "Count" or "Frequency"; hide if KDE-only |
-| **X-axis** | Label with variable name and units |
-
-### Comparison Chart (Grouped Bars for Segment Comparison)
-
-Use for side-by-side comparisons of segments across a shared metric.
-
-| Property | Value |
-|----------|-------|
-| **Layout** | Use `grouped_bar()` function |
-| **Segment ordering** | Largest segment first (or chronological if time-based) |
-| **Highlight** | Set `highlight_group` to the segment that tells the story |
-| **Error bars** | If confidence intervals available, add as thin lines (1pt, Gray 600) |
-| **Baseline reference** | Optional horizontal dashed line for overall average (Gray 400, 1pt) |
-| **Max segments** | 4-5; use small multiples beyond that |
-
-### Correlation Chart (Scatter with Trend Line)
-
-Use for showing the relationship between two continuous variables.
-
-| Property | Value |
-|----------|-------|
-| **Dot color** | Gray 200 (`#E5E7EB`) for all points |
-| **Dot size** | 30-50 (matplotlib `s` parameter); scale by a third variable if bubble chart |
-| **Highlighted dots** | Action Amber (`#D97706`), slightly larger (50-70) |
-| **Trend line** | Use `add_trendline()` — dashed, 1pt, Gray 400 |
-| **R-squared annotation** | 9pt, placed in upper-left or lower-right corner, Gray 600 |
-| **Axis labels** | 10pt, Gray 600, include units |
-| **Gridlines** | Light y-axis and x-axis gridlines (Gray 200, 0.5pt) |
-
-### Ranking Chart (Horizontal Bars Sorted by Magnitude)
-
-Use for showing items ranked by a single metric.
-
-| Property | Value |
-|----------|-------|
-| **Layout** | Use `highlight_bar()` with `horizontal=True, sort=True` |
-| **Bar direction** | Horizontal (category names on y-axis, values on x-axis) |
-| **Sort order** | Ascending (smallest at top, largest at bottom) — matplotlib convention for readability |
-| **Top-N highlight** | Highlight the top 1-3 items in Action Amber, rest in Gray 200 |
-| **Direct labels** | Placed at bar end, 9pt, with value format matching the metric |
-| **X-axis** | Hidden (values shown as direct labels) |
-| **Max items** | 10-15; beyond that, show "Top 10" and note total count |
+| **Most recent year** | Orange `#FF6600`, 2.5pt, small markers (size 4) |
+| **2nd most recent** | Fact Blue `#285DAB`, 1.5pt, no markers |
+| **Older years** | Light Blue `#CCE9F9`, 1.5pt, no markers |
+| **X-axis** | Month abbreviations (Jan, Feb, ..., Dec) |
+| **Legend** | Upper left, frameless, year labels |
+| **Companion table** | Year, Month, Value, MoM diff, MoM %, YoY diff, YoY % |
 
 ---
 

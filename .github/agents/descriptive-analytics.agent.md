@@ -5,44 +5,6 @@ user-invocable: false
 tools: ['read', 'search', 'edit', 'terminalLastCommand']
 ---
 
-<!-- CONTRACT_START
-name: descriptive-analytics
-description: Perform drivers analysis, segmentation, and funnel analysis on a dataset to identify what is happening, why, and which factors matter most.
-inputs:
-  - name: DATASET
-    type: str
-    source: system
-    required: true
-  - name: QUESTION_BRIEF
-    type: file
-    source: agent:question-framing
-    required: false
-  - name: HYPOTHESIS_DOC
-    type: file
-    source: agent:hypothesis
-    required: false
-  - name: DATA_INVENTORY
-    type: file
-    source: agent:data-explorer
-    required: false
-  - name: FOCUS_AREA
-    type: str
-    source: user
-    required: false
-outputs:
-  - path: outputs/analysis_report_{{DATE}}.md
-    type: markdown
-  - path: outputs/charts/*.png
-    type: chart
-  - path: working/data_readiness_check.md
-    type: markdown
-depends_on:
-  - source-tieout
-knowledge_context:
-  - .knowledge/datasets/{active}/schema.md
-  - .knowledge/datasets/{active}/quirks.md
-pipeline_step: 5
-CONTRACT_END -->
 
 # Agent: Descriptive Analytics
 
@@ -50,10 +12,10 @@ CONTRACT_END -->
 Perform drivers analysis, segmentation, and funnel analysis on a dataset to identify what is happening, why, and which factors matter most, producing a structured analysis report with charts, tables, and key findings.
 
 ## Inputs
-- {{DATASET}}: The data source to analyze. Can be a file path (CSV, Parquet), a database table reference, or a MotherDuck/DuckDB connection string. If a Data Explorer Agent report exists, reference it for schema and quality context.
+- {{DATASET}}: The data source to analyze. Can be a file path (CSV, Parquet), a database table reference, or a database connection string. If a Data Explorer Agent report exists, reference it for schema and quality context.
 - {{QUESTION_BRIEF}}: (provide one of QUESTION_BRIEF or HYPOTHESIS_DOC) The structured question brief from the Question Framing Agent, specifying what questions to answer.
 - {{HYPOTHESIS_DOC}}: (provide one of QUESTION_BRIEF or HYPOTHESIS_DOC) The hypothesis document from the Hypothesis Forming Agent, specifying testable hypotheses with expected outcomes and test plans.
-- {{DATA_INVENTORY}}: (optional) The data inventory report from the Data Explorer Agent. If provided, use it to understand available columns, quality issues, and join relationships. Avoids redundant data profiling.
+- {{DATA_FEASIBILITY}}: (optional) The data feasibility report from the Data Explorer Agent (`outputs/data_feasibility_{{DATE}}.md`). If provided, use it to understand which data points are AVAILABLE, DERIVABLE, or MISSING, along with dataset configuration and key filters. Avoids redundant data profiling.
 - {{FOCUS_AREA}}: (optional) A specific analytical focus if not running the full suite — one of: "segmentation", "funnel", "drivers", or "all" (default: "all").
 
 ## Workflow
@@ -90,12 +52,13 @@ If neither is provided, inform the user that running without a question or hypot
 ### Step 2: Validate Data Readiness
 Before running any analysis, check data quality:
 
-**If {{DATA_INVENTORY}} is provided:**
-- Review the quality assessment for any BLOCKERs that affect the planned analysis
-- Note WARNINGs that require caveats on findings
-- Confirm the required columns and tables are available
+**If {{DATA_FEASIBILITY}} is provided:**
+- Review the feasibility ratings for each question (FULLY/MOSTLY/PARTIALLY/NOT SUPPORTED)
+- Check for MISSING data points and their workarounds
+- Apply the recommended dataset configuration (primary dataset, key filters, known quirks)
+- Confirm the required columns and tables are AVAILABLE or DERIVABLE
 
-**If {{DATA_INVENTORY}} is not provided:**
+**If {{DATA_FEASIBILITY}} is not provided:**
 - Run a quick data quality check: row count, null rates on key columns, date range, duplicate check
 - Apply the Data Quality Check skill (`.github/skills/data-quality-check/SKILL.md`) at a summary level
 - If any BLOCKER-level issues are found, stop and report them before proceeding
@@ -143,16 +106,16 @@ For user-centric datasets, apply RFM analysis and concentration analysis from `h
 ```python
 from helpers.analytics_helpers import rfm_analysis, concentration_analysis, compare_segments
 
-# RFM segmentation (requires user_id, date, and monetary columns)
-rfm = rfm_analysis(df, user_col='user_id', date_col='order_date', monetary_col='revenue')
+# RFM segmentation (requires customer_id, date, and revenue columns)
+rfm = rfm_analysis(df, customer_col='user_id', date_col='order_date', revenue_col='revenue')
 # Returns segments: Champions, Loyal, At Risk, Lost, Other
 
 # Concentration analysis (how concentrated is revenue across users?)
-conc = concentration_analysis(df, entity_col='user_id', value_col='revenue')
+conc = concentration_analysis(df, value_col='revenue', entity_col='user_id')
 # Returns Gini coefficient, Pareto ratio, Lorenz curve data
 
 # Pairwise comparison between specific segments
-comparison = compare_segments(df, group_col='plan_type', metric_col='revenue')
+comparison = compare_segments(df, segment_col='plan_type', metric_col='revenue')
 # Auto-selects Mann-Whitney or t-test, returns p-values with Bonferroni correction + Cohen's d
 ```
 

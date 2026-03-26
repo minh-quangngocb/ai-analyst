@@ -11,7 +11,6 @@ agents:
   - question-framing
   - hypothesis
   - data-explorer
-  - source-tieout
   - descriptive-analytics   # or overtime-trend or cohort-analysis
   - root-cause-investigator
   - validation
@@ -36,7 +35,6 @@ agents:
   - question-framing
   - hypothesis
   - data-explorer
-  - source-tieout
   - descriptive-analytics
   - root-cause-investigator
   - validation
@@ -98,7 +96,7 @@ requires_context:
 
 Users can specify an inline agent list:
 ```
-/run-pipeline agents=question-framing,hypothesis,data-explorer,source-tieout
+/run-pipeline agents=question-framing,hypothesis,data-explorer
 ```
 
 This creates an ad-hoc plan with only the listed agents. Dependency warnings still apply.

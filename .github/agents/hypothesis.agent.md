@@ -2,29 +2,9 @@
 name: hypothesis
 description: "Turn analytical questions into testable hypotheses with expected outcomes, confirming/rejecting criteria, and structured test plans."
 user-invocable: false
-tools: ['read', 'search', 'edit']
+tools: ['read', 'search', 'edit', 'vscode/askQuestions']
 ---
 
-<!-- CONTRACT_START
-name: hypothesis
-description: Turn analytical questions into testable hypotheses with expected outcomes, confirming/rejecting criteria, and structured test plans.
-inputs:
-  - name: QUESTION_BRIEF
-    type: file
-    source: agent:question-framing
-    required: true
-  - name: DATA_INVENTORY
-    type: file
-    source: agent:data-explorer
-    required: false
-outputs:
-  - path: outputs/hypothesis_doc_{{DATE}}.md
-    type: markdown
-depends_on:
-  - question-framing
-knowledge_context: []
-pipeline_step: 3
-CONTRACT_END -->
 
 # Agent: Hypothesis Forming
 
@@ -32,19 +12,20 @@ CONTRACT_END -->
 Turn analytical questions into testable hypotheses with expected outcomes, confirming/rejecting criteria, and a structured test plan that specifies exactly what data and analysis is needed.
 
 ## Inputs
-- {{QUESTION_BRIEF}}: The structured question brief produced by the Question Framing Agent (typically `outputs/question_brief_{{DATE}}.md`). Must contain at least one prioritized question with its decision context, category, and data requirements. If no question brief exists, instruct the user to run the Question Framing Agent first or provide questions manually.
-- {{DATA_INVENTORY}}: (optional) The data inventory report from the Data Explorer Agent (`outputs/data_inventory_{{DATE}}.md`). If provided, use it to validate that hypotheses reference real, available data fields. If not provided, rely on the data requirements listed in the question brief.
+- {{QUESTION_BRIEF}}: The structured question brief produced by the Question Framing Agent (typically `outputs/question_brief_{{DATE}}.md`). Must contain at least one prioritized question with its decision context, category, and initial hypotheses. If no question brief exists, instruct the user to run the Question Framing Agent first or provide questions manually.
+- {{DATA_FEASIBILITY}}: The data feasibility report from the Data Explorer Agent (`outputs/data_feasibility_{{DATE}}.md`). Contains which data points are AVAILABLE, DERIVABLE, or MISSING for each question, along with feasibility ratings and dataset configuration. Use this to ensure hypotheses reference real, available data fields and to scope test plans to what the data can actually support.
 
 ## Workflow
 
-### Step 1: Parse the Question Brief
-Read {{QUESTION_BRIEF}} and extract:
+### Step 1: Parse the Question Brief and Data Feasibility
+Read {{QUESTION_BRIEF}} and {{DATA_FEASIBILITY}} and extract:
 - The prioritized questions (focus on the top 3, or all questions if fewer than 3)
-- For each question: the decision it informs, the category (descriptive/diagnostic/comparative/predictive/prescriptive), and any data requirements already identified
+- For each question: the decision it informs, the category (descriptive/diagnostic/comparative/predictive/prescriptive), and initial hypotheses from the question brief
 - The business context summary (goal, decision, constraints, stakeholders)
-- Any tracking gaps flagged in the brief
+- From the feasibility report: which data points are AVAILABLE, DERIVABLE, or MISSING per question; the feasibility rating; the recommended dataset configuration and key filters
+- Any data gaps that were surfaced to the user and their resolution
 
-If the question brief is missing required fields (no decision context, no data requirements), note the gaps and proceed with reasonable assumptions, stated explicitly.
+If the question brief is missing required fields (no decision context), note the gaps and proceed with reasonable assumptions, stated explicitly. Use the feasibility report to ground hypotheses in what the data can actually answer — do not generate hypotheses that depend on MISSING data with no workaround.
 
 ### Step 2: Generate 2-3 Testable Hypotheses per Question
 For each question from the brief, generate 2-3 hypotheses. Each hypothesis must be:
@@ -92,6 +73,20 @@ After generating all hypotheses for a question, verify category diversity:
 
 The purpose of category coverage is not to generate bad hypotheses for completeness — it's to prevent the common failure mode where the obvious explanation crowds out the correct one. Many metric changes that look like product issues turn out to be mix shifts, and many apparent technical issues turn out to be seasonal patterns.
 
+### Step 2c: Clarify Hypotheses with the User
+Before proceeding to evidence definition, present the generated hypotheses to the user using `#tool:vscode/askQuestions` for validation:
+
+- Show the summary table of all hypotheses (question, hypothesis, category, key metric)
+- Ask the user to confirm, adjust, or add hypotheses:
+  > "Here are the hypotheses I've generated for your questions. For each:
+  > 1. Does it match your intuition? Any you'd remove or rephrase?
+  > 2. Are there hypotheses you'd add based on your domain knowledge?
+  > 3. Any specific thresholds or benchmarks I should use for confirming/rejecting?"
+
+- If the user provides corrections or additions, incorporate them before proceeding.
+- If the user confirms without changes, proceed to Step 3.
+- If the user suggests a hypothesis that depends on MISSING data (per the feasibility report), flag it: "That hypothesis would need [data point] which was flagged as MISSING. Should we proceed with [workaround] or skip it?"
+
 ### Step 3: Define Confirming and Rejecting Evidence
 For each hypothesis, specify:
 
@@ -117,7 +112,11 @@ For each hypothesis, apply the Metric Spec Template skill (`.github/skills/metri
 - **Filters**: Date range, user segments, exclusions
 - **Segmentation**: How to slice the metric (by cohort, by platform, by plan type, etc.)
 
-If {{DATA_INVENTORY}} is provided, cross-reference each metric against the actual available columns. Flag any metric that requires data not present in the inventory.
+Cross-reference each metric against the data feasibility report:
+- For AVAILABLE data points: cite the exact `table.column` from the feasibility report
+- For DERIVABLE data points: include the derivation logic and complexity level
+- For MISSING data points: use the agreed workaround from the user discussion, or note the limitation
+- Apply the recommended dataset configuration (primary dataset, key filters, known quirks) from the feasibility report
 
 ### Step 5: Design the Test Plan
 For each question (with its hypotheses), produce a test plan:
@@ -151,6 +150,7 @@ A markdown file saved to `outputs/hypothesis_doc_{{DATE}}.md` with this structur
 # Hypothesis Document
 **Generated:** {{DATE}}
 **Source:** {{QUESTION_BRIEF}} file path
+**Data Feasibility:** {{DATA_FEASIBILITY}} file path
 **Business Context:** [1-2 sentence summary from the question brief]
 
 ## Summary Table

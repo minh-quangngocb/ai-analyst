@@ -11,6 +11,8 @@ Define any metric clearly and completely using a standardized template so there 
 ## When to Use
 Apply this skill when defining a new metric, when a metric is referenced without a clear definition, or when different people are using the same metric name to mean different things. Every metric used in an analysis should have a spec.
 
+This skill is invoked by the hypothesis agent (Step 4) to define metrics grounded in the data feasibility report. When used in the pipeline context, cross-reference each metric's data source against the feasibility report's AVAILABLE/DERIVABLE/MISSING classifications.
+
 ## Instructions
 
 ### Metric Spec Template
@@ -37,19 +39,12 @@ Apply this skill when defining a new metric, when a metric is referenced without
 | [e.g., Geography] | [US, EU, APAC] | [Different markets → different baselines] |
 
 ### Data Source
-- **Primary table:** [schema.table_name]
+- **Primary table:** [project.dataset.table_name — use fully qualified BigQuery path]
 - **Key columns:** [list]
-- **Refresh cadence:** [real-time / hourly / daily / weekly]
-- **Latency:** [how delayed is the data?]
+- **Feasibility status:** [AVAILABLE / DERIVABLE / MISSING — from data feasibility report]
+- **Derivation logic:** [if DERIVABLE, describe the computation and complexity]
 - **Reference query:** [SQL query that computes this metric — the canonical implementation]
 
-### Thresholds
-| Condition | Value | Action |
-|-----------|-------|--------|
-| **Healthy** | [e.g., >3.5%] | No action needed |
-| **Watch** | [e.g., 2.5-3.5%] | Monitor weekly, investigate if persists >2 weeks |
-| **Investigate** | [e.g., <2.5%] | Root cause analysis within 48 hours |
-| **Alert** | [e.g., <1.5%] | Escalate to leadership, immediate investigation |
 
 ### Known Limitations
 - [Limitation 1: e.g., "Does not include guest checkouts — only registered users"]
@@ -86,8 +81,10 @@ or [parent metric] = [driver 1] + [driver 2] + [driver 3] (for additive)
 1. **Definition must be unambiguous** — two different analysts reading the spec should write the same SQL
 2. **Always specify the denominator** — "conversion rate" is meaningless without knowing what's in the denominator (visitors? sessions? users?)
 3. **Always specify the time window** — "DAU" measured daily is different from "DAU" measured as a 7-day average
-4. **Always specify exclusions** — which users/events are filtered out? (test accounts, internal users, bots)
+4. **Always specify exclusions** — which users/events are filtered out? (test accounts, internal users, bots). Reference dataset quirks for standard filters (e.g., `intraday = FALSE`, `known_bot_session = FALSE` for PFA)
 5. **Thresholds should be based on historical data** — not gut feel. State the basis: "Based on 6-month average of 3.8% ± 0.4%"
+6. **Always cite the feasibility status** — when used in the pipeline, every data source reference must note whether it is AVAILABLE, DERIVABLE, or MISSING (with workaround) per the data feasibility report
+7. **Use fully qualified BigQuery table paths** — write `project.dataset.table` (e.g., `cb-data-hub-prod.privacy_friendly_analytics.sessions`), not generic `{schema}` placeholders
 
 ## Examples
 
@@ -117,6 +114,7 @@ or [parent metric] = [driver 1] + [driver 2] + [driver 3] (for additive)
 ### Data Source
 - **Primary table:** analytics.events
 - **Key columns:** user_id, event_type, event_timestamp, device_type, properties.payment_method
+- **Feasibility status:** AVAILABLE
 - **Refresh cadence:** Hourly
 - **Latency:** ~2 hours from event to availability
 
@@ -269,7 +267,7 @@ After writing a metric spec, automatically register it in the metric dictionary:
 
 ## Reference Queries for Common Metrics
 
-Use these canonical SQL patterns when computing standard metrics. Replace `{schema}` with the active dataset schema (e.g., `your_dataset`).
+Use these canonical SQL patterns when computing standard metrics. Replace table references with the actual BigQuery fully qualified paths from the dataset skills (e.g., `cb-data-hub-prod.privacy_friendly_analytics.sessions` for PFA, `cb-data-hub-prod.google_analytics_4.sessions` for GA4). Always include standard filters from the dataset quirks (intraday exclusion, bot exclusion, etc.).
 
 ### Conversion Rate (Event-Based)
 

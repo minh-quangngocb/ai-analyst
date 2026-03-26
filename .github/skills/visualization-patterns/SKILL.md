@@ -1,15 +1,15 @@
 ---
 name: visualization-patterns
-description: "Ensures every chart follows Storytelling with Data design standards with consistent styling and clear data communication."
+description: "Ensures every chart follows Coolblue brand standards: simple chart types (bar/line only), Coolblue colors, white background, and YoY time-series conventions."
 user-invocable: false
 ---
 # Visualization Patterns
 
 ## Purpose
-Ensure every chart the assistant produces follows high-quality design standards with named themes, consistent styling, and clear data communication.
+Ensure every chart the assistant produces follows Coolblue brand standards with simple chart types, consistent Coolblue colors, and clean design.
 
 ## When to Use
-Apply this skill whenever generating a chart, graph, or data visualization. Always apply the active theme unless the user specifies otherwise. Default theme: `minimal`.
+Apply this skill whenever generating a chart, graph, or data visualization. Always apply the Coolblue style. Default and only theme: `coolblue`.
 
 ## Instructions
 
@@ -20,25 +20,60 @@ Before executing, check `.knowledge/learnings/index.md` for relevant entries:
 - If entries exist, incorporate them as constraints for this execution (e.g., preferred chart types, color overrides, annotation preferences).
 - Never block execution if learnings are unavailable.
 
-### Core Principle: Storytelling with Data (SWD)
+### Core Principle: Coolblue Visualization Standards
 
-Every chart follows the SWD methodology by Cole Nussbaumer Knaflic:
+Every chart follows the Coolblue simplicity standard:
 
-> **Gray everything first. Color is reserved for the one data point that tells the story.**
+> **Keep it simple. Use only bar charts and line charts. Use only Coolblue colors. White background always.**
 
-- Maximum **2 colors + gray** per chart. Action Amber (`#D97706`) for the primary focus, Accent Red (`#DC2626`) for a secondary callout. Everything else is gray.
-- **Titles state the takeaway**, not a description. "iOS drove the June ticket spike" not "Tickets by Platform."
-- Every visual element must earn its place — if it doesn't help the reader understand the story, remove it.
-- Prefer text over charts for single numbers. Prefer horizontal bars over pie charts. Prefer direct labels over legends.
+#### Allowed Chart Types
+- **Horizontal bar chart** — for comparing categories (default, preferred)
+- **Vertical bar chart** — for comparing a few categories (≤6)
+- **Line chart** — for time series and trends
+- **No other chart types** — heatmaps, matrices, scatter plots, pie charts, donut charts, area charts, waterfall charts, stacked bars, and all other complex visualizations are banned
 
-**Implementation:** Always apply the SWD style before generating any chart:
+#### Color Palette (Coolblue Brand)
+```python
+COLORS = {
+    "orange":     "#FF6600",   # Most important element
+    "fact_blue":  "#285DAB",   # Second most important
+    "coolblue":   "#0090E3",   # Coolblue Blue (axis labels, ticks)
+    "light_blue": "#CCE9F9",   # Supporting/context data
+    "grey":       "#F7F6F2",   # Subtle fill only
+    "white":      "#FFFFFF",   # Chart background — ALWAYS white
+}
+```
+
+**Color hierarchy:**
+- **Orange `#FF6600`** — the primary/most important data element
+- **Fact Blue `#285DAB`** — the secondary data element
+- **Light Blue `#CCE9F9`** — supporting/context data (non-highlighted bars, older time series)
+- **No other colors** — no reds, greens, ambers, purples, or grays outside this palette
+- Background is always white (`#FFFFFF`), never off-white or colored
+
+#### Time Series Convention (YoY / MoM data)
+When data spans multiple years (e.g., monthly data from 2023-2026):
+1. **Each year is a separate line** on one chart (NOT separate charts per year)
+2. **Most recent year** → Orange `#FF6600` (thicker line, optional small markers)
+3. **2nd most recent year** → Fact Blue `#285DAB`
+4. **3rd and older years** → Light Blue `#CCE9F9`
+5. **Every time series chart must include a companion DataFrame** with: Year, Month, Value, MoM difference, MoM % change, YoY difference, YoY % change
+
+Use `yoy_line_chart()` from `helpers/coolblue_charts.py` for this pattern.
+
+**Implementation:** Apply the Coolblue style before generating any chart:
+```python
+from helpers.coolblue_charts import apply_coolblue_style, bar_chart, line_chart, yoy_line_chart, COLORS
+
+apply_coolblue_style()  # Sets white bg, Coolblue color cycle, clean spines
+```
+
+Or using the core helpers:
 ```python
 from helpers.chart_helpers import swd_style, highlight_bar, highlight_line, action_title, save_chart
 
-colors = swd_style()  # Loads .mplstyle + returns color palette
+colors = swd_style()  # Loads style + returns Coolblue color palette
 ```
-
-Use `highlight_bar()` for bar charts (highlights one bar, grays the rest), `highlight_line()` for line charts (highlights one series, grays the rest), and `action_title()` for all chart titles.
 
 ### Declutter Checklist
 
@@ -47,13 +82,16 @@ Before finalizing **any** chart, verify each item:
 - [ ] Chart border / box — removed entirely
 - [ ] Top and right spines — removed (keep only bottom and left)
 - [ ] Heavy gridlines — removed or very light gray (`#E5E7EB`), y-axis only
-- [ ] Data markers — removed from line charts (the line *is* the data)
-- [ ] Legend — replaced with direct labels on the data
+- [ ] Data markers — removed from line charts (except most recent year in YoY)
+- [ ] Legend — present and clean for multi-series; use direct labels where practical
 - [ ] Rotated axis text — if labels need rotation, switch to horizontal bars
-- [ ] Trailing zeros — use `$45` not `$45.00`; use `12%` not `12.0%`
+- [ ] Trailing zeros — use `€45` not `€45.00`; use `12%` not `12.0%`
 - [ ] 3D effects — never
-- [ ] Background color — always warm off-white (`#F7F6F2`)
-- [ ] Redundant axis labels — if the title says "Revenue ($M)", the y-axis doesn't need "Revenue in Millions of Dollars"
+- [ ] Background color — always white (`#FFFFFF`)
+- [ ] Colors — only Coolblue palette (orange, fact_blue, light_blue)
+- [ ] Chart type — only bar (horizontal/vertical) or line chart
+- [ ] No distracting elements — no annotations, arrows, shaded regions unless essential
+- [ ] Redundant axis labels — if the title says "Revenue (€M)", the y-axis doesn't need "Revenue in Millions of Euros"
 - [ ] Excessive tick marks — reduce to 4-6 ticks maximum
 - [ ] Decimal precision — match the precision to the decision (`12%` not `12.347%`)
 
@@ -78,292 +116,125 @@ All chart helpers live in `helpers/chart_helpers.py`. The style file is `helpers
 
 | Function | Purpose | Key Args |
 |----------|---------|----------|
-| `swd_style()` | Apply SWD matplotlib style, return color palette | — |
-| `highlight_bar()` | Bar chart with one bar highlighted, rest gray | `highlight=`, `horizontal=True`, `sort=True` |
-| `highlight_line()` | Line chart with one line colored, rest gray | `highlight=`, `y_dict={}` |
-| `action_title()` | Bold takeaway title + optional subtitle | `title`, `subtitle=` |
+| `swd_style()` | Apply Coolblue matplotlib style, return color palette | — |
+| `highlight_bar()` | Bar chart with one bar highlighted (orange), rest light_blue | `highlight=`, `horizontal=True`, `sort=True` |
+| `highlight_line()` | Line chart with one line colored (orange), rest light_blue | `highlight=`, `y_dict={}` |
+| `action_title()` | Bold title + optional subtitle | `title`, `subtitle=` |
 | `annotate_point()` | Clean annotation with arrow | `x`, `y`, `text`, `offset=` |
-| `save_chart()` | Tight layout + correct DPI | `fig`, `path`, `dpi=150` |
+| `save_chart()` | Tight layout + white background + correct DPI | `fig`, `path`, `dpi=150` |
 
-### Theme Definitions
+#### Coolblue Chart Library (preferred for new charts)
 
-#### Theme: `nyt` (New York Times)
+| Function | Purpose | Key Args |
+|----------|---------|----------|
+| `apply_coolblue_style()` | Apply Coolblue rcParams globally (white bg, brand colors) | — |
+| `bar_chart()` | Bar chart from DataFrame | `df`, `x`, `y`, `highlight=`, `horizontal=True` |
+| `line_chart()` | Line chart from DataFrame | `df`, `x`, `y` (str or list) |
+| `yoy_line_chart()` | YoY overlay: each year as separate line + comparison table | `df`, `date_col`, `value_col` |
+| `save_chart()` | Save with white background | `fig`, `path` |
+
+### Theme Definition
+
+#### Theme: `coolblue` (Default — only theme)
 ```python
-NYT_THEME = {
+COOLBLUE_THEME = {
     "colors": {
-        "primary": "#000000",
-        "secondary": "#666666",
-        "accent": "#D03A2B",
-        "palette": ["#D03A2B", "#1A6B54", "#3D6CA3", "#E8912D", "#8B5E3C", "#6B4C9A"],
-        "background": "#FFFFFF",
-        "grid": "#E5E5E5",
+        "primary": "#FF6600",      # Orange — most important
+        "secondary": "#285DAB",    # Fact Blue — second most important
+        "tertiary": "#CCE9F9",     # Light Blue — supporting data
+        "accent": "#0090E3",       # Coolblue Blue — axis labels, ticks
+        "palette": ["#FF6600", "#285DAB", "#CCE9F9"],
+        "background": "#FFFFFF",   # Always white
+        "grid": "#E5E7EB",
     },
     "fonts": {
-        "title": {"family": "Georgia", "size": 18, "weight": "bold"},
-        "subtitle": {"family": "Arial", "size": 12, "weight": "normal", "color": "#666666"},
-        "axis_label": {"family": "Arial", "size": 10},
-        "annotation": {"family": "Arial", "size": 9, "style": "italic"},
+        "title": {"family": "sans-serif", "size": 14, "weight": "bold"},
+        "subtitle": {"family": "sans-serif", "size": 10, "weight": "normal", "color": "#4B5563"},
+        "axis_label": {"family": "sans-serif", "size": 10},
+        "annotation": {"family": "sans-serif", "size": 9},
     },
-    "grid": {"show": True, "axis": "y", "style": "--", "alpha": 0.3},
-    "annotations": {"style": "minimal", "callout_arrows": True},
-    "title": {"position": "left-aligned", "include_subtitle": True},
-}
-```
-
-#### Theme: `economist` (The Economist)
-```python
-ECONOMIST_THEME = {
-    "colors": {
-        "primary": "#1F2E3C",
-        "secondary": "#7C8A96",
-        "accent": "#E3120B",
-        "palette": ["#E3120B", "#1F6ED4", "#36B37E", "#F5A623", "#6554C0", "#00B8D9"],
-        "background": "#D7E4E8",
-        "grid": "#FFFFFF",
-    },
-    "fonts": {
-        "title": {"family": "Helvetica", "size": 16, "weight": "bold"},
-        "subtitle": {"family": "Helvetica", "size": 11, "weight": "normal"},
-        "axis_label": {"family": "Helvetica", "size": 9},
-        "annotation": {"family": "Helvetica", "size": 8},
-    },
-    "grid": {"show": True, "axis": "y", "style": "-", "alpha": 0.5, "color": "#FFFFFF"},
-    "annotations": {"style": "inline", "red_highlight": True},
-    "title": {"position": "left-aligned", "red_bar_top": True},
-}
-```
-
-#### Theme: `minimal`
-```python
-MINIMAL_THEME = {
-    "colors": {
-        "primary": "#333333",
-        "secondary": "#999999",
-        "accent": "#2563EB",
-        "palette": ["#2563EB", "#DC2626", "#059669", "#D97706", "#7C3AED", "#DB2777"],
-        "background": "#FFFFFF",
-        "grid": "#F0F0F0",
-    },
-    "fonts": {
-        "title": {"family": "Helvetica", "size": 14, "weight": "bold"},
-        "subtitle": {"family": "Helvetica", "size": 10, "weight": "normal", "color": "#666666"},
-        "axis_label": {"family": "Helvetica", "size": 9},
-        "annotation": {"family": "Helvetica", "size": 8},
-    },
-    "grid": {"show": True, "axis": "y", "style": "-", "alpha": 0.15},
+    "grid": {"show": False, "axis": "y", "style": "-", "alpha": 0.15},
     "annotations": {"style": "minimal", "direct_labels": True},
-    "title": {"position": "left-aligned", "include_subtitle": True},
+    "title": {"position": "left-aligned", "include_subtitle": False},
 }
 ```
 
-#### Theme: `corporate`
-```python
-CORPORATE_THEME = {
-    "colors": {
-        "primary": "#1B2A4A",
-        "secondary": "#5A6B7F",
-        "accent": "#0066CC",
-        "palette": ["#0066CC", "#00A651", "#FF6600", "#CC0000", "#9933CC", "#00CCCC"],
-        "background": "#FFFFFF",
-        "grid": "#E8E8E8",
-    },
-    "fonts": {
-        "title": {"family": "Arial", "size": 16, "weight": "bold"},
-        "subtitle": {"family": "Arial", "size": 11, "weight": "normal"},
-        "axis_label": {"family": "Arial", "size": 10},
-        "annotation": {"family": "Arial", "size": 9},
-    },
-    "grid": {"show": True, "axis": "both", "style": "-", "alpha": 0.2},
-    "annotations": {"style": "callout", "box_highlight": True},
-    "title": {"position": "center", "include_subtitle": True},
-}
-```
-
-### Applying a Theme (matplotlib)
-
-```python
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
-
-def apply_theme(fig, ax, theme):
-    """Apply a named theme to a matplotlib figure."""
-    fig.patch.set_facecolor(theme["colors"]["background"])
-    ax.set_facecolor(theme["colors"]["background"])
-
-    # Title styling
-    ax.set_title(
-        ax.get_title(),
-        fontfamily=theme["fonts"]["title"]["family"],
-        fontsize=theme["fonts"]["title"]["size"],
-        fontweight=theme["fonts"]["title"]["weight"],
-        loc="left" if theme["title"]["position"] == "left-aligned" else "center",
-        pad=15,
-    )
-
-    # Grid
-    if theme["grid"]["show"]:
-        ax.grid(
-            axis=theme["grid"]["axis"],
-            linestyle=theme["grid"]["style"],
-            alpha=theme["grid"]["alpha"],
-            color=theme["colors"].get("grid", "#E0E0E0"),
-        )
-        ax.set_axisbelow(True)
-
-    # Clean spines
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    ax.spines["left"].set_alpha(0.3)
-    ax.spines["bottom"].set_alpha(0.3)
-
-    # Axis labels
-    ax.xaxis.label.set_fontfamily(theme["fonts"]["axis_label"]["family"])
-    ax.xaxis.label.set_fontsize(theme["fonts"]["axis_label"]["size"])
-    ax.yaxis.label.set_fontfamily(theme["fonts"]["axis_label"]["family"])
-    ax.yaxis.label.set_fontsize(theme["fonts"]["axis_label"]["size"])
-
-    plt.tight_layout()
-```
+All other themes (nyt, economist, minimal, corporate) are deprecated. Use the Coolblue theme for all charts.
 
 ### Chart Type Selection
 
 | Data Relationship | Chart Type | When to Use |
 |---|---|---|
-| **Comparison** (categories) | Bar chart (vertical) | Comparing ≤12 categories |
-| **Comparison** (many categories) | Bar chart (horizontal) | Comparing >7 categories or long labels |
-| **Comparison** (parts of whole) | Stacked bar | Showing composition across categories |
+| **Comparison** (categories) | Bar chart (horizontal) | Comparing categories — **default choice** |
+| **Comparison** (few categories) | Bar chart (vertical) | Comparing ≤6 categories |
 | **Change over time** | Line chart | Continuous time series, trends |
 | **Change over time** (few periods) | Bar chart | Discrete periods (quarters, years) |
-| **Correlation** | Scatter plot | Relationship between two continuous variables |
-| **Distribution** | Histogram | Single variable distribution |
-| **Distribution** (compare groups) | Box plot or violin | Distribution comparison across groups |
-| **Proportion** | Donut chart | ≤5 segments, one variable |
-| **Flow/Process** | Funnel chart | Conversion or drop-off rates |
-| **Intensity** | Heatmap | Two categorical dimensions + one value |
-| **Cumulative** | Area chart | Running totals over time |
-| **Ranking changes** | Bump chart | Rank position changes over time |
-| **Waterfall** | Waterfall chart | Additive/subtractive contributions |
+| **Year-over-Year** | YoY line chart | Each year as separate line + comparison DataFrame |
 
-### Annotation Standards
+**Banned chart types:** Scatter plots, heatmaps, matrices, pie/donut charts, box plots, violin plots, area charts, waterfall charts, stacked bars, funnel charts, bump charts, radar charts, treemaps, bubble charts, and any other complex visualization. Convert to bar or line charts instead.
 
-1. **Always label key data points directly** — do not rely on legends for primary story elements
-2. **Use direct labels** on bars and line endpoints instead of requiring axis reading
-3. **Annotate inflection points** — mark where trends change with a brief note
-4. **Titles are takeaways, not descriptions** — "Revenue grew 23% after launch" not "Revenue by Month"
-5. **Subtitles provide context** — "Monthly revenue, Jan–Dec 2025, in $M"
-6. **Source line** at bottom-left in small gray text
-7. **Format numbers for readability** — "$1.2M" not "$1,234,567"; "23%" not "0.2345"
-8. **Max 6 colors** in any single chart — use gray for "other" or "rest"
-9. **Highlight the story** — use accent color for the key data point, gray for context
+### Chart Design Standards
+
+1. **Label key data points directly** on bars and line endpoints
+2. **Titles are simple and clear** — "Sessions by segment (last 28 days)" is fine
+3. **Format numbers for readability** — "€1.2M" not "€1,234,567"; "23%" not "0.2345"
+4. **Use Coolblue colors only** — orange (primary), fact_blue (secondary), light_blue (supporting)
+5. **No distracting elements** — no annotations, arrows, shaded regions, trendlines, or event markers unless essential
+6. **Legend for multi-series** — clean, no frame, positioned to not overlap data
 
 ### Standard Chart Setup
 
 ```python
-def create_chart(data, chart_type, theme_name="minimal", title="", subtitle=""):
-    """Standard chart creation pattern."""
-    theme = {"nyt": NYT_THEME, "economist": ECONOMIST_THEME,
-             "minimal": MINIMAL_THEME, "corporate": CORPORATE_THEME}[theme_name]
+from helpers.coolblue_charts import apply_coolblue_style, bar_chart, line_chart, yoy_line_chart
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-    fig.patch.set_facecolor(theme["colors"]["background"])
-    ax.set_facecolor(theme["colors"]["background"])
+apply_coolblue_style()
 
-    # Plot data using theme colors
-    colors = theme["colors"]["palette"]
+# Bar chart
+fig, ax = bar_chart(df, x="revenue", y="segment", title="Revenue by segment")
 
-    # Set title as takeaway
-    ax.set_title(title, fontfamily=theme["fonts"]["title"]["family"],
-                 fontsize=theme["fonts"]["title"]["size"],
-                 fontweight=theme["fonts"]["title"]["weight"],
-                 loc="left", pad=20)
-    # Subtitle
-    if subtitle:
-        ax.text(0, 1.02, subtitle, transform=ax.transAxes,
-                fontfamily=theme["fonts"]["subtitle"]["family"],
-                fontsize=theme["fonts"]["subtitle"]["size"],
-                color=theme["fonts"]["subtitle"].get("color", "#666666"))
+# Line chart
+fig, ax = line_chart(df, x="date", y="sessions", title="Sessions over time")
 
-    apply_theme(fig, ax, theme)
-    return fig, ax
-```
-
-## Examples
-
-### Example 1: Bar chart with NYT theme
-```python
-fig, ax = plt.subplots(figsize=(10, 6))
-categories = ["Mobile", "Desktop", "Tablet"]
-values = [45, 35, 20]
-colors = ["#D03A2B", "#666666", "#666666"]  # Accent on key finding
-
-bars = ax.bar(categories, values, color=colors, width=0.6)
-# Direct labels
-for bar, val in zip(bars, values):
-    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1,
-            f"{val}%", ha="center", fontsize=12, fontweight="bold")
-
-ax.set_title("Mobile drives nearly half of all sessions", loc="left",
-             fontfamily="Georgia", fontsize=18, fontweight="bold")
-ax.set_ylabel("")
-ax.set_ylim(0, 55)
-apply_theme(fig, ax, NYT_THEME)
-```
-
-### Example 2: Line chart with annotations
-```python
-fig, ax = plt.subplots(figsize=(10, 6))
-ax.plot(dates, revenue, color="#2563EB", linewidth=2)
-# Annotate the inflection point
-ax.annotate("Feature launch\n+23% MoM", xy=(launch_date, launch_value),
-            xytext=(launch_date - timedelta(days=30), launch_value + 50000),
-            fontsize=9, fontstyle="italic",
-            arrowprops=dict(arrowstyle="->", color="#666666"))
-# Direct label on endpoint
-ax.text(dates[-1], revenue[-1], f"${revenue[-1]/1e6:.1f}M",
-        fontsize=11, fontweight="bold", va="bottom")
-ax.set_title("Revenue grew 23% after feature launch", loc="left")
-apply_theme(fig, ax, MINIMAL_THEME)
-```
-
-### Example 3: Highlighting one segment
-```python
-# Use accent for the key finding, gray for everything else
-colors = ["#E0E0E0"] * len(categories)
-colors[key_index] = theme["colors"]["accent"]  # Highlight the story
+# YoY time series (returns chart + comparison DataFrame)
+fig, ax, comparison_df = yoy_line_chart(
+    df, date_col="date", value_col="sessions",
+    title="Sessions by month — Year over Year",
+)
 ```
 
 ## Anti-Patterns (Banned)
 
 | Anti-Pattern | Why It's Bad | Use Instead |
 |--------------|-------------|-------------|
-| **Pie charts** | Humans can't compare angles accurately | Horizontal bar chart |
-| **Rainbow palettes** | No natural ordering, visual noise, not colorblind-safe | Gray + one highlight color (max 2 colors + gray) |
-| **Spaghetti lines** | Too many colored lines, nothing stands out | `highlight_line()` — gray all, highlight one |
+| **Heatmaps / matrices** | Too complex, hard to read at a glance | Bar chart (horizontal) |
+| **Pie / donut charts** | Humans can't compare angles accurately | Horizontal bar chart |
+| **Scatter plots** | Too complex for product analytics | Bar or line chart |
+| **Stacked bars** | Hard to compare non-baseline segments | Grouped bars or separate charts |
+| **Area charts** | Obscures individual series values | Line chart |
+| **Waterfall charts** | Overly complex | Bar chart with labels |
+| **Rainbow palettes** | Visual noise, not brand-compliant | Coolblue colors only |
 | **Dual y-axes** | Misleading — any two series can be made to "correlate" | Two separate charts, stacked vertically |
 | **3D charts** | Distorts proportions, adds no information | Flat 2D versions |
-| **Descriptive titles** | Don't tell the reader what to think | Action titles via `action_title()` |
-| **Legend boxes** | Force the reader to look away from the data | Direct labels on the data |
-| **Excessive gridlines** | Create visual clutter | Light y-axis gridlines only, or none |
+| **Non-Coolblue colors** | Off-brand, inconsistent | Orange / Fact Blue / Light Blue only |
+| **Colored backgrounds** | Distracting, not brand-compliant | Always white `#FFFFFF` |
+| **Excessive annotations** | Clutters the chart | Keep it clean — title + legend + labels only |
 | **Truncated y-axes** | Exaggerate small differences (for bar charts) | Start at zero for bar charts |
-| **Cluttered annotations** | Annotating every data point defeats the purpose | Annotate only the story |
-| **Default matplotlib styling** | Looks generic, unprofessional | Always apply `swd_style()` first |
-| **More than 2 colors** | Creates visual noise, dilutes focus | Gray + Action Amber + optional Accent Red |
+| **Default matplotlib styling** | Looks generic, unprofessional | Always apply `apply_coolblue_style()` first |
 
 ## Review Checklist
 
 Before including any chart in an analysis:
 
-- [ ] Title states the takeaway (not a description)
-- [ ] Only 1-2 colors used (plus gray)
+- [ ] Chart type is bar (horizontal/vertical) or line — nothing else
+- [ ] Colors are only from the Coolblue palette (orange, fact_blue, light_blue)
+- [ ] Background is white (`#FFFFFF`)
+- [ ] Title is simple and clear
 - [ ] No chart border, no top/right spines
-- [ ] Direct labels instead of legend
+- [ ] Legend is clean for multi-series charts
 - [ ] Gridlines removed or very light
 - [ ] Axis labels are clean (no rotation, no trailing zeros)
-- [ ] Annotations are minimal and support the story
-- [ ] Chart type matches the data relationship
-- [ ] A single number isn't charted — it's displayed as text
+- [ ] No distracting elements (no arrows, shaded regions, excessive annotations)
 - [ ] The chart would be understood in 5 seconds
-- [ ] YoY comparisons use lines (not two similar-colored bars)
+- [ ] YoY comparisons use overlaid lines (each year = separate line)
+- [ ] YoY charts have a companion MoM/YoY comparison DataFrame
 - [ ] Labels don't collide with bars, axes, or other labels
-- [ ] External context events have prominent bbox annotations
-- [ ] Multi-panel charts with fig-level titles use direct `savefig()` (not `save_chart()`)

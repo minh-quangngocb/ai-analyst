@@ -9,9 +9,7 @@ Themes control colors, typography, chart styling, and presentation defaults.
 themes/
 ├── _base.yaml              # Default theme (always loaded first)
 ├── README.md               # Theme directory overview
-├── analytics.css           # Marp theme for presentations (light mode)
-├── analytics-dark.css      # Marp theme for presentations (dark mode)
-├── analytics-light.css     # Marp theme alias
+├── coolblue.css            # Marp theme for presentations (Coolblue brand)
 └── brands/
     └── {brand}/
         ├── theme.yaml      # Brand overrides (merged on top of _base)
@@ -109,16 +107,11 @@ charts:
 ```yaml
 presentations:
   engine: marp
-  theme: analytics          # Maps to themes/analytics.css
+  theme: coolblue           # Maps to themes/coolblue.css
   paginate: true
   background_color: "#FFFFFF"
   text_color: "#333333"
-  accent_color: "#4878CF"
-  dark_mode:
-    theme: analytics-dark   # Maps to themes/analytics-dark.css
-    background_color: "#1E1E2E"
-    text_color: "#CDD6F4"
-    accent_color: "#89B4FA"
+  accent_color: "#0090E3"
 ```
 
 ### `export` — Output Settings
@@ -260,7 +253,7 @@ from helpers.theme_loader import load_theme
 theme = load_theme("mycompany")
 
 # Marp frontmatter generation
-marp_theme = theme.get("presentations", {}).get("theme", "analytics")
+marp_theme = theme.get("presentations", {}).get("theme", "coolblue")
 bg_color = theme.get("presentations", {}).get("background_color", "#FFFFFF")
 
 marp_header = f"""---
@@ -307,8 +300,7 @@ Use online tools to verify theme colors:
 | `helpers/theme_loader.py` | Theme loading, caching, and merging |
 | `helpers/chart_palette.py` | Palette generation and contrast checking |
 | `helpers/chart_helpers.py` | Chart creation with theme integration |
-| `themes/analytics.css` | Marp presentation theme (light mode) |
-| `themes/analytics-dark.css` | Marp presentation theme (dark mode) |
+| `themes/coolblue.css` | Marp presentation theme (Coolblue brand) |
 
 ## Advanced: Sequential and Diverging Colormaps
 
@@ -391,10 +383,10 @@ fig.savefig('test_mycompany_theme.png')
 - Clear matplotlib font cache: `rm -rf ~/.matplotlib/fontlist-*.json`
 - Use common fallback fonts: "Helvetica Neue, Arial, sans-serif"
 
-**Dark mode slides look wrong:**
-- Verify `presentations.dark_mode` section exists in theme
-- Check that chart backgrounds are transparent or match slide background
-- Use `swd_style(theme="mycompany", dark_mode=True)` for dark mode charts
+**Slides not picking up Coolblue styling:**
+- Verify `theme: coolblue` in Marp frontmatter
+- Check that `themes/coolblue.css` exists
+- Use `--theme themes/coolblue.css` when running Marp CLI
 
 **Theme changes not appearing:**
 - Clear the theme cache: `from helpers.theme_loader import clear_cache; clear_cache()`

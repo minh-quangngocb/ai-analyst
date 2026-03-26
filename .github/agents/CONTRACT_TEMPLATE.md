@@ -42,7 +42,7 @@ CONTRACT_END -->
 
 ### Minimal contract (no dependencies)
 
-From `agents/question-framing.md`:
+From `.github/agents/question-framing.agent.md`:
 
 ```yaml
 <!-- CONTRACT_START
@@ -72,7 +72,7 @@ CONTRACT_END -->
 
 ### Contract with upstream dependency and knowledge context
 
-From `agents/data-explorer.md`:
+From `.github/agents/data-explorer.agent.md`:
 
 ```yaml
 <!-- CONTRACT_START
@@ -102,7 +102,7 @@ CONTRACT_END -->
 
 ### Contract with agent-sourced inputs
 
-From `agents/story-architect.md`:
+From `.github/agents/story-architect.agent.md`:
 
 ```yaml
 <!-- CONTRACT_START
@@ -178,7 +178,7 @@ Auto-resolved by the orchestrator at runtime. The standard system variables are:
 | `{{DATASET_NAME}}` | Short name from `.knowledge/active.yaml` |
 | `{{BUSINESS_CONTEXT_TITLE}}` | Short title derived from `{{BUSINESS_CONTEXT}}` |
 | `{{DATA_SOURCE}}` | Connection string or path from active dataset manifest |
-| `{{THEME}}` | Presentation theme (default: `analytics-dark` for workshops, `analytics` for reports) |
+| `{{THEME}}` | Presentation theme (default: `coolblue`) |
 
 ### `agent:X`
 Output from agent X. The orchestrator reads agent X's `outputs` to locate the file, then passes its path or content as the input. This creates an explicit dependency -- agent X must complete before this agent runs.
@@ -195,9 +195,9 @@ Output from agent X. The orchestrator reads agent X's `outputs` to locate the fi
 
 4. **`pipeline_step` must be unique per sequential position.** Agents that run in sequence must have different step numbers. Agents that can run in parallel share the same step number (e.g. `descriptive-analytics`, `overtime-trend`, and `cohort-analysis` all at step 5).
 
-5. **Every `agent:X` source must be satisfiable.** The agent named in `agent:X` must exist as a file in `agents/` and must declare the referenced output in its own CONTRACT block.
+5. **Every `agent:X` source must be satisfiable.** The agent named in `agent:X` must exist as a file in `.github/agents/` and must declare the referenced output in its own CONTRACT block.
 
-6. **`name` must match filename.** The `name` field in the CONTRACT must exactly match the agent's filename minus the `.md` extension. `name: data-explorer` lives in `agents/data-explorer.md`.
+6. **`name` must match filename.** The `name` field in the CONTRACT must exactly match the agent's filename minus the `.agent.md` extension. `name: data-explorer` lives in `.github/agents/data-explorer.agent.md`.
 
 7. **Use `{active}` in knowledge_context paths.** Do not hardcode dataset names. The orchestrator replaces `{active}` with the current dataset name from `.knowledge/active.yaml`.
 

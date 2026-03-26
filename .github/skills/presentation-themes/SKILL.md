@@ -9,7 +9,7 @@ user-invocable: false
 Generate slide decks that look professional, tell a coherent analytical story, and follow consistent theme standards matching the visualization patterns.
 
 ## When to Use
-Apply this skill whenever creating a presentation, slide deck, or structured output intended for stakeholders. Always apply the active theme. Default theme: `corporate`.
+Apply this skill whenever creating a presentation, slide deck, or structured output intended for stakeholders. Always apply the Coolblue theme. Default theme: `coolblue`.
 
 ## Instructions
 
@@ -116,117 +116,53 @@ Every deck follows: **Situation → Analysis → Finding → Implication → Rec
 
 ### Theme Specifications
 
-#### Theme: `corporate`
-- Title font: Arial Bold, 28pt, #1B2A4A
-- Body font: Arial, 16pt, #333333
-- Accent color: #0066CC
-- Background: white
-- Chart style: `corporate` from Visualization Patterns skill
-- Header bar: thin #0066CC line below headline
+#### Theme: `coolblue`
+- Title font: Open Sans Bold, 52pt (title), 32pt (content), #FFFFFF on blue, #1A1A1A on white
+- Body font: Open Sans, 24pt, #1A1A1A on white, rgba(255,255,255,0.9) on blue
+- Brand color: #0090E3 (Coolblue Blue)
+- Title/agenda background: #0090E3 (Coolblue Blue)
+- Content background: #FFFFFF (white) with blue bottom bar (#0090E3, 1/5 of slide height)
+- Slide title (h2) renders inside the blue bottom bar in white
+- Logo: Coolblue logo top-right on title and agenda slides (`templates/coolblue_logo.png`)
+- Footer: current date
+- Positive metrics: #059669, Negative metrics: #DC2626
+- Marp CSS theme: `themes/coolblue.css`
+- Best for: Coolblue internal presentations, stakeholder readouts, team reviews
 
-#### Theme: `minimal`
-- Title font: Helvetica Bold, 24pt, #333333
-- Body font: Helvetica, 14pt, #555555
-- Accent color: #2563EB
-- Background: white
-- Chart style: `minimal` from Visualization Patterns skill
-- No decorative elements
+**Coolblue theme structure (mandatory):**
+- Slide 1: `cb-title` — blue background, logo, deck title, subtitle
+- Slide 2: `cb-agenda` — blue background, logo, numbered agenda
+- Slides 3+: white background content slides with blue bar at bottom
 
-#### Theme: `nyt`
-- Title font: Georgia Bold, 26pt, #000000
-- Body font: Arial, 14pt, #333333
-- Accent color: #D03A2B
-- Background: white
-- Chart style: `nyt` from Visualization Patterns skill
-- Source attribution at bottom of each chart slide
+**Coolblue content slide rules:**
+- **Short statements:** Use `chart-full`. One chart per slide from `outputs/charts/`. No extra text — the chart tells the story. One statement can span multiple slides with different supporting charts.
+- **Detailed points:** Use `takeaway`. Concise bullet points (max 4). Minimal math/numbers. Plain language for stakeholders.
+- Font: Open Sans throughout. Black text on white background, white text on blue background.
 
-#### Theme: `economist`
-- Title font: Helvetica Bold, 24pt, #1F2E3C
-- Body font: Helvetica, 14pt, #333333
-- Accent color: #E3120B
-- Background: #D7E4E8
-- Chart style: `economist` from Visualization Patterns skill
-- Red bar at top of each slide
-
-#### Theme: `analytics`
-- Title font: Inter/system sans-serif Bold, 36pt, #1F2937
-- Body font: Inter/system sans-serif, 16pt, #4B5563
-- Accent color: #D97706 (amber)
-- Background: #F7F6F2 (warm off-white)
-- Surface: #FFFFFF (white cards — charts integrate naturally)
-- Chart style: charts on white backgrounds with clean borders
-- Brand signature: 3px amber left border on every slide
-- Positive metrics: #059669 (emerald), Negative metrics: #DC2626 (red)
-- Marp CSS theme: `themes/analytics-light.css`
-- Best for: Analytics presentations with charts, data tables, and KPI metrics. Designed for screen share and print.
-
-**Analytics theme components:**
-- `.metric-callout` — Single big number with label and context
-- `.kpi-row` > `.kpi-card` — Multiple metrics side by side (value, label, delta)
-- `.finding` — Insight card with headline, detail, and impact callout
-- `.chart-container` — White card with border for chart images
-- `.rec-row` — Recommendation with number, action, rationale, confidence badge
-- `.callout` — Amber callout box for key takeaways
-- `.so-what` — Amber highlight box for "so what" on insight slides
-- `.delta` — Inline change indicator (`.up` green, `.down` red, `.flat` gray)
-- `.badge` — Tags (`.positive`, `.negative`, `.accent`, `.neutral`)
-- `.data-source` — Attribution line at bottom of slide
-
-**Analytics layout variants:**
+**Coolblue slide classes:**
 
 | Variant | Class Directive | Purpose |
 |---------|----------------|---------|
-| Insight (full-width) | `<!-- _class: insight -->` | Full-width chart under headline — default for first insight slide |
-| Chart-left (60/40) | `<!-- _class: chart-left -->` | Chart on left, text/callout on right — good for chart + so-what pairs |
-| Chart-right (40/60) | `<!-- _class: chart-right -->` | Text/callout on left, chart on right — alternates with chart-left |
-| Impact | `<!-- _class: impact -->` | Centered statement slide — breathing/pacing between insight runs |
-
-#### Theme: `analytics-dark`
-- Background: #1A1A17 (warm dark)
-- Surface: #222220
-- Elevated: #2A2A27
-- Text: #F5F5F0 (off-white)
-- Text secondary: #A8A090 (muted amber)
-- Text muted: #8A8580
-- Accent: #D97706 (amber-orange)
-- Accent light: #F0A060
-- Brand signature: 3px amber left border on every slide
-- Positive: #22C55E, Negative: #EF4444
-- Marp CSS theme: `themes/analytics-dark.css`
-- Best for: Workshop presentations, talks, screen-share heavy contexts, dark environments
-
-**Analytics-dark slide variants:**
-
-| Variant | Class Directive | Purpose |
-|---------|----------------|---------|
-| Default dark | (no class needed) | Standard content slides — warm dark bg, amber accents |
-| Dark title | `<!-- _class: dark-title -->` | Opening/hero slides — larger type, centered layout |
-| Dark impact | `<!-- _class: dark-impact -->` | Breathing/statement slides — centered, big numbers or single takeaway |
-| Two-column | `<!-- _class: two-col -->` | Side-by-side layout (inherits dark styling automatically) |
-| Diagram | `<!-- _class: diagram -->` | Extra padding for visual components |
-| Insight | `<!-- _class: insight -->` | Compact padding for chart + so-what callout |
-| Chart-left | `<!-- _class: chart-left -->` | 60/40 split — chart on left, text/callout on right |
-| Chart-right | `<!-- _class: chart-right -->` | 40/60 split — text/callout on left, chart on right |
-
-All components (`.kpi-card`, `.finding`, `.rec-row`, `.box-card`, `.before-after`, etc.) render correctly on every slide variant without additional class overrides — the CSS handles dark styling at the theme level.
-
-**CSS scoping warning:** When extending `analytics-dark.css` with new component styles, ensure overrides cover all three dark-specific variants if they have unique backgrounds:
-```css
-section.dark-title .component,
-section.dark-impact .component { ... }
-```
-This prevents light-mode colors from leaking through on title and impact slides (which have distinct background gradients). The base `section` selector covers standard dark slides.
+| Title | `<!-- _class: cb-title -->` | Blue background, logo, opening slide |
+| Agenda | `<!-- _class: cb-agenda -->` | Blue background, logo, numbered agenda |
+| Section opener | `<!-- _class: section-opener -->` | Blue background, topic transition |
+| Chart-full | `<!-- _class: chart-full -->` | White + blue bar, one chart, short statement |
+| Takeaway | `<!-- _class: takeaway -->` | White (no bar), concise bullet points |
+| Impact | `<!-- _class: impact -->` | White (no bar), centered statement |
+| KPI | `<!-- _class: kpi -->` | White + blue bar, metric cards |
+| Chart-left | `<!-- _class: chart-left -->` | White + blue bar, 60/40 chart + text |
+| Chart-right | `<!-- _class: chart-right -->` | White + blue bar, 40/60 text + chart |
+| Recommendation | `<!-- _class: recommendation -->` | White + blue bar, action items |
+| Appendix | `<!-- _class: appendix -->` | White + blue bar, reference material |
 
 ### Automatic Theme Selection
 
-When no `{{THEME}}` is explicitly passed, Deck Creator auto-selects the theme based on context:
+The `coolblue` theme is the default and only supported theme. All decks use Coolblue brand styling.
 
-| Condition | Default Theme | Rationale |
-|-----------|--------------|-----------|
-| `{{THEME}}` explicitly provided | Use as-is | Explicit override always wins |
-| `{{CONTEXT}}` is "workshop" or "talk" | `analytics-dark` | Dark themes project better in live settings |
-| `{{FORMAT}}` is "marp" (no context) | `analytics` (light) | Analyst deliverables default to light for readability |
-| Otherwise | `corporate` | Gamma output default |
+| Condition | Theme | Rationale |
+|-----------|-------|----------|
+| Default | `coolblue` | All presentations use Coolblue branding |
+| `{{THEME}}` explicitly provided | Use as-is | Explicit override accepted |
 
 Pass `{{THEME}}` to override auto-selection for any context.
 
@@ -249,13 +185,13 @@ Nothing except footers and page numbers should be below 16px. If text must be sm
 
 ### QR Code Integration Pattern
 
-When embedding QR codes on dark slides, wrap in a white container to ensure scannability:
+When embedding QR codes on slides, use a clean container:
 
 ```html
 <div style="background:#fff; border-radius:10px; padding:6px; display:inline-block;">
   <img src="qr-code.png" style="width:140px; height:140px; display:block;">
 </div>
-<div style="font-size:14px; color:#8A8580; margin-top:6px;">Scan for [description]</div>
+<div style="font-size:14px; color:#9CA3AF; margin-top:6px;">Scan for [description]</div>
 ```
 
 Sizing: 120-160px for supporting QR codes, 180-220px for primary CTA QR codes.
@@ -286,82 +222,50 @@ Place engagement markers at natural breaks — after revealing a key number, bef
 
 ### Export Formats
 
-**Marp PDF (recommended for `analytics` theme):**
+**Marp PDF (Coolblue theme):**
 
-Marp converts markdown directly to PDF via Chromium. Use when you need a self-contained PDF deck.
+Marp converts markdown directly to PDF via Chromium.
 
 ```markdown
 ---
 marp: true
-theme: analytics
+theme: coolblue
 size: 16:9
 paginate: true
 html: true
-footer: "[Organization] | [Author] | [Date]"
+footer: "March 26, 2026"
 ---
 
-## Slide Headline
+<!-- _class: cb-title -->
 
-Content here
+<div class="logo"><img src="templates/coolblue_logo.png" alt="Coolblue"></div>
+
+# Slide Headline
+
+## Subtitle
+
+---
+
+<!-- _class: chart-full -->
+
+## Next Slide Headline
+
+<div class="chart-container">
+  <img src="charts/chart.png" alt="Description">
+</div>
 
 <!--
 Speaker Notes:
 "Notes go in HTML comments."
 -->
-
----
-
-## Next Slide Headline
-
-Content here
 ```
 
 Generate PDF with:
 ```bash
-# Light theme (analytics)
 npx @marp-team/marp-cli --no-stdin --pdf --html --allow-local-files \
-  --theme themes/analytics-light.css \
+  --theme themes/coolblue.css \
   outputs/deck_name.marp.md \
   -o outputs/deck_name.pdf
-
-# Dark theme (analytics-dark)
-npx @marp-team/marp-cli --no-stdin --pdf --html --allow-local-files \
-  --theme themes/analytics-dark.css \
-  outputs/deck_name.marp.md \
-  -o outputs/deck_name.pdf
-```
-
-**Gamma-compatible Markdown:**
-```markdown
----
-theme: [theme_name]
----
-
-# Slide Title
-
-Content here
-
----
-
-# Next Slide Title
-
-Content here
-```
-
-**Structured JSON (for programmatic use):**
-```json
-{
-  "title": "Deck Title",
-  "theme": "corporate",
-  "slides": [
-    {
-      "type": "title",
-      "headline": "...",
-      "subtitle": "...",
-      "speaker_notes": "..."
-    }
-  ]
-}
 ```
 
 **Speaker Notes Format:**
@@ -373,28 +277,26 @@ Every slide includes speaker notes with:
 
 ## Examples
 
-### Example 1: Correct insight slide
+### Example 1: Correct chart slide (Coolblue)
 ```markdown
-# Mobile conversion dropped 18% in Q3, erasing gains from the app redesign
+<!-- _class: chart-full -->
 
-[Bar chart: Conversion rate by device, Q2 vs Q3, mobile highlighted in red]
+## Mobile conversion dropped 18% in Q3
 
-- Desktop conversion stable at 4.2% (±0.1%)
-- Mobile fell from 3.8% to 3.1% between July and September
-- Drop correlates with iOS 18 update rollout (Aug 12)
-
-**So what:** The app redesign ROI is negative until we fix the iOS 18 compatibility issue. ~$340K/month in lost mobile conversions.
+<div class="chart-container">
+  <img src="charts/conversion_by_device.png" alt="Conversion rate by device">
+</div>
 ```
 
-### Example 2: Correct executive summary
+### Example 2: Correct takeaway slide (Coolblue)
 ```markdown
-# Q3 conversion dropped 12% — mobile is the culprit, and it's fixable
+<!-- _class: takeaway -->
 
-- **Mobile conversion fell 18%** after the iOS 18 update broke checkout flow on iPhones
-- **Desktop held steady** at 4.2%, confirming the issue is mobile-specific
-- **Fix is scoped** — engineering estimates 2 weeks to patch, recovering ~$340K/month
+## Q3 conversion decline is fixable
 
-**Recommendation:** Prioritize the iOS 18 checkout fix over the planned Q4 feature work.
+- Mobile fell 18% after iOS 18 update broke checkout
+- Desktop held steady, confirming the issue is mobile-specific
+- Engineering estimates 2-week fix, recovering ~$340K/month
 ```
 
 ## Anti-Patterns

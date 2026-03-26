@@ -96,7 +96,7 @@ Future analyses will check for this pattern during validation.
 4. SQL snippets in `sql_before`/`sql_after` should be trimmed to the relevant
    clause, not the entire multi-hundred-line query
 5. `prevented_by` should reference a specific validation layer: structural,
-   logical, business-rules, Simpson's check, or source tie-out
+   logical, business-rules, or Simpson's check
 
 ## Edge Cases
 - **No SQL involved:** Set `sql_before` and `sql_after` to null

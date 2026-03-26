@@ -69,33 +69,12 @@ Ask: "What data do we need, and do we have it?"
 
 When multiple questions emerge, prioritize:
 
-```
-                    HIGH IMPACT
-                        │
-          ┌─────────────┼─────────────┐
-          │   DO FIRST   │   PLAN FOR  │
-          │  (Quick win)  │  (Strategic) │
-HIGH      │               │              │
-FEASIBILITY ──────────────┼──────────────── LOW
-          │               │              │ FEASIBILITY
-          │   DO IF TIME  │    SKIP     │
-          │  (Nice to have)│  (Not worth) │
-          └─────────────┼─────────────┘
-                        │
-                    LOW IMPACT
-```
+| | High Impact | Low Impact |
+|---|---|---|
+| **High Feasibility** | **DO FIRST** (Quick win) | **DO IF TIME** (Nice to have) |
+| **Low Feasibility** | **PLAN FOR** (Strategic) | **SKIP** (Not worth it) |
 
-**Impact criteria:**
-- Revenue/cost implication >$100K → High
-- Affects >10% of users → High
-- Informs a decision being made this quarter → High
-- Curiosity-driven, no pending decision → Low
 
-**Feasibility criteria:**
-- Data exists and is clean → High
-- Can be answered in <4 hours → High
-- Requires new instrumentation → Low
-- Requires data from another team → Low
 
 ### Output Format: Question Brief
 

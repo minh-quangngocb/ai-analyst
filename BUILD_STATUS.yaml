@@ -308,8 +308,7 @@ tasks:
       - .github/skills/run-pipeline/SKILL.md
       - .github/skills/datasets/SKILL.md
       - .github/skills/metric-spec/SKILL.md
-      - agents/source-tieout.md
-      - agents/deck-creator.md
+      - .github/agents/deck-creator.agent.md
       - helpers/chart_helpers.py
       - README.md
       - .knowledge/README.md
@@ -850,10 +849,10 @@ tasks:
       - W3.3
       - W3.2
     output_files:
-      - agents/descriptive-analytics.md
-      - agents/overtime-trend.md
-      - agents/cohort-analysis.md
-      - agents/root-cause-investigator.md
+      - .github/agents/descriptive-analytics.agent.md
+      - .github/agents/overtime-trend.agent.md
+      - .github/agents/cohort-analysis.agent.md
+      - .github/agents/root-cause-investigator.agent.md
     agent_type: builder
     parallel_group: "W3-C"
     session: null
@@ -1006,7 +1005,7 @@ tasks:
       - W2.6
     output_files:
       - .github/skills/run-pipeline/SKILL.md
-      - agents/registry.yaml
+      - .github/agents/registry.yaml
     agent_type: builder
     parallel_group: "W4-A"
     session: null
@@ -1020,7 +1019,7 @@ tasks:
       - W4.1
     output_files:
       - .github/skills/run-pipeline/SKILL.md
-      - agents/registry.yaml
+      - .github/agents/registry.yaml
     agent_type: builder
     parallel_group: "W4-B"
     session: null
@@ -1064,7 +1063,7 @@ tasks:
       - W0B.11
       - W0B.12
     output_files:
-      - agents/comms-drafter.md
+      - .github/agents/comms-drafter.agent.md
     agent_type: builder
     parallel_group: "W4-A"
     session: null
@@ -1080,9 +1079,9 @@ tasks:
       - W4.3
       - W4.5
     output_files:
-      - agents/registry.yaml
-      - agents/CONTRACT_TEMPLATE.md
-      - agents/pipeline_state_schema.md
+      - .github/agents/registry.yaml
+      - .github/agents/CONTRACT_TEMPLATE.md
+      - .github/agents/pipeline_state_schema.md
     agent_type: builder
     parallel_group: "W4-D"
     session: null
@@ -1365,7 +1364,7 @@ tasks:
     agent_type: builder
     parallel_group: "W7-A"
     session: null
-    notes: "Comms Drafter added to agents/INDEX.md (extracted from CLAUDE.md)"
+    notes: "Comms Drafter added to .github/agents/INDEX.md (extracted from CLAUDE.md)"
 
   - id: W7.3
     wave: "7"
@@ -1378,7 +1377,7 @@ tasks:
     agent_type: builder
     parallel_group: "W7-A"
     session: null
-    notes: "13 system variables added to agents/INDEX.md (extracted from CLAUDE.md)"
+    notes: "13 system variables added to .github/agents/INDEX.md (extracted from CLAUDE.md)"
 
   - id: W7.4
     wave: "7"

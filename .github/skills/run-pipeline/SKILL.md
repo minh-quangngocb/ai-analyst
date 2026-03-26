@@ -7,7 +7,7 @@ argument-hint: "data_path=<path> question="<question>" [plan=full_presentation|d
 # Run Pipeline
 
 ## Purpose
-Single entry point for end-to-end analysis — from raw data to finished slide deck. Uses a DAG-based execution engine that reads agent dependencies from `agents/registry.yaml`, resolves execution order automatically, and supports parallel agent execution, resume from failure, and execution plan pruning.
+Single entry point for end-to-end analysis — from raw data to finished slide deck. Uses a DAG-based execution engine that reads agent dependencies from `.github/agents/registry.yaml`, resolves execution order automatically, and supports parallel agent execution, resume from failure, and execution plan pruning.
 
 ## When to Use
 Invoke with: `/run-pipeline`, "run the full pipeline", "analyze end-to-end", or "take this data through the full workflow".
@@ -19,7 +19,7 @@ Invoke with: `/run-pipeline`, "run the full pipeline", "analyze end-to-end", or 
 | `data_path` | Yes | — | Path to CSV, parquet, or directory of data files |
 | `question` | Yes | — | The business question to answer |
 | `context` | No | `"stakeholder readout"` | Presentation context: "stakeholder readout", "workshop", "talk", "team standup" |
-| `theme` | No | `analytics` (light) | Theme override: "analytics" (light) or "analytics-dark" (dark) |
+| `theme` | No | `coolblue` | Theme override (default: coolblue) |
 | `audience` | No | `"senior stakeholders"` | Who will see the deck — controls content density |
 | `dataset_name` | No | Derived from data_path | Short name for file naming (e.g., "hawaii", "my_dataset") |
 | `plan` | No | `full_presentation` | Execution plan: `full_presentation`, `deep_dive`, `quick_chart`, `refresh_deck`, `validate_only`, or inline agent list |
@@ -41,8 +41,8 @@ If required arguments are missing, prompt the user before proceeding.
 
 These rules override any default behavior. Violation of any rule is a pipeline failure.
 
-### R1: Theme Default is Light
-Standard analysis → `analytics` (light theme). Dark theme (`analytics-dark`) only when `context` is "workshop" or "talk", OR when the user explicitly passes `theme=analytics-dark`. When in doubt, use light.
+### R1: Theme Default is Coolblue
+All presentations use the `coolblue` theme. The user can pass `theme=X` to override, but the default is always `coolblue`.
 
 ### R2: Chart Title ≠ Slide Headline
 The chart's baked-in `title` (the SWD action title) MUST differ from the slide headline. The chart title is a specific data claim with numbers. The slide headline is narrative framing.
@@ -62,7 +62,7 @@ Recommendations are always ordered High → Medium → Low confidence. Never alp
 Headlines, transitions, and breathing slides must never use: **surgical, devastating, exploded, ticking time bomb, smoking gun, alarm/fire metaphors, unprecedented** (unless literally true), **unleash, supercharge, game-changing, skyrocketed**.
 
 ### R6: Breathing Slides Every 3-4 Insight Slides
-Never more than 4 consecutive chart/insight slides without a pacing break. Pacing classes: `impact`, `dark-impact`, `section-opener`, `takeaway`.
+Never more than 4 consecutive chart/insight slides without a pacing break. Pacing classes: `impact`, `section-opener`, `takeaway`.
 
 ### R7: Charts at Standard Figsize
 Every chart is generated at (10, 6) figsize / 150 DPI (~1500x900px) and used directly on slides. CSS `object-fit: contain` handles all containment. No slide variants needed.
@@ -70,20 +70,17 @@ Every chart is generated at (10, 6) figsize / 150 DPI (~1500x900px) and used dir
 ### R8: Agent Files Must Be Read from Disk
 At each phase, read the agent file from its path on disk. Do NOT rely on cached knowledge or memory.
 
-### R9: Source Tie-Out Before Analysis
-After data exploration and before analysis, run Source Tie-Out to verify data loading integrity. HALT on mismatch.
-
-### R10: All Marp Decks Must Use HTML Components
+### R9: All Marp Decks Must Use HTML Components
 Every Marp deck must use at least 3 different HTML component types from the theme (e.g., `.kpi-row`, `.so-what`, `.finding`, `.rec-row`, `.chart-container`). Valid slide classes include `chart-full`, `kpi`, `takeaway`, `recommendation`, `appendix` (new one-job-per-slide classes) and all existing classes (`insight`, `impact`, `chart-left`, `chart-right`, `two-col`, `diagram`, `section-opener`, `title`). Plain-markdown-only insight slides are a pipeline failure. The deck-creator agent must read `templates/marp_components.md` for the snippet library and `templates/deck_skeleton.marp.md` for the skeleton template. Frontmatter must include all 6 required keys: `marp`, `theme`, `size`, `paginate`, `html`, `footer`. Run `helpers/marp_linter.py` to validate.
 
-### R11: Pipeline Exports Both PDF and HTML
+### R10: Pipeline Exports Both PDF and HTML
 After deck creation and Checkpoint 4, the pipeline must export the deck to both PDF and HTML using `helpers/marp_export.py`. Export paths are recorded in `pipeline_state.json`. If Marp CLI is not available, log a warning and skip export (do not HALT). The exported files go alongside the deck: `outputs/deck_{{DATASET_NAME}}_{{DATE}}.pdf` and `outputs/deck_{{DATASET_NAME}}_{{DATE}}.html`.
 
 ---
 
 ## DAG EXECUTION ENGINE
 
-The pipeline runs on a DAG (directed acyclic graph) derived from `agents/registry.yaml`. Instead of hardcoded steps, the engine resolves execution order from agent dependencies.
+The pipeline runs on a DAG (directed acyclic graph) derived from `.github/agents/registry.yaml`. Instead of hardcoded steps, the engine resolves execution order from agent dependencies.
 
 ### Step 0: Pre-execution Cleanup (Crash Recovery)
 
@@ -113,7 +110,7 @@ After cleanup completes (or is skipped if no stale state found), proceed to Phas
 
 Before any execution, validate the registry:
 
-1. **Read registry:** Parse `agents/registry.yaml`. Extract each agent's `name`, `file`, `pipeline_step`, `depends_on`, `depends_on_any`, `critical`, `inputs`, `outputs`, `knowledge_context`.
+1. **Read registry:** Parse `.github/agents/registry.yaml`. Extract each agent's `name`, `file`, `pipeline_step`, `depends_on`, `depends_on_any`, `critical`, `inputs`, `outputs`, `knowledge_context`.
 
 2. **File existence check:** For each agent, verify the file at `agent.file` exists on disk. If any file is missing, HALT with: `"Agent file not found: {path}"`
 
@@ -125,7 +122,7 @@ Before any execution, validate the registry:
 5. **Compute execution tiers:** Group agents into tiers where all agents in a tier have their dependencies satisfied by agents in earlier tiers.
    ```
    Tier 0: agents with no dependencies (e.g., question-framing, data-explorer)
-   Tier 1: agents depending only on Tier 0 agents (e.g., hypothesis, source-tieout)
+   Tier 1: agents depending only on Tier 0 agents (e.g., hypothesis)
    Tier 2: agents depending on Tier 0-1 agents (e.g., descriptive-analytics)
    ...
    ```
@@ -158,7 +155,7 @@ Before any execution, validate the registry:
    copy final artifacts into `{RUN_DIR}/working/` and `{RUN_DIR}/outputs/` so the run
    directory is self-contained.
 
-**Initialize pipeline_state.json** in `{RUN_DIR}/` per the schema in `agents/pipeline_state_schema.md`:
+**Initialize pipeline_state.json** in `{RUN_DIR}/` per the schema in `.github/agents/pipeline_state_schema.md`:
 - Set `pipeline_id` to current ISO timestamp
 - Set `run_dir` to the full run directory path
 - Set `dataset` from active dataset
@@ -294,7 +291,6 @@ Present summary:
 **Type:** A (automated). **Plans:** full_presentation, deep_dive.
 
 Verify:
-- [ ] Source tie-out passed
 - [ ] Root cause is specific and actionable
 - [ ] Findings are validated (SQL spot-checked)
 - [ ] Data quality issues documented
@@ -388,9 +384,9 @@ Each agent has a 5-minute execution timeout:
    - **Retry once** with the same context
 3. If the retry also times out:
    - Mark agent as `failed` with error: `"Timeout after 2 attempts (5min each)"`
-   - Apply degradation policy: if the agent is non-critical (visual-design-critic, narrative-coherence-reviewer), continue pipeline with a warning. If critical (source-tieout, validation), HALT.
+   - Apply degradation policy: if the agent is non-critical (visual-design-critic, narrative-coherence-reviewer), continue pipeline with a warning. If critical (validation), HALT.
 
-**Critical agents** (HALT on timeout): source-tieout, validation, data-explorer
+**Critical agents** (HALT on timeout): validation, data-explorer
 **Non-critical agents** (degrade on timeout): visual-design-critic, narrative-coherence-reviewer, opportunity-sizer
 
 ---
@@ -469,7 +465,7 @@ At the start and end of each tier (mapped to phases), emit progress:
 | Phase | Agents | Name |
 |-------|--------|------|
 | 1 | question-framing, hypothesis | Framing |
-| 2 | data-explorer, source-tieout, descriptive-analytics, root-cause-investigator, validation, opportunity-sizer | Exploration & Analysis |
+| 2 | data-explorer, descriptive-analytics, root-cause-investigator, validation, opportunity-sizer | Exploration & Analysis |
 | 3 | story-architect, narrative-coherence-reviewer, chart-maker, visual-design-critic | Storytelling & Charts |
 | 4 | storytelling, deck-creator, visual-design-critic-slides, close-the-loop | Deck & Delivery |
 
@@ -512,7 +508,7 @@ After Checkpoint 4 passes, export the deck to PDF and HTML:
 from helpers.marp_export import export_both, check_ready
 
 deck_path = "outputs/deck_{{DATASET_NAME}}_{{DATE}}.marp.md"
-theme = pipeline_args.get("theme", "analytics")
+theme = pipeline_args.get("theme", "coolblue")
 
 # Check if Marp CLI is available
 status = check_ready()

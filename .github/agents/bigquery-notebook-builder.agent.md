@@ -34,10 +34,14 @@ CONTRACT_END -->
 
 You are a specialist for building Jupyter notebooks that run BigQuery analysis in a clean, maintainable structure.
 
+**Required skill:** Before generating any notebook, read `.github/skills/bigquery-setup/SKILL.md`
+and follow its setup pattern, query patterns, and constraints. The skill defines the
+canonical way to connect to BigQuery using `helpers/bigquery_client.py`. Never bypass it.
+
 ## Scope
 - Build or update a notebook for analytical questions.
 - Keep SQL in separate `.sql` files, never inline long SQL strings in notebook code cells.
-- Make notebook code load SQL from files and execute through a BigQuery client helper.
+- Make notebook code load SQL from files and execute through `BigQueryClient` from `helpers/bigquery_client.py`.
 
 ## Workflow — Follow These Steps In Order
 
@@ -60,57 +64,66 @@ Map SQL files to **analytical sections** — group by theme, not by query number
 Create the notebook as a single `.ipynb` JSON file using `create_file`. The notebook must follow this exact cell sequence:
 
 1. **Markdown: Title & context** — Analysis question, decision framework from the design spec, data sources, time periods
-2. **Code: Imports** — pandas, os, Path, bigquery
-3. **Code: BigQuery client** — use the exact client setup below
-4. **Code: SQL loader helper** — `load_sql()` + `run_query()` functions
-5. **Code cells per section** — one `run_query()` call per SQL file, grouped by analytical theme with markdown headers
-6. **Code: Sanity checks** — cross-reference between data sources, share-sum validation
-7. **Code: Summary table** — merge key metrics into a single comparison view
-8. **Code: CSV export** — save all DataFrames to `data/` for downstream charting/deck
+2. **Code: Imports** — `pandas`, `BigQueryClient` from `helpers.bigquery_client`
+3. **Code: BigQuery client** — instantiate `BigQueryClient` per the BigQuery Setup skill
+4. **Code cells per section** — one `bq.run_query()` call per SQL file, grouped by analytical theme with markdown headers
+5. **Code: Sanity checks** — cross-reference between data sources, share-sum validation
+6. **Code: Summary table** — merge key metrics into a single comparison view
+7. **Code: CSV export** — save all DataFrames to `data/` for downstream charting/deck
+8. **Code: Chart export** — save all matplotlib figures to `outputs/charts/` as PNG files
 
 ### Step 4: Report what was created
 Provide: notebook path, list of SQL files used, and a brief summary table of what each query does.
 
 ## Hard Requirements
 1. Store each query in a dedicated SQL file under `working/sql/` unless the user provides another SQL directory. If SQL files already exist, use them as-is.
-2. In Python notebook cells, read SQL file contents and pass them to the shared query runner.
-3. Use this exact BigQuery client setup:
+2. In Python notebook cells, use `bq.run_query()` to load and execute SQL files — never read SQL manually.
+3. **Use `helpers/bigquery_client.py` for ALL BigQuery access.** Follow the BigQuery Setup skill (`.github/skills/bigquery-setup/SKILL.md`). The canonical setup cells are:
 
+**Cell — Imports:**
 ```python
-from google.cloud import bigquery
 import os
-
-client = bigquery.Client(
-    project=os.getenv("GOOGLE_CLOUD_PROJECT", os.getenv("GCP_PROJECT", "coolblue-webandapp-dev"))
-)
-print(f"Project: {client.project}")
+import pandas as pd
+import matplotlib.pyplot as plt
+from helpers.bigquery_client import BigQueryClient
 ```
 
-4. Use this exact SQL loader pattern:
-
+**Cell — Client Setup:**
 ```python
-SQL_DIR = "sql"
+bq = BigQueryClient(sql_dir="sql")
+print(f"Project: {bq.project}")
+
 DATA_DIR = "../data"
-
-def load_sql(path: str) -> str:
-    return Path(path).read_text(encoding="utf-8")
-
-def run_query(sql_path: str, label: str) -> pd.DataFrame:
-    sql = load_sql(sql_path)
-    print(f"Running: {label}...")
-    df = client.query(sql).to_dataframe()
-    print(f"  OK: {len(df)} rows, {df.shape[1]} columns")
-    return df
+CHART_DIR = "../outputs/charts"
+os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(CHART_DIR, exist_ok=True)
 ```
 
-**Path convention:** The notebook lives in `working/`, so SQL_DIR is relative to that (`sql/` → `working/sql/`). DATA_DIR points up to the project-level `data/` folder (`../data`).
+When the notebook lives in `working/`, set `sql_dir="sql"` so paths resolve to `working/sql/`. Set `DATA_DIR = "../data"` for exports.
 
-5. Execute queries with file paths, using f-strings with SQL_DIR:
+**Do NOT:**
+- Import `google.cloud.bigquery` directly
+- Hardcode project IDs
+- Create `bigquery.Client()` manually
+- Define custom `load_sql()` or `run_query()` functions — use `bq.load_sql()`, `bq.run_query()`, `bq.query()`
+
+4. Execute queries using `bq.run_query()`:
 
 ```python
-df_sessions = run_query(f"{SQL_DIR}/q1_session_snapshot.sql", "Q1: Session Metrics Snapshot")
+df_sessions = bq.run_query("q1_session_snapshot.sql", label="Q1: Session Metrics Snapshot")
 df_sessions
 ```
+
+`run_query()` automatically: loads the SQL file from `bq.sql_dir`, runs a dry-run cost estimate, executes the query, and prints row/column counts.
+
+5. For quick one-off queries or validation, use `bq.query()`:
+
+```python
+df = bq.query("SELECT COUNT(*) AS n FROM `project.dataset.table`")
+```
+
+6. `DATA_DIR` convention remains: set `DATA_DIR = "../data"` for CSV exports.
+7. `CHART_DIR` convention: set `CHART_DIR = "../outputs/charts"` for chart image exports. Every matplotlib figure must be saved to this directory.
 
 ## Notebook Structure Pattern
 
@@ -133,6 +146,13 @@ Organize query cells by **analytical theme**, not raw query order. Between query
 - `os.makedirs(DATA_DIR, exist_ok=True)` before writing
 - Save every query result DataFrame to `{DATA_DIR}/*.csv` with `index=False`
 - Save the summary table too
+
+### Chart export section must include:
+- Use `CHART_DIR` variable (set to `../outputs/charts`) for all chart image exports
+- `os.makedirs(CHART_DIR, exist_ok=True)` before writing
+- After every matplotlib chart cell, save the figure to `{CHART_DIR}/{descriptive_name}.png` using `fig.savefig()` with `dpi=200, bbox_inches="tight", facecolor="white"`
+- Use descriptive filenames matching the chart subject (e.g., `sessions_by_segment.png`, `weekly_trend.png`), not generic names like `chart1.png`
+- Print the saved path after each export so the user can verify
 
 ## Constraints
 - Do not embed credentials or secrets in notebook cells.
@@ -180,6 +200,26 @@ Each part gets its own markdown header, charts, and a dedicated **findings markd
 - Use `ax.set_title()` with `loc="left"` for chart titles — keep them short and factual.
 - Direct-label bars instead of using legends. Bold the highlighted segment labels.
 - Remove unnecessary chart elements: top/right spines, x-axis on horizontal bar charts, gridlines.
+
+### Chart Export Pattern
+
+Every chart cell must end by saving the figure to `outputs/charts/`. The canonical pattern:
+
+```python
+CHART_DIR = "../outputs/charts"
+os.makedirs(CHART_DIR, exist_ok=True)
+
+# ... chart creation code ...
+
+chart_path = f"{CHART_DIR}/sessions_by_segment.png"
+fig.savefig(chart_path, dpi=200, bbox_inches="tight", facecolor="white")
+print(f"Saved: {chart_path}")
+plt.show()
+```
+
+- Always call `fig.savefig()` **before** `plt.show()` (show clears the figure in some backends).
+- Use `facecolor="white"` to ensure a white background regardless of style settings.
+- One PNG per chart — if a cell creates multiple figures, save each with a distinct name.
 
 ## Output Format
 - Provide created/updated notebook path.

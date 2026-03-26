@@ -1,10 +1,8 @@
 # Marp HTML Component Snippets
 
-Copy-paste reference for all HTML components defined in the `analytics` and
-`analytics-dark` themes. Components work identically in both themes — CSS
-handles color adaptation.
+Copy-paste reference for all HTML components defined in the `coolblue` theme.
 
-> **Rule:** Every insight slide MUST use at least one HTML component.
+> **Rule:** Every content slide MUST use at least one HTML component.
 > Plain-markdown-only slides look generic and miss the branded styling.
 
 ---
@@ -28,16 +26,112 @@ than hoping the audience reads both at once.
 ```yaml
 ---
 marp: true
-theme: analytics          # or analytics-dark
+theme: coolblue
 size: 16:9
 paginate: true
 html: true
-footer: "AI Analyst Lab | Client Name | Month Year"
+footer: "March 26, 2026"
 ---
 ```
 
 **All 6 keys are mandatory.** Missing `html: true` disables every component
 below. Missing `size: 16:9` produces 4:3 slides with broken layouts.
+
+---
+
+## Coolblue Theme — Slide Classes & Components
+
+The `coolblue` theme adds Coolblue-branded slide classes. Use these **instead
+of** `title` and add `cb-agenda` as slide 2.
+
+### Coolblue Title Slide (slide 1 — always)
+
+```html
+<!-- _class: cb-title -->
+
+<div class="logo"><img src="templates/coolblue_logo.png" alt="Coolblue"></div>
+
+# Deck Title Here
+
+## Subtitle or topic description
+```
+
+- Blue background (#0090E3), white Open Sans text
+- Coolblue logo top-right
+- Footer shows current date
+
+### Coolblue Agenda Slide (slide 2 — always)
+
+```html
+<!-- _class: cb-agenda -->
+
+<div class="logo"><img src="templates/coolblue_logo.png" alt="Coolblue"></div>
+
+## Agenda
+
+1. Context & background
+2. Key findings
+3. Deep dive
+4. Recommendations
+5. Next steps
+```
+
+- Same blue background as title slide
+- Numbered list with clean spacing
+
+### Content Slides (slide 3+)
+
+All content slides have:
+- **White background** with black text (Open Sans)
+- **Blue horizontal bar** at the bottom (1/5 of slide height, #0090E3)
+- The **slide title (h2)** is rendered inside the blue bar in white
+
+### Short Statement Slides
+
+For short statements, use `chart-full` with ONE supporting chart. No extra
+text — the chart tells the story. One statement may span multiple slides with
+different charts.
+
+```html
+<!-- _class: chart-full -->
+
+## Android Tablet app is the smallest segment
+
+<div class="chart-container">
+  <img src="outputs/charts/segment_comparison.png" alt="Segment comparison chart">
+</div>
+```
+
+### Detailed Points Slides
+
+For longer, more detailed points, use concise bullet points. Avoid heavy
+math or numbers that confuse stakeholders.
+
+```html
+<!-- _class: takeaway -->
+
+## The conversion decline is a composition effect
+
+- Mix shifted toward low-converting user segments
+- Each individual segment actually improved
+- Aggregate metric masks the real story
+```
+
+### Coolblue Slide Class Reference
+
+| Class | Use For | Background |
+|-------|---------|------------|
+| `cb-title` | Opening title slide (slide 1) | Blue (#0090E3) |
+| `cb-agenda` | Agenda slide (slide 2) | Blue (#0090E3) |
+| `section-opener` | Section dividers | Blue (#0090E3) |
+| `chart-full` | Short statement + one chart | White + blue bar |
+| `chart-left` | 60/40 chart + text | White + blue bar |
+| `chart-right` | 40/60 text + chart | White + blue bar |
+| `takeaway` | Detailed bullet points | White (no bar) |
+| `impact` | Statement / breathing slide | White (no bar) |
+| `kpi` | 2-4 metric cards | White + blue bar |
+| `recommendation` | Action items | White + blue bar |
+| `appendix` | Methodology, caveats | White + blue bar |
 
 ---
 
@@ -47,47 +141,22 @@ Use `<!-- _class: NAME -->` on the line after `---`.
 
 | Class | Use For | One Job |
 |-------|---------|---------|
-| `title` | Opening title slide | Set context |
-| `section-opener` | Section dividers (h2 in accent color) | Signal topic change |
-| `insight` | Standard analysis slide (headline + content) | Present one finding with components |
-| `impact` | Breathing / statement slides (centered, large text) | Pause and emphasize |
-| `two-col` | Side-by-side content | Compare two things |
+| `cb-title` | Opening title slide (slide 1) | Blue background, logo, set context |
+| `cb-agenda` | Agenda slide (slide 2) | Blue background, logo, numbered agenda |
+| `section-opener` | Section dividers | Blue background, signal topic change |
+| `chart-full` | One chart, maximum space | Short statement + chart evidence |
 | `chart-left` | 60/40 chart-left, text-right | Chart with brief annotation |
 | `chart-right` | 40/60 text-left, chart-right | Chart with brief annotation |
-| `diagram` | Generous space for visuals | Show a diagram or architecture |
-| `chart-full` | One chart, maximum space (overrides `max-height: 420px`) | Show the evidence |
-| `kpi` | 2-4 metric cards, no chart needed | Headline metrics at a glance |
-| `takeaway` | Interpretation / so-what after a chart | State what it means |
+| `takeaway` | Interpretation / bullet points | Concise detail for stakeholders |
+| `impact` | Breathing / statement slides | Pause and emphasize |
+| `kpi` | 2-4 metric cards, no chart | Headline metrics at a glance |
+| `two-col` | Side-by-side content | Compare two things |
 | `recommendation` | Action items with confidence levels | Tell them what to do |
-| `appendix` | Methodology, caveats, data sources (muted styling) | Reference material |
+| `appendix` | Methodology, caveats, data sources | Reference material |
 
-**Invalid classes:** `breathing` (use `impact`), `dark-title` (light theme
-only — use `title`).
-
-For `analytics-dark` theme, use `dark-title` and `dark-impact` instead of
-`title` and `impact`.
-
-### Migration Table (old → new)
-
-If you have decks using the old `insight` class for everything, migrate:
-
-| Old Pattern | New Pattern | Why |
-|-------------|-------------|-----|
-| `insight` with chart + so-what on same slide | `chart-full` + `takeaway` (two slides) | One job per slide — separate evidence from interpretation |
-| `insight` with KPI row only (no chart) | `kpi` | Dedicated layout optimized for metric cards |
-| `insight` with rec-rows | `recommendation` | Dedicated layout for action items |
-| Last slide with methodology text | `appendix` | Muted styling signals reference material |
-| `insight` with standalone finding/so-what | `takeaway` | Centered layout for interpretation |
-
----
-
-## Accent Bar (title slides)
-
-```html
-<div class="accent-bar"></div>
-```
-
-60px amber bar. Place after title text on `_class: title` slides.
+**Invalid classes:** `breathing` (use `impact`), `title` (use `cb-title`),
+`insight` (use `chart-full` or `takeaway`), `dark-title` / `dark-impact`
+(not supported).
 
 ---
 
@@ -101,7 +170,7 @@ If you have decks using the old `insight` class for everything, migrate:
 </div>
 ```
 
-Value modifiers: `.positive` (green), `.negative` (red), `.accent` (amber).
+Value modifiers: `.positive` (green), `.negative` (red), `.accent` (Coolblue blue).
 
 ---
 
@@ -139,12 +208,12 @@ Use 2-4 cards per row. Best on `_class: kpi` slides.
 <div class="so-what">The blended rate is misleading — track segments separately.</div>
 ```
 
-Amber-highlighted box with left border. Place after chart or finding.
+Blue-highlighted box with left border. Place after chart or finding.
 Best on `_class: takeaway` slides.
 
 ---
 
-## Finding Card (insight with impact)
+## Finding Card
 
 ```html
 <div class="finding">
@@ -154,7 +223,7 @@ Best on `_class: takeaway` slides.
 </div>
 ```
 
-White card with amber left border. Impact line gets amber background.
+White card with blue left border. Impact line gets blue background.
 
 ---
 
@@ -194,7 +263,7 @@ get maximum room.
 </div>
 ```
 
-Confidence modifiers: `.high` (green), `.medium` (amber), `.low` (gray).
+Confidence modifiers: `.high` (green), `.medium` (blue), `.low` (gray).
 **Always order recommendations High → Medium → Low** (Rule R4).
 Best on `_class: recommendation` slides.
 
@@ -302,7 +371,7 @@ Best on `_class: recommendation` slides.
 ```
 
 For 3 columns: `<div class="box-grid three-col">`.
-Accent modifier: `<div class="box-card accent">` (amber left border).
+Accent modifier: `<div class="box-card accent">` (blue left border).
 
 ---
 
@@ -328,7 +397,7 @@ Accent modifier: `<div class="box-card accent">` (amber left border).
 </div>
 ```
 
-Modifiers: `.accent` (amber), `.positive` (green).
+Modifiers: `.accent` (blue), `.positive` (green).
 
 ---
 
@@ -354,7 +423,7 @@ Modifiers: `.accent` (amber), `.positive` (green).
 </div>
 ```
 
-Active stop: `<div class="timeline-stop active">` (amber dot with glow).
+Active stop: `<div class="timeline-stop active">` (blue dot with glow).
 
 ---
 
@@ -373,7 +442,7 @@ Active stop: `<div class="timeline-stop active">` (amber dot with glow).
 
 ```html
 <ul class="checklist">
-  <li class="done">Source tie-out passed</li>
+  <li class="done">Data quality checks passed</li>
   <li class="done">Root cause is specific and actionable</li>
   <li>Experiment designed for validation</li>
   <li>Stakeholder sign-off received</li>

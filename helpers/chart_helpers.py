@@ -34,26 +34,33 @@ import matplotlib.ticker as mticker
 import numpy as np
 
 # ---------------------------------------------------------------------------
-# Color palette — source of truth: themes/analytics-dark.css
+# Color palette — source of truth: Coolblue brand colors
 # ---------------------------------------------------------------------------
 
 COLORS = {
-    "action":   "#D97706",
-    "accent":   "#DC2626",
-    "negative": "#DC2626",
-    "success":  "#059669",
-    "warning":  "#D97706",
-    "danger":   "#DC2626",
-    "gray900":  "#1F2937",
-    "gray600":  "#6B7280",
-    "gray400":  "#9CA3AF",
-    "gray200":  "#E5E7EB",
-    "gray100":  "#F3F4F6",
-    "white":    "#FFFFFF",
-    "bg":       "#F7F6F2",
-    # Semantic aliases for analytical chart builders
-    "primary":  "#D97706",   # same as action — main data series
-    "muted":    "#9CA3AF",   # same as gray400 — supporting elements
+    # Coolblue brand palette
+    "orange":     "#FF6600",   # Primary highlight — most important element
+    "fact_blue":  "#285DAB",   # Secondary highlight
+    "coolblue":   "#0090E3",   # Coolblue Blue (axis labels, ticks)
+    "light_blue": "#CCE9F9",   # Tertiary / supporting data
+    "grey":       "#F7F6F2",   # Subtle fill only (not chart background)
+    "white":      "#FFFFFF",   # Chart background — always white
+    "bg":         "#FFFFFF",   # Chart background alias
+    # Text colors
+    "text_dark":  "#1F2937",   # Titles
+    "text_mid":   "#4B5563",   # Axis labels
+    "text_light": "#6B7280",   # Tick labels
+    "grid":       "#E5E7EB",   # Gridlines
+    # Legacy aliases for backward compatibility
+    "action":     "#FF6600",   # -> orange
+    "accent":     "#285DAB",   # -> fact_blue
+    "primary":    "#FF6600",   # -> orange
+    "muted":      "#CCE9F9",   # -> light_blue
+    "gray900":    "#1F2937",
+    "gray600":    "#6B7280",
+    "gray400":    "#9CA3AF",
+    "gray200":    "#E5E7EB",
+    "gray100":    "#F3F4F6",
 }
 
 # ---------------------------------------------------------------------------
@@ -122,29 +129,30 @@ def swd_style(theme: dict | None = None):
     """
     if _STYLE_FILE.exists():
         plt.style.use(str(_STYLE_FILE))
-    else:
-        # Fallback: apply critical settings directly
-        plt.rcParams.update({
-            "figure.figsize": (8, 5),
-            "figure.dpi": 150,
-            "figure.facecolor": "#F7F6F2",
-            "axes.facecolor": "#F7F6F2",
-            "axes.spines.top": False,
-            "axes.spines.right": False,
-            "axes.grid": False,
-            "font.family": "sans-serif",
-            "font.size": 10,
-            "axes.titlesize": 14,
-            "axes.titleweight": "bold",
-        })
+
+    # Always enforce Coolblue standards: white background, clean spines
+    plt.rcParams.update({
+        "figure.figsize": (10, 6),
+        "figure.dpi": 150,
+        "figure.facecolor": "#FFFFFF",
+        "axes.facecolor": "#FFFFFF",
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "axes.grid": False,
+        "font.family": "sans-serif",
+        "font.size": 10,
+        "axes.titlesize": 14,
+        "axes.titleweight": "bold",
+        "axes.labelcolor": COLORS["text_mid"],
+        "text.color": COLORS["text_dark"],
+        "xtick.color": COLORS["text_light"],
+        "ytick.color": COLORS["text_light"],
+    })
 
     # Override with theme colors when a theme is provided
     if theme is not None:
         colors = theme.get("colors", {})
-        bg = colors.get("background", "#F7F6F2")
-        text = colors.get("text", "#333333")
-        plt.rcParams["figure.facecolor"] = bg
-        plt.rcParams["axes.facecolor"] = bg
+        text = colors.get("text", COLORS["text_dark"])
         plt.rcParams["text.color"] = text
         plt.rcParams["axes.labelcolor"] = text
 
@@ -183,8 +191,8 @@ def highlight_bar(ax, categories, values, highlight=None, highlight_color=None,
         highlight_color = theme["colors"]["highlight"]["focus"]
     if theme is not None and base_color is None:
         base_color = theme["colors"]["highlight"]["comparison"]
-    highlight_color = highlight_color or COLORS["action"]
-    base_color = base_color or COLORS["gray200"]
+    highlight_color = highlight_color or COLORS["orange"]
+    base_color = base_color or COLORS["light_blue"]
 
     cats = list(categories)
     vals = list(values)
@@ -257,8 +265,8 @@ def highlight_line(ax, x, y_dict, highlight=None, highlight_color=None,
         highlight_color = theme["colors"]["highlight"]["focus"]
     if theme is not None and base_color is None:
         base_color = theme["colors"]["highlight"]["comparison"]
-    highlight_color = highlight_color or COLORS["action"]
-    base_color = base_color or COLORS["gray200"]
+    highlight_color = highlight_color or COLORS["orange"]
+    base_color = base_color or COLORS["light_blue"]
 
     if isinstance(highlight, str):
         highlight = [highlight]
@@ -270,7 +278,7 @@ def highlight_line(ax, x, y_dict, highlight=None, highlight_color=None,
             ax.plot(x, y, color=base_color, linewidth=linewidth_base,
                     zorder=1)
             ax.text(x[-1], y[-1], f"  {name}", va="center",
-                    fontsize=8, color=COLORS["gray400"])
+                    fontsize=8, color=COLORS["text_light"])
 
     # Draw highlighted lines on top
     for name, y in y_dict.items():
@@ -281,7 +289,7 @@ def highlight_line(ax, x, y_dict, highlight=None, highlight_color=None,
                     fontsize=9, fontweight="bold", color=highlight_color)
 
     # Light horizontal gridlines only
-    ax.yaxis.grid(True, color=COLORS["gray200"], linewidth=0.5)
+    ax.yaxis.grid(True, color=COLORS["grid"], linewidth=0.5)
     ax.set_axisbelow(True)
 
 
@@ -384,7 +392,7 @@ def save_chart(fig, path, dpi=150, close=True):
         close: If True (default), close the figure after saving.
     """
     fig.tight_layout()
-    fig.savefig(path, dpi=dpi, bbox_inches="tight", facecolor=COLORS["bg"],
+    fig.savefig(path, dpi=dpi, bbox_inches="tight", facecolor=COLORS["white"],
                 edgecolor="none")
     if close:
         plt.close(fig)

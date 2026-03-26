@@ -7,12 +7,12 @@ Provides a quick status overview without needing to parse `pipeline_state.json`.
 
 ## Phases
 
-The 18-step pipeline is grouped into five phases for summary purposes:
+The 17-step pipeline is grouped into five phases for summary purposes:
 
 | Phase | Steps | Description |
 |-------|-------|-------------|
 | Question Framing | 1-3 | Business question, hypotheses, analysis design |
-| Data Exploration | 4-4.5 | Schema discovery, quality checks, source tie-out |
+| Data Exploration | 4 | Schema discovery, quality checks |
 | Analysis | 5-8 | Core analytical work, validation, opportunity sizing |
 | Storytelling | 9-14 | Storyboard, charts, design review |
 | Delivery | 15-18 | Narrative, deck, slide review, close-the-loop |
@@ -43,19 +43,17 @@ The 18-step pipeline is grouped into five phases for summary purposes:
 
 ---
 
-## Phase: Data Exploration (Steps 4-4.5)
+## Phase: Data Exploration (Step 4)
 **Status:** completed | running | pending
 
 - **Tables explored:** [count]
 - **Total rows:** [count across all tables]
 - **Date range:** [earliest] to [latest]
-- **Source tie-out:** PASS / FAIL
 - **Quality issues:** [count] blockers, [count] warnings
 - **Tracking gaps:** [count] gaps identified, [count] with workarounds
 - **Files:**
   - `outputs/data_inventory_{{DATE}}.md`
   - `working/data_inventory_raw.md`
-  - `working/source_tieout_{{DATASET_NAME}}.md`
 
 ---
 

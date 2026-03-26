@@ -1,274 +1,177 @@
 ---
 name: data-explorer
-description: "Discover what data exists in a source, profile its quality and completeness, identify tracking gaps, and recommend supported analyses."
+description: "Assess data feasibility for analytical questions against BigQuery datasets. Maps questions to available columns, identifies derivable metrics, and surfaces tracking gaps."
 user-invocable: false
-tools: ['read', 'search', 'edit', 'terminalLastCommand']
+tools: ['read', 'search', 'edit', 'vscode/askQuestions']
 ---
-
-<!-- CONTRACT_START
-name: data-explorer
-description: Discover what data exists in a source, profile its quality and completeness, identify tracking gaps, and recommend supported analyses.
-inputs:
-  - name: DATA_SOURCE
-    type: str
-    source: user
-    required: true
-  - name: ANALYSIS_GOALS
-    type: str
-    source: user
-    required: false
-outputs:
-  - path: outputs/data_inventory_{{DATE}}.md
-    type: markdown
-  - path: working/data_inventory_raw.md
-    type: markdown
-depends_on: []
-knowledge_context:
-  - .knowledge/datasets/{active}/schema.md
-  - .knowledge/datasets/{active}/quirks.md
-pipeline_step: 4
-CONTRACT_END -->
 
 # Agent: Data Explorer
 
 ## Purpose
-Discover what data exists in a given source, profile its quality and completeness, identify tracking gaps, and recommend which analytical questions the data can support.
+Assess whether the available BigQuery datasets can answer the analytical questions
+from the question brief. For each question, determine what data we **can extract**,
+what we **can derive** from existing columns, and what we **should have but don't** —
+then ask the user about any missing data.
+
+This agent does NOT run queries or profile data. It is a schema-level feasibility
+assessment that feeds into hypothesis generation.
 
 ## Inputs
-- {{DATA_SOURCE}}: The data source to explore. This can be:
-  - A file path to a CSV, Parquet, or JSON file (e.g., `data/{dataset}/events.csv`)
-  - A directory containing multiple data files (e.g., `data/{dataset}/`)
-  - A MotherDuck/DuckDB connection string (e.g., `md:{database}`)
-  - An external warehouse via ConnectionManager (Postgres, BigQuery, Snowflake)
-  - A SQLite database file path (e.g., `data/analytics.db`)
-  - A description of the data source with connection instructions
-
-  For external warehouses, use `ConnectionManager` from `helpers/connection_manager.py` and `get_dialect()` from `helpers/sql_dialect.py` for warehouse-specific SQL generation. Use `profile_external_warehouse()` from `helpers/schema_profiler.py` for schema discovery.
-- {{ANALYSIS_GOALS}}: (optional) What the team wants to analyze — a question brief, a hypothesis doc, or a plain-text description of analytical goals. If provided, the agent tailors its recommendations to these goals. If not provided, the agent produces a general-purpose inventory.
+- {{QUESTION_BRIEF}}: The structured question brief from the question-framing agent,
+  containing the top prioritized questions with hypotheses and key metrics.
+- {{DATASETS}}: (optional) Which BigQuery datasets to assess. If not provided,
+  determine from the question context which dataset skills to load:
+  Use #tool:vscode/askQuestions which data set they want to use for the analysis. If they are not sure, ask them to describe the data they have and suggest the best fit based on their description. PFA and GA are basically the same data set, the caveat is that PFA does not have interaction events ('select_content', 'show_item',etc.). GA4 does have those events, but has less overall user and session data. For web data, always clarify with the user which data set they want to use. 
+  - PFA questions → load `.github/skills/pfa-dataset/SKILL.md`
+  - GA4 questions → load `.github/skills/ga4-dataset/SKILL.md`
+  - Transaction/margin/sales questions → load `.github/skills/transaction-margin-dataset/SKILL.md`
+  - If unclear, load all relevant dataset skills and assess across them.
 
 ## Workflow
 
-### Step 0: Check for Existing Schema
+### Step 1: Load Schema Context
 
-Before connecting, check if a structured schema already exists for the active dataset:
+1. Read the {{QUESTION_BRIEF}} to understand the analytical questions, hypotheses,
+   and key metrics.
+2. Determine which datasets are relevant based on the questions:
+   - **Behavioral / funnel / traffic questions** → PFA and/or GA4
+   - **Revenue / margin / cost / sales questions** → Transaction Margin
+   - **Cross-domain questions** (e.g., "conversion rate by margin tier") → Multiple datasets
+3. Load the corresponding dataset skill(s) to get the full schema, quirks, and
+   query patterns.
+4. Also check `.knowledge/datasets/{active}/schema.md` and
+   `.knowledge/datasets/{active}/quirks.md` for any additional context.
 
-1. Check `data/schemas/{active}.yaml` — if found, load it with `schema_to_markdown()` from `helpers/data_helpers.py` to get a pre-built schema overview. This avoids redundant profiling for seed datasets.
-2. Check `.knowledge/datasets/{active}/schema.md` — if found, read it for context on known tables and columns.
-3. Check `.knowledge/datasets/{active}/last_profile.md` — if a recent profile exists, use it to skip basic profiling in Step 2.
+### Step 2: Map Questions to Available Data
 
-If any of these exist, use them as a starting point and focus Step 2 on validation and gap detection rather than full profiling. If none exist, proceed with full discovery.
+For each question in the question brief, analyze what data is needed and categorize
+every required data point into one of three buckets:
 
-### Step 1: Connect and Enumerate
-Connect to {{DATA_SOURCE}} and enumerate all available data objects:
+**AVAILABLE** — The column exists directly in the schema and can be queried as-is.
+- Cite the exact `table.column` reference
+- Note any quirks (e.g., "filter on `intraday = FALSE`", "use `date` not `event_date`")
 
-**For file-based sources (CSV, Parquet, JSON):**
-- List all files, their sizes, and row counts
-- Read column names and data types from each file
-- Sample the first 10 rows to understand the data shape
-- Identify the delimiter, encoding, and any parsing issues
+**DERIVABLE** — The data point does not exist as a column, but can be computed
+from existing columns.
+- Describe the derivation logic clearly (e.g., "session duration = `session_end_datetime - session_start_datetime`")
+- Note which table(s) and column(s) are needed
+- Flag complexity: SIMPLE (single expression), MODERATE (join or aggregation), COMPLEX (multi-step transformation)
 
-**For database sources (MotherDuck, DuckDB, SQLite):**
-- List all schemas, tables, and views
-- For each table: column names, data types, row count
-- Identify primary keys, foreign keys, and indexes where visible
-- List any stored procedures or functions if applicable
+**MISSING** — The data point is not in any available dataset and cannot be derived.
+- Explain exactly what is missing and why it matters for the question
+- Suggest a workaround if one exists (e.g., "no direct NPS data, but could proxy with return rate")
+- Flag severity: BLOCKER (question cannot be answered without it) or LIMITATION (question can be partially answered)
 
-**For directories with multiple files:**
-- Enumerate all files and their formats
-- Group related files (e.g., events_2024_01.csv, events_2024_02.csv are monthly partitions)
-- Note any inconsistencies across files (different column counts, naming changes)
+### Step 3: Assess Feasibility Per Question
 
-Write the results to `working/data_inventory_raw.md` as an intermediate output.
+For each of the top questions from the brief, produce a feasibility rating:
 
-### Step 2: Profile Each Table/File
-For each table or file discovered, compute:
+- **FULLY SUPPORTED** — All required data points are AVAILABLE or DERIVABLE (SIMPLE)
+- **MOSTLY SUPPORTED** — Core data points available; some require MODERATE/COMPLEX derivation; no blockers
+- **PARTIALLY SUPPORTED** — Key data points are missing but workarounds exist; results will have caveats
+- **NOT SUPPORTED** — Critical data is MISSING with no workaround; question cannot be answered
 
-**Shape and coverage:**
-- Total row count
-- Total column count
-- Date range (min and max of any timestamp/date columns)
-- Distinct count of key identifier columns (user_id, session_id, event_type, etc.)
+### Step 4: Ask the User About Missing Data
 
-**Column-level profiling (for each column):**
-- Data type (string, integer, float, boolean, timestamp, etc.)
-- Null count and null rate (as a percentage)
-- Distinct value count
-- For numeric columns: min, max, mean, median, standard deviation
-- For categorical columns: top 10 most frequent values with counts
-- For timestamp columns: min date, max date, any gaps in date coverage
+If any data points are classified as MISSING, use `#tool:vscode/askQuestions` to ask
+the user:
 
-**Execute this profiling using Python (pandas) or SQL depending on the data source type.** Write the actual code, run it, and capture the results. Do not estimate or guess — compute the real values.
+For each MISSING data point, ask specifically:
+- "To answer [question], we need [data point]. This is not available in [datasets checked]. Do you have access to this data in another source? Or should we proceed with [workaround]?"
 
-### Step 3: Assess Data Quality
-Apply the Data Quality Check skill (`.github/skills/data-quality-check/SKILL.md`). For each table/file, check:
+Group related gaps into a single question to avoid question fatigue. Example:
+> "I found 3 data gaps for your questions:
+> 1. **Customer NPS scores** — needed for satisfaction analysis. Any survey data available?
+> 2. **Marketing spend by channel** — needed for ROI calculation. Is this in a separate table?
+> 3. **Product return reasons** — needed for root cause. Is this tracked anywhere?
+>
+> For each, let me know if you have the data or if we should proceed with workarounds."
 
-**Completeness:**
-- Flag columns with >5% null rate as WARNING, >20% as BLOCKER
-- Flag date ranges with missing days/weeks as WARNING
-- Flag tables with unexpectedly low row counts as WARNING
+If all data points are AVAILABLE or DERIVABLE, skip this step.
 
-**Consistency:**
-- Check for duplicate rows (exact duplicates and near-duplicates on key columns)
-- Verify referential integrity across tables (e.g., all user_ids in events exist in users)
-- Check for data type mismatches (strings in numeric columns, dates formatted inconsistently)
-- Check for impossible values (negative counts, future dates, percentages >100%)
+### Step 5: Identify Cross-Dataset Join Paths
 
-**Distribution sanity:**
-- Flag any column where >50% of values are a single value (low cardinality warning)
-- Flag numeric columns with extreme outliers (>3 standard deviations from mean)
-- Flag any sudden changes in data volume over time (potential tracking breakage)
+If the analysis requires data from multiple datasets, map the join paths:
+- Identify the join keys between datasets (e.g., `order_id`, `session_id`, `customer_id`)
+- Note any key type mismatches (e.g., STRING in GA4 vs INT64 in PFA)
+- Flag any known orphan rates or join quality issues from the dataset quirks
 
-Rate each finding with a severity:
-- **BLOCKER**: Analysis will be wrong if this is not addressed (e.g., 80% nulls in a key column)
-- **WARNING**: Results should be interpreted with caution (e.g., 10% nulls in a segmentation column)
-- **INFO**: Worth noting but does not affect analysis (e.g., 0.1% duplicates)
+### Step 6: Compile the Data Feasibility Report
 
-### Step 4: Identify Tracking Gaps
-Apply the Tracking Gap Identification skill (`.github/skills/tracking-gaps/SKILL.md`):
-
-**If {{ANALYSIS_GOALS}} is provided:**
-- Extract the data requirements from the analysis goals (questions, hypotheses, or plain text)
-- For each required data point, check if it exists in the inventory
-- Classify each as: AVAILABLE (exists and is quality), PARTIAL (exists but quality issues), MISSING (not in the data), DERIVABLE (not directly present but can be computed from existing fields)
-- For MISSING fields: suggest workarounds or alternative approaches
-- For DERIVABLE fields: describe how to compute them (e.g., "session duration can be derived from timestamp of first and last event in a session")
-
-**If {{ANALYSIS_GOALS}} is not provided:**
-- Identify what common analytical questions this data CAN support based on the fields present
-- Note obvious gaps: "This dataset has user events but no user attributes — segmentation by user properties won't be possible"
-- Suggest what additional data would make the dataset more analytically useful
-
-### Step 5: Generate Recommended Analyses
-Based on the data inventory and quality assessment, recommend specific analyses:
-
-**For each recommendation, specify:**
-- **Analysis description**: One sentence describing what to investigate
-- **Why this data supports it**: Which tables/columns make this feasible
-- **Suggested approach**: Funnel analysis, segmentation, trend analysis, etc.
-- **Agent to use**: Which agent would execute this (Descriptive Analytics Agent, Overtime/Trend Agent, etc.)
-- **Caveats**: Any data quality issues that would affect this analysis
-
-Generate 3-5 recommendations, ordered by the strength of data support (most feasible first).
-
-**If {{ANALYSIS_GOALS}} is provided**, additionally map each goal to the available data and indicate whether it is fully supported, partially supported, or not supported.
-
-### Step 5b: Record Lineage
-Log this agent's data flow for traceability:
-
-```python
-from helpers.lineage_tracker import track
-
-track(
-    step=4,  # pipeline_step from CONTRACT
-    agent="data-explorer",
-    inputs=[str(DATA_SOURCE)],  # source files/tables explored
-    outputs=["outputs/data_inventory_{{DATE}}.md"],
-    metadata={"tables_profiled": len(tables), "total_rows": total_rows}
-)
-```
-
-### Step 6: Compile the Data Inventory Report
-Assemble all outputs into a single structured document following the Output Format below. Remove the intermediate file from `working/`.
+Assemble all outputs into a single structured document following the Output Format below.
 
 ## Output Format
 
-A markdown file saved to `outputs/data_inventory_{{DATE}}.md` with this structure:
+A markdown file saved to `outputs/data_feasibility_{{DATE}}.md` with this structure:
 
 ```markdown
-# Data Inventory Report: {{DATA_SOURCE_NAME}}
+# Data Feasibility Report
 **Generated:** {{DATE}}
-**Source:** {{DATA_SOURCE}}
-**Total tables/files:** [count]
-**Date range:** [earliest date] to [latest date]
-**Total rows across all tables:** [count]
+**Question Brief:** [title from question brief]
+**Datasets Assessed:** [list of datasets checked]
 
-## Executive Summary
-[3-5 sentences: what data exists, its overall quality, and what it can support.
- Highlight any blockers. State the single most important finding about this data.]
+## Summary
+[2-3 sentences: overall feasibility, number of questions fully/partially/not supported,
+ key gaps if any.]
 
-## Table/File Inventory
+## Feasibility by Question
 
-### [Table/File 1 Name]
-- **Rows:** [count]
-- **Columns:** [count]
-- **Date range:** [min] to [max]
-- **Description:** [inferred description of what this table contains]
+### Question 1: [Question text]
+**Feasibility:** [FULLY SUPPORTED / MOSTLY SUPPORTED / PARTIALLY SUPPORTED / NOT SUPPORTED]
 
-| Column | Type | Nulls | Null % | Distinct | Notes |
-|--------|------|-------|--------|----------|-------|
-| user_id | string | 0 | 0% | 45,231 | Primary identifier |
-| event_type | string | 0 | 0% | 23 | Top: page_view (40%), click (25%) |
-| timestamp | datetime | 12 | 0.01% | — | Range: 2024-01-01 to 2024-12-31 |
-| revenue | float | 1,205 | 8.5% | — | Min: 0, Max: 9,999, Mean: 42.50 |
-| ... | ... | ... | ... | ... | ... |
+#### Available Data
+| Data Point | Source | Column | Notes |
+|-----------|--------|--------|-------|
+| [metric/dimension] | [dataset.table] | [column] | [quirks to watch] |
 
-### [Table/File 2 Name]
+#### Derivable Data
+| Data Point | Source Tables | Derivation | Complexity |
+|-----------|-------------|------------|------------|
+| [metric] | [tables] | [SQL/logic description] | SIMPLE/MODERATE/COMPLEX |
+
+#### Missing Data
+| Data Point | Impact | Severity | Workaround |
+|-----------|--------|----------|------------|
+| [data point] | [why needed] | BLOCKER/LIMITATION | [alternative approach or "none"] |
+
+### Question 2: [Question text]
 [same structure]
 
-## Data Quality Assessment
-
-### Blockers
-| Issue | Table | Column | Detail | Impact |
-|-------|-------|--------|--------|--------|
-| High null rate | events | user_segment | 35% nulls | Cannot segment 35% of users |
-
-### Warnings
-| Issue | Table | Column | Detail | Impact |
-|-------|-------|--------|--------|--------|
-| [issue] | [table] | [column] | [detail] | [impact] |
-
-### Info
-| Issue | Table | Column | Detail |
-|-------|-------|--------|--------|
-| [issue] | [table] | [column] | [detail] |
-
-## Tracking Gap Analysis
-[Only present if {{ANALYSIS_GOALS}} was provided]
-
-| Required Data Point | Status | Source | Notes |
-|--------------------|--------|--------|-------|
-| [data point from goals] | AVAILABLE | events.column_name | Clean, ready to use |
-| [data point from goals] | PARTIAL | users.segment | 35% nulls — use with caution |
-| [data point from goals] | DERIVABLE | Compute from events.timestamp | session_duration = max(ts) - min(ts) per session |
-| [data point from goals] | MISSING | — | Would need user survey data; workaround: use behavioral proxy |
-
-## Recommended Analyses
-
-### 1. [Analysis title]
-- **Description:** [one sentence]
-- **Data support:** [which tables/columns]
-- **Approach:** [analysis type]
-- **Agent:** [which agent to invoke]
-- **Caveats:** [quality issues to watch]
-
-### 2. [Analysis title]
+### Question 3: [Question text]
 [same structure]
 
-### 3. [Analysis title]
-[same structure]
+## Cross-Dataset Joins
+[Only present if multiple datasets are needed]
 
-## Entity Relationship Map
-[If multiple tables exist, describe how they connect:]
-- `users.user_id` → `events.user_id` (one-to-many)
-- `events.product_id` → `products.product_id` (many-to-one)
-- [Note any orphaned records: "1,203 events reference user_ids not in the users table"]
+| From | To | Join Key | Type Match | Notes |
+|------|-----|----------|-----------|-------|
+| [dataset.table] | [dataset.table] | [key] | [yes/no — type details] | [orphan rate, quirks] |
 
-## Next Steps
-1. [Address blockers — specific action items]
-2. [Recommended first analysis to run]
-3. [Data enrichment opportunities]
+## User Input Needed
+[Only present if Step 4 identified MISSING data]
+
+| # | Missing Data | Question Affected | Severity | Proposed Workaround |
+|---|-------------|-------------------|----------|-------------------|
+| 1 | [data point] | Q1, Q3 | BLOCKER | [workaround or "none"] |
+| 2 | [data point] | Q2 | LIMITATION | [workaround] |
+
+## Recommended Dataset Configuration
+- **Primary dataset:** [which dataset to use as the main source]
+- **Supporting datasets:** [additional datasets to join]
+- **Key filters:** [standard filters to apply: intraday, bot exclusion, date range]
+- **Known quirks to watch:** [critical quirks from dataset skills]
 ```
 
 ## Skills Used
-- `.github/skills/data-quality-check/SKILL.md` — for the completeness, consistency, and distribution checks in Step 3, including severity rating criteria (BLOCKER/WARNING/INFO)
-- `.github/skills/tracking-gaps/SKILL.md` — for the gap analysis in Step 4, including the AVAILABLE/PARTIAL/MISSING/DERIVABLE classification and workaround suggestions
+- `.github/skills/pfa-dataset/SKILL.md` — schema, quirks, and query patterns for Privacy Friendly Analytics. Load when questions involve behavioral/funnel/web analytics data from PFA.
+- `.github/skills/ga4-dataset/SKILL.md` — schema, quirks, and query patterns for Google Analytics 4. Load when questions involve behavioral/funnel/web analytics data from GA4.
+- `.github/skills/transaction-margin-dataset/SKILL.md` — schema, quirks, and query patterns for Transaction Margin. Load when questions involve transactions, margins, sales, revenue, or cost breakdown.
+- `.github/skills/tracking-gaps/SKILL.md` — for the AVAILABLE/DERIVABLE/MISSING classification framework and workaround suggestion patterns.
 
 ## Validation
-Before presenting the data inventory report, verify:
-1. **Row counts are real, not estimated** — re-run a `COUNT(*)` or `len(df)` on each table/file and confirm the number in the report matches. Do not estimate row counts from file size.
-2. **Null percentages are arithmetic-correct** — verify that null_count / total_rows = reported null percentage for at least 3 columns. Rounding errors are acceptable; order-of-magnitude errors are not.
-3. **Date ranges are plausible** — check that the reported min and max dates are reasonable (not in the future, not before the product existed). Flag any date column where min/max seems wrong.
-4. **All tables/files are accounted for** — count the tables/files discovered in Step 1 and confirm the same count appears in the report. Missing a table is a critical error.
-5. **Quality severity ratings are consistent** — re-read each BLOCKER and confirm it meets the criteria (>20% nulls or analysis would be wrong). Ensure no WARNING should actually be a BLOCKER.
-6. **Entity relationships are validated** — if the report claims table A joins to table B on a key, verify by checking that the join key exists in both tables and report the orphan rate.
-7. **Recommendations reference real data** — each recommended analysis must cite specific tables and columns from the inventory. A recommendation that references non-existent data is invalid.
+Before presenting the feasibility report, verify:
+1. **Every data point references a real column** — cross-check each `table.column` citation against the loaded dataset skill schema. A reference to a non-existent column is a critical error.
+2. **Derivation logic is sound** — for each DERIVABLE data point, verify that the referenced columns exist and the logic is correct (e.g., don't subtract timestamps of different types).
+3. **Feasibility ratings are consistent** — a question rated FULLY SUPPORTED must have zero MISSING data points. A question with a BLOCKER gap cannot be rated above PARTIALLY SUPPORTED.
+4. **Join keys are type-compatible** — if cross-dataset joins are proposed, verify the key types match or note the cast needed.
+5. **No question is left unassessed** — every question from the brief must appear in the feasibility report with a rating.

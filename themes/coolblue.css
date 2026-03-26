@@ -1,0 +1,854 @@
+/* @theme coolblue */
+
+@import 'default';
+
+/* ============================================
+   Coolblue — Brand Presentation Theme
+   Design: Coolblue blue title/agenda slides, white content
+   slides with blue bottom bar, Open Sans typography
+   ============================================ */
+
+/* --- Design Tokens --- */
+:root {
+  --cb-blue: #0090E3;
+  --cb-blue-dark: #006BB3;
+  --cb-white: #FFFFFF;
+  --cb-black: #1A1A1A;
+  --cb-text: #1A1A1A;
+  --cb-text-secondary: #4B5563;
+  --cb-text-muted: #9CA3AF;
+  --cb-border: #E5E7EB;
+  --cb-surface: #FFFFFF;
+  --cb-positive: #059669;
+  --cb-positive-bg: #ECFDF5;
+  --cb-negative: #DC2626;
+  --cb-negative-bg: #FEF2F2;
+  --cb-accent: #0090E3;
+  --cb-accent-light: #CCE9F9;
+  --cb-bar-height: 20%;
+  --font-heading: 'Open Sans', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Open Sans', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ============================================
+   BASE SECTION (every slide)
+   ============================================ */
+
+section {
+  background: var(--cb-white);
+  color: var(--cb-text);
+  font-family: var(--font-body);
+  font-size: 24px;
+  line-height: 1.5;
+  padding: 60px 80px 160px 80px;
+  justify-content: flex-start;
+  border-left: none;
+  overflow: hidden;
+  position: relative;
+}
+
+/* --- Blue bottom bar (1/5 of slide height) on content slides --- */
+section::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--cb-bar-height);
+  background: var(--cb-blue);
+  z-index: 0;
+}
+
+/* --- Slide title positioned in the blue bar --- */
+section h2 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--cb-bar-height);
+  display: flex;
+  align-items: center;
+  padding: 0 80px;
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--cb-white);
+  z-index: 1;
+  background: transparent;
+  line-height: 1.3;
+}
+
+/* --- Image Containment --- */
+section img {
+  max-height: 380px;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+/* --- Typography --- */
+section h1 {
+  font-family: var(--font-heading);
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--cb-text);
+  margin-bottom: 24px;
+  line-height: 1.2;
+}
+
+section h3 {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--cb-text);
+  margin-bottom: 16px;
+}
+
+section p {
+  font-size: 24px;
+  color: var(--cb-text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+section li {
+  font-size: 22px;
+  margin-bottom: 8px;
+  color: var(--cb-text);
+}
+
+section strong {
+  color: var(--cb-text);
+  font-weight: 700;
+}
+
+section a {
+  color: var(--cb-blue);
+  text-decoration: underline;
+}
+
+/* --- Page Numbers --- */
+section::after {
+  font-size: 14px;
+  color: var(--cb-text-muted);
+}
+
+/* --- Footer (Marp footer directive) --- */
+section footer {
+  font-size: 12px;
+  color: var(--cb-text-muted);
+  letter-spacing: 0.03em;
+  bottom: 24px;
+  left: 85px;
+  width: auto;
+  z-index: 2;
+}
+
+section footer a {
+  color: var(--cb-text-muted);
+  text-decoration: none;
+}
+
+/* ============================================
+   TITLE SLIDE — Blue background, white text, logo top-right
+   Used for Slide 1 (Title) and Slide 2 (Agenda)
+   ============================================ */
+
+section.cb-title {
+  background: var(--cb-blue);
+  color: var(--cb-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 80px 100px;
+}
+
+/* Remove the blue bottom bar on title slides */
+section.cb-title::before {
+  display: none;
+}
+
+section.cb-title h1 {
+  font-size: 52px;
+  color: var(--cb-white);
+  margin-bottom: 16px;
+  line-height: 1.15;
+}
+
+section.cb-title h2 {
+  position: static;
+  height: auto;
+  display: block;
+  padding: 0;
+  font-size: 28px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 12px;
+  background: transparent;
+}
+
+section.cb-title p {
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Logo positioning — top-right on title slides */
+section.cb-title .logo {
+  position: absolute;
+  top: 40px;
+  right: 60px;
+  width: 180px;
+  height: auto;
+}
+
+section.cb-title .logo img {
+  max-height: none;
+  width: 180px;
+  height: auto;
+  margin: 0;
+}
+
+/* Footer on title slides: white text */
+section.cb-title footer {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Page number on title slides */
+section.cb-title::after {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ============================================
+   AGENDA SLIDE — Same blue background as title
+   ============================================ */
+
+section.cb-agenda {
+  background: var(--cb-blue);
+  color: var(--cb-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 80px 100px;
+}
+
+section.cb-agenda::before {
+  display: none;
+}
+
+section.cb-agenda h1 {
+  font-size: 44px;
+  color: var(--cb-white);
+  margin-bottom: 32px;
+}
+
+section.cb-agenda h2 {
+  position: static;
+  height: auto;
+  display: block;
+  padding: 0;
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--cb-white);
+  margin-bottom: 32px;
+  background: transparent;
+}
+
+section.cb-agenda ol,
+section.cb-agenda ul {
+  padding-left: 0;
+  list-style: none;
+  counter-reset: agenda;
+}
+
+section.cb-agenda li {
+  font-size: 26px;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  counter-increment: agenda;
+  padding-left: 40px;
+  position: relative;
+}
+
+section.cb-agenda li::before {
+  content: counter(agenda) ".";
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+  color: var(--cb-white);
+}
+
+section.cb-agenda li:last-child {
+  border-bottom: none;
+}
+
+/* Logo on agenda slides */
+section.cb-agenda .logo {
+  position: absolute;
+  top: 40px;
+  right: 60px;
+  width: 180px;
+  height: auto;
+}
+
+section.cb-agenda .logo img {
+  max-height: none;
+  width: 180px;
+  height: auto;
+  margin: 0;
+}
+
+section.cb-agenda footer {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+section.cb-agenda::after {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ============================================
+   SECTION OPENER — Blue background, transition slide
+   ============================================ */
+
+section.section-opener {
+  background: var(--cb-blue);
+  color: var(--cb-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 80px 100px;
+}
+
+section.section-opener::before {
+  display: none;
+}
+
+section.section-opener h2 {
+  position: static;
+  height: auto;
+  display: block;
+  padding: 0;
+  font-size: 42px;
+  color: var(--cb-white);
+  margin-bottom: 12px;
+  background: transparent;
+}
+
+section.section-opener p {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 70%;
+}
+
+/* ============================================
+   CONTENT SLIDES — White background + blue bottom bar
+   ============================================ */
+
+/* --- Chart Full (one chart, maximum space) --- */
+section.chart-full {
+  padding: 40px 60px 160px 60px;
+  display: flex;
+  flex-direction: column;
+}
+
+section.chart-full h2 {
+  font-size: 28px;
+}
+
+section.chart-full .chart-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+}
+
+section.chart-full .chart-container img {
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
+section.chart-full img {
+  max-height: none;
+  max-width: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
+/* --- Insight Slide --- */
+section.insight {
+  padding: 50px 80px 160px 80px;
+}
+
+section.insight img {
+  max-height: 380px;
+}
+
+/* --- Impact / Statement Slide --- */
+section.impact {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 60px 140px 160px 140px;
+}
+
+section.impact h2 {
+  position: static;
+  height: auto;
+  display: block;
+  padding: 0;
+  font-size: 44px;
+  color: var(--cb-text);
+  line-height: 1.2;
+  margin-bottom: 24px;
+  background: transparent;
+}
+
+section.impact::before {
+  display: none;
+}
+
+section.impact p {
+  font-size: 22px;
+  max-width: 60%;
+}
+
+/* --- Chart-Left Layout (60/40) --- */
+section.chart-left {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 32px;
+  align-items: center;
+  padding: 50px 80px 160px 80px;
+}
+
+section.chart-left h2 {
+  /* stays in the blue bar at bottom, remove from grid */
+}
+
+section.chart-left img {
+  max-height: 360px;
+}
+
+/* --- Chart-Right Layout (40/60) --- */
+section.chart-right {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 32px;
+  align-items: center;
+  padding: 50px 80px 160px 80px;
+}
+
+section.chart-right img {
+  max-height: 360px;
+}
+
+/* --- Two Column Layout --- */
+section.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+  gap: 40px;
+  align-items: start;
+  padding: 50px 80px 160px 80px;
+}
+
+/* --- KPI Slide --- */
+section.kpi {
+  padding: 50px 80px 160px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Takeaway Slide --- */
+section.takeaway {
+  padding: 60px 100px 160px 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+section.takeaway h2 {
+  position: static;
+  height: auto;
+  display: block;
+  padding: 0;
+  font-size: 36px;
+  color: var(--cb-text);
+  margin-bottom: 24px;
+  background: transparent;
+}
+
+/* --- Recommendation Slide --- */
+section.recommendation {
+  padding: 50px 80px 160px 80px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Appendix Slide --- */
+section.appendix {
+  padding: 50px 80px 160px 80px;
+}
+
+section.appendix h2 {
+  font-size: 28px;
+  color: var(--cb-white);
+}
+
+section.appendix p,
+section.appendix li {
+  font-size: 18px;
+  color: var(--cb-text-secondary);
+}
+
+/* --- Diagram Slide --- */
+section.diagram {
+  padding: 50px 60px 160px 60px;
+}
+
+section.diagram img {
+  max-height: 420px;
+}
+
+/* ============================================
+   COMPONENTS — Adapted for Coolblue brand
+   ============================================ */
+
+/* --- So-What Callout --- */
+.so-what {
+  font-size: 18px;
+  font-weight: 600;
+  color: #005A8F;
+  background: var(--cb-accent-light);
+  padding: 12px 20px;
+  border-radius: 8px;
+  border-left: 3px solid var(--cb-blue);
+  margin-top: 16px;
+}
+
+/* --- Metric Callout --- */
+.metric-callout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+}
+
+.metric-callout .metric-value {
+  font-size: 96px;
+  font-weight: 800;
+  color: var(--cb-text);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.metric-callout .metric-value.positive { color: var(--cb-positive); }
+.metric-callout .metric-value.negative { color: var(--cb-negative); }
+.metric-callout .metric-value.accent { color: var(--cb-blue); }
+
+.metric-callout .metric-label {
+  font-size: 22px;
+  color: var(--cb-text-secondary);
+}
+
+.metric-callout .metric-context {
+  font-size: 16px;
+  color: var(--cb-text-muted);
+  margin-top: 8px;
+}
+
+/* --- KPI Row --- */
+.kpi-row {
+  display: flex;
+  gap: 24px;
+  margin: 24px 0;
+}
+
+.kpi-card {
+  flex: 1;
+  background: var(--cb-surface);
+  border: 1px solid var(--cb-border);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+}
+
+.kpi-card .kpi-value {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--cb-text);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.kpi-card .kpi-value.positive { color: var(--cb-positive); }
+.kpi-card .kpi-value.negative { color: var(--cb-negative); }
+.kpi-card .kpi-value.accent { color: var(--cb-blue); }
+
+.kpi-card .kpi-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cb-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kpi-card .kpi-delta {
+  font-size: 14px;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.kpi-card .kpi-delta.up { color: var(--cb-positive); }
+.kpi-card .kpi-delta.down { color: var(--cb-negative); }
+
+/* --- Chart Container --- */
+.chart-container {
+  background: var(--cb-surface);
+  border: 1px solid var(--cb-border);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chart-container img {
+  max-width: 100%;
+  max-height: 340px;
+  object-fit: contain;
+  flex: 0 1 auto;
+}
+
+.chart-container .chart-source {
+  font-size: 12px;
+  color: var(--cb-text-muted);
+  margin-top: 8px;
+  text-align: right;
+  align-self: flex-end;
+}
+
+/* --- Finding Card --- */
+.finding {
+  background: var(--cb-surface);
+  border: 1px solid var(--cb-border);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 16px 0;
+  border-left: 4px solid var(--cb-blue);
+}
+
+.finding .finding-headline {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cb-text);
+  margin-bottom: 8px;
+}
+
+.finding .finding-detail {
+  font-size: 16px;
+  color: var(--cb-text-secondary);
+  margin-bottom: 12px;
+}
+
+.finding .finding-impact {
+  font-size: 14px;
+  font-weight: 600;
+  color: #005A8F;
+  background: var(--cb-accent-light);
+  padding: 8px 16px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+/* --- Recommendation Row --- */
+.rec-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--cb-border);
+}
+
+.rec-row:last-child {
+  border-bottom: none;
+}
+
+.rec-row .rec-number {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--cb-blue);
+  min-width: 36px;
+}
+
+.rec-row .rec-content { flex: 1; }
+
+.rec-row .rec-action {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cb-text);
+  margin-bottom: 4px;
+}
+
+.rec-row .rec-rationale {
+  font-size: 16px;
+  color: var(--cb-text-secondary);
+}
+
+.rec-row .rec-confidence {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.rec-row .rec-confidence.high {
+  background: var(--cb-positive-bg);
+  color: var(--cb-positive);
+}
+
+.rec-row .rec-confidence.medium {
+  background: var(--cb-accent-light);
+  color: #005A8F;
+}
+
+.rec-row .rec-confidence.low {
+  background: #F3F4F6;
+  color: var(--cb-text-muted);
+}
+
+/* --- Callout Box --- */
+.callout {
+  background: var(--cb-accent-light);
+  border-left: 4px solid var(--cb-blue);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 24px;
+  margin: 16px 0;
+}
+
+.callout .callout-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #005A8F;
+  margin-bottom: 4px;
+}
+
+.callout .callout-text {
+  font-size: 16px;
+  color: var(--cb-text-secondary);
+}
+
+/* --- Data Source --- */
+.data-source {
+  font-size: 12px;
+  color: var(--cb-text-muted);
+  text-align: right;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--cb-border);
+}
+
+/* --- Badge / Tag --- */
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-left: 8px;
+}
+
+.badge.positive { background: var(--cb-positive-bg); color: var(--cb-positive); }
+.badge.negative { background: var(--cb-negative-bg); color: var(--cb-negative); }
+.badge.accent { background: var(--cb-accent-light); color: #005A8F; }
+.badge.neutral { background: #F3F4F6; color: var(--cb-text-secondary); }
+
+/* --- Delta indicators --- */
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.delta.up { color: var(--cb-positive); }
+.delta.down { color: var(--cb-negative); }
+.delta.flat { color: var(--cb-text-muted); }
+
+/* --- Tables --- */
+section table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 18px;
+  background: var(--cb-surface);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+section table th {
+  background: var(--cb-blue);
+  color: var(--cb-white);
+  font-weight: 700;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 16px;
+}
+
+section table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--cb-border);
+  color: var(--cb-text-secondary);
+}
+
+section table td strong {
+  color: var(--cb-text);
+  font-weight: 700;
+}
+
+section table tr:nth-child(even) td {
+  background: rgba(0, 144, 227, 0.03);
+}
+
+/* ============================================
+   PRINT OVERRIDES
+   ============================================ */
+
+@media print {
+  section::before {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  section.cb-title,
+  section.cb-agenda,
+  section.section-opener {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

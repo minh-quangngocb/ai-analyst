@@ -61,8 +61,8 @@ Create a complete slide deck from analysis outputs by combining a storytelling n
 ## Inputs
 - {{NARRATIVE}}: Path to the narrative document produced by the Storytelling Agent. Must contain an executive summary, findings, insight, implication, and recommendations sections.
 - {{CHARTS}}: Path to the directory or list of chart files (PNG/SVG) produced during analysis. Each chart file should have a descriptive filename. If no charts are available, the agent will generate text-only slides and note where charts should be inserted.
-- {{THEME}}: (optional) Presentation theme to apply — one of the named themes from the Presentation Themes skill (e.g., "nyt", "economist", "minimal", "corporate", "analytics", "analytics-dark"). Defaults to "corporate" if not specified.
-- {{FORMAT}}: (optional) Output format — "gamma" for Gamma-compatible markdown (default), or "marp" for Marp PDF-ready markdown. When "marp" is selected with the "analytics" theme, the deck uses `themes/analytics-light.css`. With "analytics-dark", the deck uses `themes/analytics-dark.css`. Both can be exported directly to PDF.
+- {{THEME}}: (optional) Presentation theme to apply. Defaults to `coolblue`.
+- {{FORMAT}}: (optional) Output format — "marp" for Marp PDF-ready markdown (default). The deck uses `themes/coolblue.css` and can be exported directly to PDF.
 - {{CONTEXT}}: (optional) Presentation context — e.g., "workshop", "talk", "stakeholder readout", "team standup". When context is "workshop" or "talk", the agent adds an optional closing sequence with CTA slides after the main content.
 - {{AUDIENCE}}: (optional) Who will see this deck — e.g., "executive team", "product review", "board meeting", "team standup". Defaults to "senior stakeholders". Controls content density and slide count.
 - {{STORYBOARD}}: (optional) Path to the storyboard from Story Architect (`working/storyboard_{{DATASET}}.md`). When provided, use the audience journey section for slide framing (who the audience is, what they believe now vs. after, what decision to drive) and the beat sequence for speaker notes transitions.
@@ -71,10 +71,9 @@ Create a complete slide deck from analysis outputs by combining a storytelling n
 ## Non-Negotiable Defaults
 
 ### Theme Selection (CRITICAL)
-- Standard analysis → `analytics` (LIGHT). When in doubt, use light.
-- Workshop/talk → `analytics-dark` (DARK).
-- Explicit {{THEME}} override always wins.
-- Never default to dark theme for a stakeholder readout, team standup, or any non-presentation context.
+- Always use `coolblue` theme. This is the only supported theme.
+- All decks use Coolblue brand styling: blue title/agenda slides, white content slides with blue bottom bar, Open Sans font.
+- Explicit {{THEME}} override is accepted but `coolblue` is the default and recommended choice.
 
 ### Title Collision Prevention
 - Slide headline ≠ chart's baked-in title. Ever.
@@ -95,17 +94,17 @@ These rules override all other instructions. Every Marp deck MUST comply.
 ```yaml
 ---
 marp: true
-theme: analytics
+theme: coolblue
 size: 16:9
 paginate: true
 html: true
-footer: "AI Analyst Lab | [Client/Dataset] | [Month Year]"
+footer: "{{DATE}}"
 ---
 ```
 
-For analytics-dark, change `theme: analytics-dark`. ALL 6 KEYS ARE MANDATORY.
+ALL 6 KEYS ARE MANDATORY.
 Missing `html: true` disables all HTML components. Missing `size: 16:9` breaks
-layouts. Missing `footer` removes branding.
+layouts. Missing `footer` removes the date.
 
 ### HTML Components Required
 
@@ -128,21 +127,20 @@ When the storyboard provides a `slides` array for each beat, map each slide entr
 
 | Class | Use For |
 |-------|---------|
-| `title` | Opening title slide |
-| `section-opener` | Section dividers |
-| `insight` | Standard analysis slide (backward-compatible) |
-| `impact` | Breathing / statement slides |
-| `chart-left` | 60/40 chart + text |
-| `chart-right` | 40/60 text + chart |
-| `two-col` | Side-by-side content |
-| `diagram` | Generous space for visuals |
-| `chart-full` | Full chart, maximum space (overrides `max-height: 420px`) |
-| `kpi` | 2-4 metric cards, no chart |
-| `takeaway` | Interpretation / so-what after a chart |
-| `recommendation` | Action items with confidence levels |
-| `appendix` | Methodology, caveats, data sources |
+| `cb-title` | Opening title slide (slide 1) — blue background, logo top-right, white text |
+| `cb-agenda` | Agenda slide (slide 2) — blue background, logo top-right, numbered list |
+| `section-opener` | Section dividers — blue background |
+| `chart-full` | Short statement + one chart, maximum space — white + blue bar |
+| `chart-left` | 60/40 chart + text — white + blue bar |
+| `chart-right` | 40/60 text + chart — white + blue bar |
+| `takeaway` | Interpretation / bullet points — white, no bar |
+| `impact` | Breathing / statement slides — white, no bar |
+| `kpi` | 2-4 metric cards, no chart — white + blue bar |
+| `two-col` | Side-by-side content — white + blue bar |
+| `recommendation` | Action items with confidence levels — white + blue bar |
+| `appendix` | Methodology, caveats, data sources — white + blue bar |
 
-**INVALID:** `breathing` (use `impact`), `hero` (use `title`).
+**INVALID:** `breathing` (use `impact`), `hero` (use `cb-title`), `title` (use `cb-title`), `insight` (use `chart-full` or `takeaway`), `dark-title` / `dark-impact` (not supported).
 
 ### Before / After Example
 
@@ -150,42 +148,41 @@ When the storyboard provides a `slides` array for each beat, map each slide entr
 ```markdown
 ---
 marp: true
-theme: analytics-light
+theme: coolblue
 paginate: true
 ---
 ## The headline: conversion fell 59%
 Session-to-purchase rate declined from **7.0%** to **2.9%**.
 ```
 
-**GOOD (HTML components, complete frontmatter):**
+**GOOD (HTML components, complete frontmatter, Coolblue structure):**
 ```markdown
 ---
 marp: true
-theme: analytics
+theme: coolblue
 size: 16:9
 paginate: true
 html: true
-footer: "AI Analyst Lab | {{DISPLAY_NAME}} | February 2026"
+footer: "March 26, 2026"
 ---
 
-<!-- _class: insight -->
+<!-- _class: cb-title -->
 
-## The headline: conversion fell 59% over 2024
+<div class="logo"><img src="templates/coolblue_logo.png" alt="Coolblue"></div>
 
-<div class="kpi-row">
-  <div class="kpi-card">
-    <div class="kpi-value negative">-59%</div>
-    <div class="kpi-label">Conversion Rate</div>
-    <div class="kpi-delta down">Feb → Dec</div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-value">250K</div>
-    <div class="kpi-label">Monthly Sessions</div>
-    <div class="kpi-delta up">+28x growth</div>
-  </div>
+# Conversion Analysis Q4
+
+## What happened and what to do about it
+
+---
+
+<!-- _class: chart-full -->
+
+## Conversion fell 59% — driven by mobile segment mix shift
+
+<div class="chart-container">
+  <img src="charts/conversion_decline.png" alt="Conversion decline chart">
 </div>
-
-<div class="so-what">The blended rate is misleading — the denominator changed.</div>
 ```
 
 ---
@@ -210,39 +207,27 @@ Inventory the chart files in {{CHARTS}}:
 - Flag any charts in {{CHARTS}} that are not referenced by any finding (candidates for appendix)
 
 **Theme selection logic:**
-1. If {{THEME}} is explicitly provided, use it (explicit override always wins)
-2. If {{THEME}} is not provided:
-   - If {{CONTEXT}} is "workshop" or "talk" → default to `analytics-dark`
-   - If {{FORMAT}} is "marp" → default to `analytics` (light theme)
-   - Otherwise → default to `corporate` (Gamma output)
+1. Always use `coolblue` theme (default).
+2. If {{THEME}} is explicitly provided, use it.
 
-**Dark mode slide class mapping** (when {{THEME}} is `analytics-dark`):
-
-| Slide Type | Light Class | Dark Class |
-|-----------|------------|------------|
-| Title | `title` | `dark-title` |
-| Content | (default) | (default — inherits dark) |
-| Impact/breathing | `impact` | `dark-impact` |
-| Two-column | `two-col` | `two-col` |
-| Diagram | `diagram` | `diagram` |
-| Insight | `insight` | `insight` |
-| Chart-left | `chart-left` | `chart-left` |
-| Chart-right | `chart-right` | `chart-right` |
-| Section opener | `section-opener` | `section-opener` |
-
-**Dark mode component usage** (when {{THEME}} is `analytics-dark`):
-- All components (`.kpi-card`, `.finding`, `.rec-row`, `.box-card`, `.before-after`, etc.) automatically use dark styling — the CSS handles it
-- Tables render with dark headers and zebra striping automatically
-- Charts should render on white backgrounds (they're embedded as `<img>` on dark slides)
-- Use the QR code white-container pattern from the Presentation Themes skill when embedding QR codes
+**Coolblue theme rules (always apply):**
+- Slide 1 MUST use `<!-- _class: cb-title -->` with Coolblue logo and blue background
+- Slide 2 MUST use `<!-- _class: cb-agenda -->` with agenda items
+- Content slides use white background + blue bottom bar (CSS handles this)
+- The h2 on content slides renders inside the blue bar — it is the slide title
+- For short statements: use `chart-full` with one chart, NO extra text. One statement can span multiple slides with different supporting charts.
+- For detailed points: use `takeaway` with concise bullet points. Keep numbers/math minimal — stakeholders should grasp the point instantly.
+- Font: Open Sans throughout. Black text on white, white text on blue.
+- Footer shows current date (set in frontmatter)
+- Logo file: `templates/coolblue_logo.png`
 
 ### Step 2: Apply the Presentation Themes skill
-Read `.github/skills/presentation-themes/SKILL.md`. Load the theme specified by {{THEME}}. Extract:
-- Color palette (primary, secondary, accent, background, text)
-- Font specifications (headline font, body font, sizes)
-- Slide layout rules (margins, chart placement, text density limits)
+Read `.github/skills/presentation-themes/SKILL.md`. Load the `coolblue` theme. Extract:
+- Color palette: #0090E3 (blue), #FFFFFF (white), #1A1A1A (text)
+- Font: Open Sans (heading and body)
+- Slide layout rules: blue title/agenda slides, white content slides with blue bottom bar
 - Content density rules for the selected audience type
-- Slide structure templates (which sections go on which slide types)
+- Slide structure templates (cb-title, cb-agenda, then content slides)
 
 If the theme specifies maximum text per slide (e.g., "no more than 40 words on an insight slide"), enforce those limits in all subsequent steps.
 
@@ -250,14 +235,13 @@ If the theme specifies maximum text per slide (e.g., "no more than 40 words on a
 Create a slide outline following this mandatory structure:
 
 1. **Title Slide** (1 slide)
+   - Use `cb-title` class. Blue background (#0090E3), white Open Sans text, Coolblue logo top-right.
    - Deck title (from {{DECK_TITLE}} or derived from narrative)
    - Subtitle: dataset, date range, analysis type
-   - Author/team attribution if available
+   - Footer shows current date.
 
-2. **Executive Summary Slide** (1 slide)
-   - The executive summary from the narrative, formatted as 3-5 bullet points
-   - Each bullet is one sentence maximum
-   - No chart on this slide — text only
+2. **Agenda Slide** (1 slide)
+   - Use `cb-agenda` class. Blue background, numbered agenda items matching the deck's section flow. Logo top-right.
 
 3. **Context Slide** (1 slide)
    - The business question being answered
@@ -279,7 +263,7 @@ Create a slide outline following this mandatory structure:
      1. After Context→Tension transition (e.g., "Wait — this isn't organic growth")
      2. At Tension midpoint after isolating the major dimension (e.g., "Everything else was normal. This was surgical.")
      3. Before Resolution (e.g., "Now we can quantify the damage")
-   - Use `impact` class (light theme) or `dark-impact` class (dark theme)
+   - Use `impact` class
    - Headlines are provocative restatements or the audience's implicit question — NOT findings headlines
    - Tone guidance: Use precise, understated language. The data carries the drama — the words should not compete with it.
      - BANNED words/phrases: surgical, devastating, exploded, ticking time bomb, smoking gun, alarm/fire metaphors, unprecedented (unless literally true)
@@ -315,7 +299,6 @@ Create a slide outline following this mandatory structure:
    - Free workshops slide (upcoming dates)
    - CTA / discount slide (code, link, contact info)
    - These slides come AFTER the appendix and follow an escalating commitment pattern (free first, paid last)
-   - Use `dark-impact` class for the final CTA slide when using `analytics-dark` theme
 
 Calculate total slide count. Flag if the deck exceeds 22 slides (suggest consolidation) or is fewer than 8 slides (suggest whether any findings need expansion).
 
@@ -333,6 +316,18 @@ For each slide in the outline, produce:
 **Headline**: A takeaway-formatted headline that communicates the key point. The headline alone should tell the story — a reader who only reads headlines should understand the full argument.
 
 **Body content**: The supporting text, formatted per theme rules. Respect the maximum word count for the slide type. Use bullet points for lists. Use a single paragraph for insight/synthesis slides.
+
+**Coolblue theme slide content rules:**
+- **Short statements** (e.g., "Android Tablet App is the smallest segment in the company on every metric"):
+  - Use `chart-full` class. Include ONE chart from `outputs/charts/` that supports the statement.
+  - NO other text on the slide — the chart should tell the story by itself.
+  - One statement can span MULTIPLE slides, each with a different supporting chart.
+  - The statement is the h2 heading (rendered in the blue bar at the bottom).
+- **Longer, more detailed points**:
+  - Use `takeaway` class with concise bullet points.
+  - Keep math and numbers minimal — stakeholders should grasp the point instantly.
+  - No more than 4 bullet points per slide.
+  - Use plain language, avoid jargon.
 
 **Chart placement**: If a chart belongs on this slide, specify:
 - Which chart file to use (from {{CHARTS}})
@@ -355,9 +350,10 @@ boundaries.
 
 | Slide Class | Layout | Notes |
 |-------------|--------|-------|
-| `chart-full` | Full chart, maximum space | Overrides global `max-height: 420px` — charts get full slide |
-| `insight`, `diagram` | Full-width content | Chart in `.chart-container` with standard containment |
+| `chart-full` | Full chart, maximum space | Short statement — chart tells the story |
+| `takeaway` | Text-focused content | Concise bullet points for detailed findings |
 | `chart-left`, `chart-right` | 60/40 split | Chart alongside brief annotation |
+| `kpi` | Metric cards | Big numbers, no chart |
 
 For slides with chart images: the chart's baked-in subtitle provides the descriptive context (what it measures, time period, filter). Do NOT add a separate `<div class="data-source">` — it would be redundant. Use `<div class="data-source">` only for non-chart slides that display data (KPI cards, tables, text-only data references). Example for non-chart slides:
 ```html
@@ -382,12 +378,7 @@ When storyboard specifies `visual_format: big_number`, render as native HTML usi
 </div>
 ```
 
-**Layout assignment** (for insight slides with charts):
-- First insight slide uses `insight` (full-width chart) — establishes the visual baseline
-- Subsequent insight slides: use `chart-left` or `chart-right` when the finding has a `.so-what`, `.finding`, or `.metric-callout` that pairs naturally with the chart in a side-by-side layout
-- Alternate between `chart-left` and `chart-right` for visual rhythm
-- Keep `insight` (full-width) when the chart needs maximum width (stacked bars, dense timelines, wide tables)
-- Never use the same layout class for more than 3 consecutive insight slides
+**Layout assignment** (for content slides with charts):\n- Short statements: use `chart-full` — one chart per slide, statement in h2 (blue bar). No extra text.\n- Detailed findings: use `takeaway` when the finding needs concise bullet points.\n- Use `chart-left` or `chart-right` when a finding has both a chart and brief annotation text.\n- Alternate between `chart-left` and `chart-right` for visual rhythm.\n- Never use the same layout class for more than 3 consecutive slides.
 
 **Slide headlines vs. chart titles:** Slide headlines and chart titles serve complementary purposes — the slide headline is the narrative beat ("This is not volume growth"), while the chart title is the specific data claim ("Tickets per 100 orders rose from 14 to 65"). Both should be present; they are not redundant.
 
@@ -420,47 +411,32 @@ Speaker notes should be written in first person ("Here we can see..." not "The p
 
 ### Step 6: Assemble the deck document
 
-**If {{FORMAT}} is "marp" (or theme is "analytics" or "analytics-dark"):**
-
 Write the deck in Marp-compatible markdown with HTML components. Start with YAML frontmatter:
 
 ```yaml
-# For analytics (light) theme:
 ---
 marp: true
-theme: analytics
+theme: coolblue
 size: 16:9
 paginate: true
 html: true
-footer: "AI Analyst Lab | [Client/Dataset] | [Month Year]"
----
-
-# For analytics-dark theme:
----
-marp: true
-theme: analytics-dark
-size: 16:9
-paginate: true
-html: true
-footer: "AI Analyst Lab | [Client/Dataset] | [Month Year]"
+footer: "{{DATE}}"
 ---
 ```
 
-Each slide is separated by `---`. Use the CSS component classes (both themes share the same class names):
-- `.metric-callout` for big numbers, `.kpi-row` for multiple metrics
-- `.finding` for insight cards with `.finding-impact` for the "so what"
+Each slide is separated by `---`. Use the CSS component classes:
+- `.kpi-row` > `.kpi-card` for metric cards
 - `.chart-container` for chart image placement
 - `.rec-row` for recommendations with confidence badges
-- `.so-what` for amber highlight callouts on insight slides
-- `.before-after` > `.panel.before` / `.panel.after` for comparisons
+- `.so-what` for blue highlight callouts on takeaway slides
+- `.finding` for insight cards with `.finding-impact`
+- `.callout` for callout boxes
 - `.data-source` for attribution at the bottom of data slides
 - `.delta.up` / `.delta.down` for inline metric changes
 
-When using `analytics-dark` theme:
-- Use `<!-- _class: dark-title -->` for the title slide (instead of `title`)
-- Use `<!-- _class: dark-impact -->` for impact/breathing slides (instead of `impact`)
-- Standard content slides need no class directive — they inherit dark styling
-- All component classes work identically — the CSS handles dark colors
+**Slide 1** must use `<!-- _class: cb-title -->` with logo div.
+**Slide 2** must use `<!-- _class: cb-agenda -->` with logo div.
+**Content slides** use the appropriate class (`chart-full`, `takeaway`, `kpi`, etc.).
 
 Speaker notes go in HTML comments:
 ```html
@@ -474,42 +450,11 @@ Save as `outputs/deck_{{DATASET_NAME}}_{{DATE}}.marp.md`
 
 To generate PDF, run:
 ```bash
-# Light theme
 npx @marp-team/marp-cli --no-stdin --pdf --html --allow-local-files \
-  --theme themes/analytics-light.css \
-  outputs/deck_{{DATASET_NAME}}_{{DATE}}.marp.md \
-  -o outputs/deck_{{DATASET_NAME}}_{{DATE}}.pdf
-
-# Dark theme
-npx @marp-team/marp-cli --no-stdin --pdf --html --allow-local-files \
-  --theme themes/analytics-dark.css \
+  --theme themes/coolblue.css \
   outputs/deck_{{DATASET_NAME}}_{{DATE}}.marp.md \
   -o outputs/deck_{{DATASET_NAME}}_{{DATE}}.pdf
 ```
-
-**If {{FORMAT}} is "gamma" (default):**
-
-Write the complete deck in Gamma-compatible markdown format. Each slide is separated by a horizontal rule (`---`). The structure for each slide:
-
-```
-## [Slide Headline]
-
-[Body content]
-
-![Chart alt text](path/to/chart.png)
-
-> **Speaker Notes:**
-> [Opening line]
-> - [Talking point 1]
-> - [Talking point 2]
-> [Transition line]
-> Likely questions: [Q1], [Q2]
-```
-
-Apply the theme's formatting directives:
-- Use the theme's heading levels for headlines vs. body
-- Apply the theme's emphasis patterns (bold for key numbers, etc.)
-- Note the theme's color palette in a metadata header (for tools like Gamma that support theme configuration)
 
 ### Step 7: Apply Visualization Patterns skill for chart consistency
 Read `.github/skills/visualization-patterns/SKILL.md`. Verify:
@@ -532,88 +477,76 @@ Where `{{DATASET_NAME}}` is derived from the narrative and `{{DATE}}` is the cur
 **Structure:**
 
 ```markdown
+---
+marp: true
+theme: coolblue
+size: 16:9
+paginate: true
+html: true
+footer: "{{DATE}}"
+---
+
+<!-- _class: cb-title -->
+
+<div class="logo"><img src="templates/coolblue_logo.png" alt="Coolblue"></div>
+
 # [Deck Title]
 
-**Theme:** {{THEME}}
-**Date:** {{DATE}}
-**Source analysis:** [Path to {{NARRATIVE}}]
-**Slide count:** [N]
+## [Subtitle: dataset, date range]
 
 ---
 
-## [Title Slide Headline]
+<!-- _class: cb-agenda -->
 
-[Subtitle: dataset, date range]
-[Attribution]
+<div class="logo"><img src="templates/coolblue_logo.png" alt="Coolblue"></div>
 
-> **Speaker Notes:**
-> [Welcome, framing, set expectations]
+## Agenda
 
----
-
-## Executive Summary
-
-- [Bullet 1 — question]
-- [Bullet 2 — top finding]
-- [Bullet 3 — core insight]
-- [Bullet 4 — recommendation]
-
-> **Speaker Notes:**
-> [Overview of what we'll cover]
+1. Context
+2. Key findings
+3. Recommendations
 
 ---
+
+<!-- _class: section-opener -->
 
 ## [Context Slide Headline]
 
-[Business question. Data analyzed. Approach.]
+---
 
-> **Speaker Notes:**
-> [Background context, why this matters]
+<!-- _class: chart-full -->
+
+## [Finding headline — stated as takeaway]
+
+<div class="chart-container">
+  <img src="charts/chart1.png" alt="Chart description">
+</div>
 
 ---
 
-## [Finding 1 Headline — stated as takeaway]
+<!-- _class: takeaway -->
 
-[Supporting data]
+## [Synthesis or detailed finding]
 
-![Alt text](path/to/chart1.png)
-
-> **Speaker Notes:**
-> [Opening. Talking points. Chart narration. Transition.]
-
----
-
-[... additional finding slides ...]
+- [Concise bullet 1]
+- [Concise bullet 2]
+- [Concise bullet 3]
 
 ---
 
-## [Synthesis Headline — the "so what?"]
+<!-- _class: recommendation -->
 
-[Core insight paragraph]
+## [Recommendation headline]
 
-> **Speaker Notes:**
-> [Connect the dots across findings]
-
----
-
-## Recommended Actions
-
-1. **[Action 1]** — [Rationale] (Confidence: [Level])
-2. **[Action 2]** — [Rationale] (Confidence: [Level])
-3. **[Action 3]** — [Rationale] (Confidence: [Level])
-
-> **Speaker Notes:**
-> [Walk through each recommendation. Anticipated pushback.]
+[Recommendation rows here]
 
 ---
+
+<!-- _class: appendix -->
 
 ## Appendix
 
-### [Appendix Item 1 Title]
-[Content — data table, methodology, caveats]
-
-### [Appendix Item 2 Title]
-[Content]
+[Supporting data, methodology, caveats]
 ```
 
 ## Skills Used
@@ -621,7 +554,7 @@ Where `{{DATASET_NAME}}` is derived from the narrative and `{{DATE}}` is the cur
 - `.github/skills/visualization-patterns/SKILL.md` — for verifying chart quality, consistency, and accessibility within the deck context
 
 ## Validation
-1. **Slide structure completeness**: Verify the deck contains all mandatory slide types: title, executive summary, context, at least one insight slide, synthesis, and recommendations. If any are missing, add them.
+1. **Slide structure completeness**: Verify the deck starts with `cb-title` (slide 1) and `cb-agenda` (slide 2), followed by context, at least one insight/chart slide, and recommendations. If any are missing, add them.
 2. **Headline storytelling test**: Read only the slide headlines in order. They should tell a coherent story on their own: "We asked X. We found Y. This means Z. We should do W." If the headline sequence does not flow, revise the headlines.
 2b. **Horizontal logic test**: Read only slide headlines in sequence. Each must state a finding or action (not a label). BAD: "Recommended Actions". GOOD: "Three actions to stop ticket rate erosion".
 3. **Chart-to-finding alignment**: Every chart referenced in a slide must exist in {{CHARTS}}. Every finding that has a corresponding chart must include it. Cross-reference the chart inventory from Step 1.

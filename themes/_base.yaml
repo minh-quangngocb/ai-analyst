@@ -90,7 +90,7 @@ charts:
     arrow_color: "#666666"  # Medium gray arrows
 
 presentations:
-  theme: "default"          # Base Marp theme to extend
+  theme: "coolblue"          # Coolblue Marp theme (themes/coolblue.css)
   paginate: true            # Show slide numbers
   width: "16:9"             # Widescreen aspect ratio
   slide_title_size: "32px"  # Large, scannable titles
@@ -98,12 +98,7 @@ presentations:
   slide_caption_size: "14px"  # Small for source lines
   slide_background: "#FFFFFF"   # Clean white slides
   slide_text: "#333333"         # Dark gray text
-  slide_accent: "#4878CF"       # Blue accent elements
-  # Dark mode variant (for analytics-dark theme)
-  dark:
-    slide_background: "#1E1E2E" # Deep dark background
-    slide_text: "#CDD6F4"       # Soft light text
-    slide_accent: "#89B4FA"     # Lighter blue for dark bg
+  slide_accent: "#0090E3"       # Coolblue blue accent elements
 
 export:
   chart_format: "png"       # PNG for lossless charts

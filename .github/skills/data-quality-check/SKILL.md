@@ -30,9 +30,13 @@ FROM table_name
 GROUP BY column_name;
 
 -- Missing date ranges (for time-series data)
+-- BigQuery syntax:
 WITH date_spine AS (
-    SELECT generate_series(MIN(date_col), MAX(date_col), INTERVAL '1 day') AS expected_date
-    FROM table_name
+    SELECT d AS expected_date
+    FROM UNNEST(GENERATE_DATE_ARRAY(
+        (SELECT MIN(date_col) FROM table_name),
+        (SELECT MAX(date_col) FROM table_name)
+    )) AS d
 )
 SELECT expected_date
 FROM date_spine

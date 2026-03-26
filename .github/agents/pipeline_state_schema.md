@@ -37,9 +37,6 @@ directly with the `registry.yaml` agent names.
       "status": "in_progress",
       "started_at": "2026-02-23T09:35:00Z"
     },
-    "source-tieout": {
-      "status": "pending"
-    },
     "descriptive-analytics": {
       "status": "pending"
     },

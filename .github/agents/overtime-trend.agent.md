@@ -5,48 +5,6 @@ user-invocable: false
 tools: ['read', 'search', 'edit', 'terminalLastCommand']
 ---
 
-<!-- CONTRACT_START
-name: overtime-trend
-description: Perform time-series analysis to identify trends, detect anomalies, decompose seasonality, and produce annotated timeline charts.
-inputs:
-  - name: DATASET
-    type: str
-    source: system
-    required: true
-  - name: TIME_COLUMN
-    type: str
-    source: user
-    required: true
-  - name: METRIC_COLUMNS
-    type: str
-    source: user
-    required: true
-  - name: GRANULARITY
-    type: str
-    source: user
-    required: false
-  - name: SEGMENTS
-    type: str
-    source: user
-    required: false
-  - name: ANALYSIS_CONTEXT
-    type: str
-    source: user
-    required: false
-outputs:
-  - path: outputs/trend_report_{{DATE}}.md
-    type: markdown
-  - path: outputs/charts/*.png
-    type: chart
-  - path: working/timeseries_prepared.csv
-    type: markdown
-depends_on:
-  - source-tieout
-knowledge_context:
-  - .knowledge/datasets/{active}/schema.md
-  - .knowledge/datasets/{active}/quirks.md
-pipeline_step: 5
-CONTRACT_END -->
 
 # Agent: Overtime / Trend
 
@@ -54,7 +12,7 @@ CONTRACT_END -->
 Perform time-series analysis on a dataset to identify trends, detect anomalies, decompose seasonality, and produce annotated timeline charts that explain what changed and when.
 
 ## Inputs
-- {{DATASET}}: The data source to analyze. Can be a file path (CSV, Parquet), a database table reference, or a MotherDuck/DuckDB connection string. Must contain at least one time/date column and one numeric metric column.
+- {{DATASET}}: The data source to analyze. Can be a file path (CSV, Parquet), a database table reference, or a database connection string. Must contain at least one time/date column and one numeric metric column.
 - {{TIME_COLUMN}}: The name of the column containing the time dimension (e.g., `date`, `created_at`, `event_timestamp`). Must be a date, datetime, or timestamp type — or a string that can be parsed as one.
 - {{METRIC_COLUMNS}}: One or more metric columns to analyze over time. Comma-separated if multiple (e.g., `revenue, active_users, conversion_rate`). Each must be a numeric column or an aggregatable field.
 - {{GRANULARITY}}: (optional) The time granularity for analysis — one of: "daily", "weekly", "monthly", "quarterly". If not provided, the agent auto-selects based on the date range: <90 days = daily, 90-365 days = weekly, 1-3 years = monthly, >3 years = quarterly.
@@ -254,7 +212,7 @@ Apply the Visualization Patterns skill (`.github/skills/visualization-patterns/S
 - Apply theme from the Visualization Patterns skill
 - Title is the insight, not the metric name ("Revenue doubled in Q4 driven by holiday demand" not "Revenue over Time")
 - Include subtitle with date range, granularity, and sample size
-- Save to `working/charts/` as PNG files
+- Save to `outputs/charts/` as PNG files
 
 ### Step 6: Triangulate and Validate
 Apply the Triangulation / Sanity Check skill (`.github/skills/triangulation/SKILL.md`):

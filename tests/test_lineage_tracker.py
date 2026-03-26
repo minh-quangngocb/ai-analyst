@@ -25,15 +25,15 @@ class TestRecordAndChain:
         )
         tracker.record(
             step=2,
-            agent="source-tieout",
+            agent="descriptive-analytics",
             inputs=["working/data_inventory.md", "data/orders.csv"],
-            outputs=["working/tieout_report.md"],
+            outputs=["working/analysis_descriptive.md"],
         )
         tracker.record(
             step=5,
-            agent="descriptive-analytics",
-            inputs=["working/tieout_report.md", "working/data_inventory.md"],
-            outputs=["working/analysis_descriptive.md"],
+            agent="validation",
+            inputs=["working/analysis_descriptive.md", "working/data_inventory.md"],
+            outputs=["working/validation_report.md"],
             metadata={"row_count": 45000, "tables_used": ["orders", "users"]},
         )
 
@@ -53,12 +53,12 @@ class TestRecordAndChain:
         tracker = LineageTracker(output_dir=tempfile.mkdtemp())
         tracker.record(step=1, agent="data-explorer",
                        inputs=["data/orders.csv"], outputs=["working/inventory.md"])
-        tracker.record(step=2, agent="source-tieout",
+        tracker.record(step=2, agent="descriptive-analytics",
                        inputs=["working/inventory.md", "data/orders.csv"],
-                       outputs=["working/tieout.md"])
-        tracker.record(step=5, agent="descriptive-analytics",
-                       inputs=["working/tieout.md", "working/inventory.md"],
                        outputs=["working/analysis.md"])
+        tracker.record(step=5, agent="validation",
+                       inputs=["working/analysis.md", "working/inventory.md"],
+                       outputs=["working/validation.md"])
 
         lineage = tracker.get_lineage()
         assert "lin_001" in lineage[1]["parent_ids"]
@@ -91,12 +91,12 @@ class TestGetLineageForOutput:
         tracker = LineageTracker(output_dir=tempfile.mkdtemp())
         tracker.record(step=1, agent="data-explorer",
                        inputs=["data/orders.csv"], outputs=["working/inventory.md"])
-        tracker.record(step=2, agent="source-tieout",
-                       inputs=["working/inventory.md"], outputs=["working/tieout.md"])
-        tracker.record(step=5, agent="descriptive-analytics",
-                       inputs=["working/tieout.md"], outputs=["working/analysis.md"])
+        tracker.record(step=2, agent="descriptive-analytics",
+                       inputs=["working/inventory.md"], outputs=["working/analysis.md"])
+        tracker.record(step=5, agent="validation",
+                       inputs=["working/analysis.md"], outputs=["working/validation.md"])
 
-        chain = tracker.get_lineage_for_output("working/analysis.md")
+        chain = tracker.get_lineage_for_output("working/validation.md")
         chain_ids = [e["id"] for e in chain]
         assert len(chain) == 3
         assert chain_ids[0] == "lin_003"
@@ -117,8 +117,8 @@ class TestSaveLoadRoundtrip:
         tracker.record(step=1, agent="data-explorer",
                        inputs=["data/orders.csv"], outputs=["working/inventory.md"],
                        metadata={"tables": 5})
-        tracker.record(step=2, agent="source-tieout",
-                       inputs=["working/inventory.md"], outputs=["working/tieout.md"])
+        tracker.record(step=2, agent="descriptive-analytics",
+                       inputs=["working/inventory.md"], outputs=["working/analysis.md"])
         tracker.save()
 
         tracker2 = LineageTracker(output_dir=tmp_dir)
@@ -151,8 +151,8 @@ class TestClear:
         tracker = LineageTracker(output_dir=tempfile.mkdtemp())
         tracker.record(step=1, agent="data-explorer",
                        inputs=["data/orders.csv"], outputs=["working/inventory.md"])
-        tracker.record(step=2, agent="source-tieout",
-                       inputs=["working/inventory.md"], outputs=["working/tieout.md"])
+        tracker.record(step=2, agent="descriptive-analytics",
+                       inputs=["working/inventory.md"], outputs=["working/analysis.md"])
         assert len(tracker.get_lineage()) == 2
         tracker.clear()
         assert len(tracker.get_lineage()) == 0
@@ -176,8 +176,8 @@ class TestSingletonTrack:
 
         track(step=1, agent="data-explorer",
               inputs=["data/orders.csv"], outputs=["working/inventory.md"])
-        track(step=2, agent="source-tieout",
-              inputs=["working/inventory.md"], outputs=["working/tieout.md"])
+        track(step=2, agent="descriptive-analytics",
+              inputs=["working/inventory.md"], outputs=["working/analysis.md"])
 
         singleton = get_tracker()
         assert singleton is tracker

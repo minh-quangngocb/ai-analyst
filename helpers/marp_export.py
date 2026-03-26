@@ -16,9 +16,7 @@ from pathlib import Path
 
 # Theme name → CSS file mapping
 THEME_CSS = {
-    "analytics": "analytics-light.css",
-    "analytics-light": "analytics-light.css",
-    "analytics-dark": "analytics-dark.css",
+    "coolblue": "coolblue.css",
 }
 
 
@@ -41,7 +39,7 @@ def _resolve_theme_css(theme, deck_path):
     """Resolve a theme name to the full CSS file path.
 
     Args:
-        theme: Theme name (e.g., "analytics", "analytics-dark")
+        theme: Theme name (e.g., "coolblue")
         deck_path: Path to the deck file (for relative resolution)
 
     Returns:
@@ -152,12 +150,12 @@ def _run_marp(deck_path, theme, output_format):
     return output_path
 
 
-def export_pdf(deck_path, theme="analytics"):
+def export_pdf(deck_path, theme="coolblue"):
     """Export a Marp deck to PDF.
 
     Args:
         deck_path: Path to the .marp.md file.
-        theme: Theme name (default: "analytics").
+        theme: Theme name (default: "coolblue").
 
     Returns:
         Path to the generated PDF file.
@@ -165,12 +163,12 @@ def export_pdf(deck_path, theme="analytics"):
     return _run_marp(deck_path, theme, "pdf")
 
 
-def export_html(deck_path, theme="analytics"):
+def export_html(deck_path, theme="coolblue"):
     """Export a Marp deck to self-contained HTML.
 
     Args:
         deck_path: Path to the .marp.md file.
-        theme: Theme name (default: "analytics").
+        theme: Theme name (default: "coolblue").
 
     Returns:
         Path to the generated HTML file.
@@ -178,12 +176,12 @@ def export_html(deck_path, theme="analytics"):
     return _run_marp(deck_path, theme, "html")
 
 
-def export_both(deck_path, theme="analytics"):
+def export_both(deck_path, theme="coolblue"):
     """Export a Marp deck to both PDF and HTML.
 
     Args:
         deck_path: Path to the .marp.md file.
-        theme: Theme name (default: "analytics").
+        theme: Theme name (default: "coolblue").
 
     Returns:
         dict with keys "pdf" and "html", each mapping to the output Path.
@@ -236,7 +234,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     deck_path = sys.argv[1]
-    theme = sys.argv[2] if len(sys.argv) > 2 else "analytics"
+    theme = sys.argv[2] if len(sys.argv) > 2 else "coolblue"
     fmt = sys.argv[3] if len(sys.argv) > 3 else "both"
 
     if fmt == "pdf":

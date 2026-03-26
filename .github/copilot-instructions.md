@@ -88,6 +88,10 @@ These skills load automatically when the context matches. They have
 | Archive Analysis | `.github/skills/archive-analysis/SKILL.md` | End of pipeline — archive analysis results to .knowledge/ |
 | Feedback Capture | `.github/skills/feedback-capture/SKILL.md` | User corrects your work — capture to learnings/corrections system |
 | Archaeology | `.github/skills/archaeology/SKILL.md` | Before writing SQL — retrieve proven patterns from query archaeology |
+| PFA Dataset | `.github/skills/pfa-dataset/SKILL.md` | Data source is Privacy Friendly Analytics (PFA) — load schema, quirks, and query patterns |
+| GA4 Dataset | `.github/skills/ga4-dataset/SKILL.md` | Data source is Google Analytics 4 (GA4) — load schema, quirks, and query patterns |
+| Transaction Margin Dataset | `.github/skills/transaction-margin-dataset/SKILL.md` | Analysis involves transactions, margins, sales, revenue, or cost breakdown — load schema, quirks, and query patterns |
+| BigQuery Setup | `.github/skills/bigquery-setup/SKILL.md` | Setting up BigQuery client in notebooks or scripts — use `helpers/bigquery_client.py` for all BigQuery access |
 
 ### Slash-Command Skills
 
@@ -129,11 +133,11 @@ step by step. Agents run sequentially, sharing conversation context. Working
 files in `working/` and `outputs/` preserve state.
 
 To run an agent:
-1. Read the agent file from `agents/`
+1. Read the agent file from `.github/agents/`
 2. Substitute the `{{VARIABLES}}` with actual values from the current context
 3. Execute the workflow step by step
 
-See `agents/INDEX.md` for the complete list of agents, system variables, and
+See `.github/agents/INDEX.md` for the complete list of agents, system variables, and
 when to invoke each agent.
 
 **Skills vs. agents:** Skills are always active — they shape everything you
@@ -147,62 +151,58 @@ things well. Agents DO multi-step work.
 When asked to analyze data, follow this process:
 
 1. **Frame the question** — What decision will this inform? What do we expect
-   to find? (Use Question Framing skill or agent)
-2. **Design the analysis** — Confirm question, decision, data needed, dimensions,
-   output format, and success criteria before touching data.
-   (Use Analysis Design Spec skill)
+   to find? (Use Question Framing agent)
+2. **Explore data feasibility** — Map questions to BigQuery schemas. Classify
+   every data point as AVAILABLE, DERIVABLE, or MISSING. Surface tracking gaps
+   and confirm dataset choice with the user.
+   (Use Data Explorer agent + dataset skills)
 3. **Form hypotheses** — Generate testable hypotheses across multiple cause
    categories: Product Changes, Technical Issues, External Factors, Mix Shift.
+   Ground each hypothesis in the data feasibility report.
    (Use Hypothesis agent)
-4. **Explore the data** — What is in this dataset? What is the quality? Any
-   gaps? (Use Data Explorer agent + Data Quality Check skill)
-4.5. **Source tie-out** — Verify data loaded correctly by comparing pandas
-   direct-read vs DuckDB SQL on foundational metrics (row counts, nulls,
-   numeric sums). HALT if any mismatch. (Use Source Tie-Out agent)
-5. **Analyze** — Segment, funnel, decompose, trend — whatever the question
+4. **Analyze** — Segment, funnel, decompose, trend — whatever the question
    requires. Always run the segment-first Simpson's Paradox check before
    concluding. (Use Descriptive Analytics or Overtime/Trend agent)
-6. **Investigate root cause** — If analysis found an anomaly or unexpected
+5. **Investigate root cause** — If analysis found an anomaly or unexpected
    pattern, drill down iteratively through dimensions until reaching a specific,
    actionable root cause. (Use Root Cause Investigator agent)
-7. **Validate** — Check your SQL. Verify the numbers add up. Cross-reference.
+6. **Validate** — Check your SQL. Verify the numbers add up. Cross-reference.
    Check guardrail metrics for any positive findings.
    (Use Validation agent + Triangulation skill + Guardrails Awareness skill)
-8. **Size the opportunity** — If the analysis recommends an investment or fix,
+7. **Size the opportunity** — If the analysis recommends an investment or fix,
    quantify the business impact with sensitivity analysis.
    (Use Opportunity Sizer agent)
-9. **Design the storyboard** — Build narrative beats (Context-Tension-Resolution)
+8. **Design the storyboard** — Build narrative beats (Context-Tension-Resolution)
    from findings, then map each beat to a visual format. Pass {{CONTEXT}} if
    the output is a workshop or talk (adds Closing beats for CTA sequence).
    (Use Story Architect agent)
-10. **Review storyboard coherence** — Verify the storyboard tells a coherent
+9. **Review storyboard coherence** — Verify the storyboard tells a coherent
     story with no gaps BEFORE any charting work begins. Validates Closing beats
     if present. (Use Narrative Coherence Reviewer agent)
-11. **Fix storyboard** — If NEEDS ADDITIONS or NEEDS RESEQUENCING, revise the
+10. **Fix storyboard** — If NEEDS ADDITIONS or NEEDS RESEQUENCING, revise the
     storyboard beats. (Story Architect revises)
-12. **Generate charts** — Create each chart from the storyboard. For each beat,
+11. **Generate charts** — Create each chart from the storyboard. For each beat,
     traverse the `slides` array and generate charts for slides with
     `type: chart-full` (or `chart-left`/`chart-right`).
     (Use Chart Maker agent, once per chart spec)
-13. **Review chart design** — Check every chart against the SWD checklist.
+12. **Review chart design** — Check every chart against the SWD checklist.
     (Use Visual Design Critic agent — chart-level review)
-14. **Fix charts** — The DAG engine automatically runs `chart-maker-fixes`
+13. **Fix charts** — The DAG engine automatically runs `chart-maker-fixes`
     when the design critic returns APPROVED WITH FIXES (passes the fix report
     as `FIX_REPORT` input). If NEEDS REVISION, the pipeline HALTs for manual
-    intervention — return to step 9 to revise the storyboard.
-15. **Tell the story** — Write the narrative using the storyboard as structure.
+    intervention — return to step 8 to revise the storyboard.
+14. **Tell the story** — Write the narrative using the storyboard as structure.
     (Use Storytelling agent + Stakeholder Communication skill)
-16. **Create the deck** — Build the slide deck from narrative + charts. Deck
-    Creator auto-selects theme based on context: workshop/talk defaults to
-    analytics-dark, all other contexts default to analytics (light). Pass
+15. **Create the deck** — Build the slide deck from narrative + charts. Deck
+    Creator uses the `coolblue` theme. Pass
     {{THEME}} to override. (Use Deck Creator agent)
-17. **Review deck design** — Check the Marp deck for font sizes, theme
+16. **Review deck design** — Check the Marp deck for font sizes, theme
     consistency, and dark mode rendering issues. Pass {{DECK_FILE}} and
     {{THEME}}. (Use Visual Design Critic agent — slide-level review)
-18. **Close the loop** — Ensure every recommendation has a decision owner,
+17. **Close the loop** — Ensure every recommendation has a decision owner,
     success metric, follow-up date, and fallback plan.
     (Use Close-the-Loop skill)
-19. **Draft communications** — Generate stakeholder-ready communications
+18. **Draft communications** — Generate stakeholder-ready communications
     (Slack summary, email brief, exec summary). Non-critical — pipeline
     continues if this fails.
     (Use Comms Drafter agent + Stakeholder Communication skill)
@@ -253,7 +253,7 @@ warehouse-specific SQL — always use the dialect adapter.
 
 At the start of any analysis, verify data connectivity:
 1. Read `.knowledge/datasets/{active}/manifest.yaml` for connection details
-2. Try the primary connection (e.g., MotherDuck via MCP) — run a simple `SELECT 1` query
+2. Try the primary connection (e.g., BigQuery, cloud warehouse via MCP) — run a simple `SELECT 1` query
 3. If primary fails → try local DuckDB via `manifest.local_data.duckdb` path
 4. If local DuckDB fails → use CSV files via pandas from `manifest.local_data.path`
 5. Always inform the user which source is active
@@ -311,7 +311,7 @@ These are non-negotiable. They protect analytical quality.
    reference.
 
 9. **Always verify data connectivity at analysis start.** Before running any
-   query, confirm which data source is active (MotherDuck, local DuckDB, or
+   query, confirm which data source is active (cloud warehouse, local DuckDB, or
    CSV). If a connection fails, fall back automatically and inform the user.
 
 10. **Adapt to the user's expertise.** Detect role from vocabulary: PM (OKRs,
@@ -348,11 +348,10 @@ These are non-negotiable. They protect analytical quality.
 
 | Problem | What to Do |
 |---------|-----------|
-| MotherDuck won't connect | Fall back to local DuckDB/CSVs automatically (see Data Source Fallback). Inform the user. |
+| Cloud warehouse won't connect | Fall back to local DuckDB/CSVs automatically (see Data Source Fallback). Inform the user. |
 | SQL query errors | Simplify the query. If JOIN fails, try subquery. If aggregation fails, check GROUP BY. Show the user what went wrong. |
 | Chart won't render | Save the data table as fallback. Try a simpler chart type. If matplotlib fails entirely, produce a text summary. |
-| Source tie-out fails | HALT. Do not proceed with analysis. Show the mismatch. Ask: "Should we investigate the data issue or proceed with caution?" |
-| Context getting long | After completing the analysis phase (steps 1-8), save all working files and suggest resuming in a fresh session. |
+| Context getting long | After completing the analysis phase (steps 1-7), save all working files and suggest resuming in a fresh session. |
 | Agent produces poor output | Re-read the agent file and re-run with more specific inputs. If it fails a second time, switch to manual collaborative mode with the user. |
 | User's data doesn't match expected schema | Agent references a column/table that doesn't exist — check the data inventory, adjust queries to match the actual schema. |
 
@@ -367,8 +366,8 @@ path mapping:
 |---------|-----------------|--------------|
 | Main instructions | `CLAUDE.md` | `.github/copilot-instructions.md` |
 | Skills (auto + commands) | `.claude/skills/{name}/skill.md` | `.github/skills/{name}/SKILL.md` |
-| Agent templates | `agents/{name}.md` | `agents/{name}.md` (shared) |
+| Agent templates | `.github/agents/{name}.agent.md` | `.github/agents/{name}.agent.md` (shared) |
 | Agent mode | N/A | `.github/agents/analyst.agent.md` |
 
 When reading skill files, use the `.github/skills/` paths. Agent template files
-in `agents/` are shared across both systems.
+in `.github/agents/` are shared across both systems.

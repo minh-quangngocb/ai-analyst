@@ -88,7 +88,7 @@ class TestMigrateV1ToV2:
                     "output_files": [],
                 },
                 "4": {
-                    "agent": "source-tieout",
+                    "agent": "descriptive-analytics",
                     "status": "pending",
                 },
             },
@@ -126,7 +126,7 @@ class TestMigrateV1ToV2:
         assert "question-framing" in agents
         assert "hypothesis" in agents
         assert "data-explorer" in agents
-        assert "source-tieout" in agents
+        assert "descriptive-analytics" in agents
         # Numeric keys should not be present
         assert "1" not in agents
         assert "2" not in agents
@@ -137,7 +137,7 @@ class TestMigrateV1ToV2:
         assert agents["question-framing"]["status"] == "complete"
         assert agents["hypothesis"]["status"] == "complete"
         assert agents["data-explorer"]["status"] == "running"
-        assert agents["source-tieout"]["status"] == "pending"
+        assert agents["descriptive-analytics"]["status"] == "pending"
 
     def test_takes_first_output_file(self, v1_state):
         result = migrate_v1_to_v2(v1_state, dataset="my_dataset")
@@ -152,7 +152,7 @@ class TestMigrateV1ToV2:
 
     def test_no_output_file_for_pending(self, v1_state):
         result = migrate_v1_to_v2(v1_state, dataset="my_dataset")
-        assert "output_file" not in result["agents"]["source-tieout"]
+        assert "output_file" not in result["agents"]["descriptive-analytics"]
 
     def test_pipeline_status_paused_when_running_step(self, v1_state):
         """A V1 state with a running step means it was interrupted -> paused."""

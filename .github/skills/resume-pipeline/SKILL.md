@@ -72,8 +72,7 @@ If no state file exists, scan `working/` and `outputs/` for artifacts:
 |-------|-------------------|-----------|
 | question-framing | `question_brief_*.md` | `outputs/` |
 | hypothesis | `hypothesis_doc_*.md` | `outputs/` |
-| data-explorer | `data_inventory_*.md` | `outputs/` |
-| source-tieout | `tieout_*.md` | `working/` |
+| data-explorer | `data_feasibility_*.md` | `outputs/` |
 | descriptive-analytics | `analysis_report_*.md` | `outputs/` |
 | root-cause-investigator | `investigation_*.md` | `working/` |
 | validation | `validation_*.md` | `outputs/` |
@@ -89,7 +88,7 @@ Walk the list top to bottom. If an artifact exists and looks complete (not empty
 
 ### Step 2: Compute READY set from DAG
 
-1. Read `agents/registry.yaml` to build the dependency graph
+1. Read `.github/agents/registry.yaml` to build the dependency graph
 2. For each agent in the registry, check `state["agents"][agent_name]["status"]`:
    - If status is `complete`, `skipped`, or `degraded` → leave it
    - If status is `failed` → reset to `pending` (will be retried)
@@ -137,7 +136,6 @@ On confirmation:
 
 - **Storyboard with "NEEDS ADDITIONS":** Mark story-architect as `pending`, not completed
 - **Partial chart generation:** Count generated charts vs storyboard beats. If incomplete, mark chart-maker as `pending`
-- **Source tie-out FAIL:** Mark as `failed`. User must investigate before resuming
 - **Stale data (>24h gap):** Warn that underlying data may have changed since the original run
 
 ## Limitations

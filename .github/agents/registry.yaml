@@ -17,87 +17,62 @@
 
 version: 1
 agents:
-  # ── Phase 1: Framing ──────────────────────────────────────────────
+  # ── Phase 1: Framing & Exploration ─────────────────────────────
 
   - name: question-framing
-    file: agents/question-framing.md
+    file: .github/agents/question-framing.agent.md
     pipeline_step: 1
     critical: true
     depends_on: []
     inputs:
       - BUSINESS_CONTEXT
       - PRODUCT_DESCRIPTION
-      - AVAILABLE_DATA
     outputs:
       - outputs/question_brief_{{DATE}}.md
     knowledge_context: []
 
-  # ── Phase 2: Hypotheses ───────────────────────────────────────────
-  # NOTE: hypothesis has no downstream DAG edges — its output is injected
-  # as runtime context (HYPOTHESIS_DOC) into descriptive-analytics et al.
-  # This is intentional: hypothesis is advisory, not blocking for analysis.
-
-  - name: hypothesis
-    file: agents/hypothesis.md
-    pipeline_step: 3
+  - name: data-explorer
+    file: .github/agents/data-explorer.agent.md
+    pipeline_step: 2
     critical: true
     depends_on:
       - question-framing
     inputs:
       - QUESTION_BRIEF
-      - DATA_INVENTORY
+      - DATASETS
+    outputs:
+      - outputs/data_feasibility_{{DATE}}.md
+    knowledge_context:
+      - .knowledge/datasets/{active}/schema.md
+      - .knowledge/datasets/{active}/quirks.md
+
+  - name: hypothesis
+    file: .github/agents/hypothesis.agent.md
+    pipeline_step: 3
+    critical: true
+    depends_on:
+      - question-framing
+      - data-explorer
+    inputs:
+      - QUESTION_BRIEF
+      - DATA_FEASIBILITY
     outputs:
       - outputs/hypothesis_doc_{{DATE}}.md
     knowledge_context: []
 
-  # ── Phase 3: Data Discovery & Verification ────────────────────────
+  # ── Phase 4: Analysis ─────────────────────────────────────────────
 
-  - name: data-explorer
-    file: agents/data-explorer.md
-    pipeline_step: 4
-    critical: true
-    depends_on: []
-    inputs:
-      - DATA_SOURCE
-      - ANALYSIS_GOALS
-    outputs:
-      - outputs/data_inventory_{{DATE}}.md
-      - working/data_inventory_raw.md
-    knowledge_context:
-      - .knowledge/datasets/{active}/schema.md
-      - .knowledge/datasets/{active}/quirks.md
-
-  - name: source-tieout
-    file: agents/source-tieout.md
-    pipeline_step: 4.5
+  - name: descriptive-analytics
+    file: .github/agents/descriptive-analytics.agent.md
+    pipeline_step: 5
     critical: true
     depends_on:
       - data-explorer
     inputs:
-      - DATA_SOURCE
-      - DUCKDB_PATH
-      - DATASET_NAME
-      - TABLE_MAPPING
-    outputs:
-      - working/tieout_{{DATASET_NAME}}_{{DATE}}.md
-      - working/tieout_mapping.md
-    knowledge_context:
-      - .knowledge/datasets/{active}/schema.md
-      - .knowledge/datasets/{active}/quirks.md
-
-  # ── Phase 4: Analysis ─────────────────────────────────────────────
-
-  - name: descriptive-analytics
-    file: agents/descriptive-analytics.md
-    pipeline_step: 5
-    critical: true
-    depends_on:
-      - source-tieout
-    inputs:
       - DATASET
       - QUESTION_BRIEF
       - HYPOTHESIS_DOC
-      - DATA_INVENTORY
+      - DATA_FEASIBILITY
       - FOCUS_AREA
     outputs:
       - outputs/analysis_report_{{DATE}}.md
@@ -108,11 +83,11 @@ agents:
       - .knowledge/datasets/{active}/quirks.md
 
   - name: overtime-trend
-    file: agents/overtime-trend.md
+    file: .github/agents/overtime-trend.agent.md
     pipeline_step: 5
     critical: true
     depends_on:
-      - source-tieout
+      - data-explorer
     inputs:
       - DATASET
       - TIME_COLUMN
@@ -129,17 +104,17 @@ agents:
       - .knowledge/datasets/{active}/quirks.md
 
   - name: cohort-analysis
-    file: agents/cohort-analysis.md
+    file: .github/agents/cohort-analysis.agent.md
     pipeline_step: 5
     critical: true
     depends_on:
-      - source-tieout
+      - data-explorer
     inputs:
       - COHORT_DIMENSION
       - RETENTION_EVENT
       - PERIODS
       - DATASET
-      - DATA_INVENTORY
+      - DATA_FEASIBILITY
     outputs:
       - working/cohort_analysis_{{DATASET}}.md
       - working/charts/retention_heatmap.png
@@ -152,7 +127,7 @@ agents:
   # ── Phase 5: Investigation ────────────────────────────────────────
 
   - name: root-cause-investigator
-    file: agents/root-cause-investigator.md
+    file: .github/agents/root-cause-investigator.agent.md
     pipeline_step: 6
     critical: true
     depends_on:
@@ -174,7 +149,7 @@ agents:
   # ── Phase 6: Validation & Sizing ──────────────────────────────────
 
   - name: validation
-    file: agents/validation.md
+    file: .github/agents/validation.agent.md
     pipeline_step: 7
     critical: true
     depends_on:
@@ -191,7 +166,7 @@ agents:
       - .knowledge/datasets/{active}/quirks.md
 
   - name: opportunity-sizer
-    file: agents/opportunity-sizer.md
+    file: .github/agents/opportunity-sizer.agent.md
     pipeline_step: 8
     critical: false
     depends_on:
@@ -211,7 +186,7 @@ agents:
   # ── Phase 7: Storytelling & Presentation ──────────────────────────
 
   - name: story-architect
-    file: agents/story-architect.md
+    file: .github/agents/story-architect.agent.md
     pipeline_step: 9
     critical: true
     depends_on:
@@ -227,7 +202,7 @@ agents:
       - .knowledge/datasets/{active}/manifest.yaml
 
   - name: narrative-coherence-reviewer
-    file: agents/narrative-coherence-reviewer.md
+    file: .github/agents/narrative-coherence-reviewer.agent.md
     pipeline_step: 10
     critical: false
     depends_on:
@@ -242,7 +217,7 @@ agents:
     knowledge_context: []
 
   - name: chart-maker
-    file: agents/chart-maker.md
+    file: .github/agents/chart-maker.agent.md
     pipeline_step: 12
     critical: true
     depends_on:
@@ -259,7 +234,7 @@ agents:
       - .knowledge/datasets/{active}/manifest.yaml
 
   - name: visual-design-critic
-    file: agents/visual-design-critic.md
+    file: .github/agents/visual-design-critic.agent.md
     pipeline_step: 13
     critical: false
     depends_on:
@@ -276,7 +251,7 @@ agents:
       - .knowledge/datasets/{active}/manifest.yaml
 
   - name: chart-maker-fixes
-    file: agents/chart-maker.md
+    file: .github/agents/chart-maker.agent.md
     pipeline_step: 14
     critical: true
     depends_on:
@@ -296,7 +271,7 @@ agents:
     conditional: true
 
   - name: storytelling
-    file: agents/storytelling.md
+    file: .github/agents/storytelling.agent.md
     pipeline_step: 15
     critical: true
     depends_on:
@@ -313,7 +288,7 @@ agents:
       - .knowledge/datasets/{active}/manifest.yaml
 
   - name: deck-creator
-    file: agents/deck-creator.md
+    file: .github/agents/deck-creator.agent.md
     pipeline_step: 16
     critical: true
     depends_on:
@@ -336,7 +311,7 @@ agents:
       - .knowledge/datasets/{active}/manifest.yaml
 
   - name: visual-design-critic-slides
-    file: agents/visual-design-critic.md
+    file: .github/agents/visual-design-critic.agent.md
     pipeline_step: 17
     critical: false
     depends_on:
@@ -368,10 +343,11 @@ agents:
       - outputs/close_the_loop_{{DATE}}.md
     knowledge_context: []
 
+  
   # ── Standalone (no pipeline_step) ─────────────────────────────────
 
   - name: experiment-designer
-    file: agents/experiment-designer.md
+    file: .github/agents/experiment-designer.agent.md
     pipeline_step: null
     critical: true
     depends_on:
@@ -387,7 +363,7 @@ agents:
       - .knowledge/datasets/{active}/quirks.md
 
   - name: comms-drafter
-    file: agents/comms-drafter.md
+    file: .github/agents/comms-drafter.agent.md
     pipeline_step: null
     critical: false
     depends_on_any:

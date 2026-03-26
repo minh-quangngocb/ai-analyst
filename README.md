@@ -121,18 +121,17 @@ Claude generates a chart following Storytelling with Data methodology: warm off-
 
 ## How It Works: The Pipeline
 
-When you run `/run-pipeline`, Claude orchestrates 18 agents across 4 phases:
+When you run `/run-pipeline`, Claude orchestrates 17 agents across 4 phases:
 
 ```
 1. FRAME              2. ANALYZE                          3. STORY                 4. DECK
 +-----------------+   +-----------------------------+   +--------------------+   +------------------+
 | Question        |   | Data Explorer               |   | Story Architect    |   | Storytelling     |
-|   Framing       |   |   > Source Tie-Out           |   |   > Coherence      |   |   > Deck Creator |
-|   > Hypothesis  |   |   > Descriptive Analytics    |   |     Reviewer       |   |   > Slide Review |
-|     Generation  |   |   > Root Cause Investigator  |   |   > Chart Maker    |   |   > Close the    |
-|                 |-->|   > Validation               |-->|   > Design Critic  |-->|     Loop         |
-+-----------------+   |   > Opportunity Sizer        |   +--------------------+   +------------------+
-                      +-----------------------------+
+|   Framing       |   |   > Descriptive Analytics    |   |   > Coherence      |   |   > Deck Creator |
+|   > Hypothesis  |   |   > Root Cause Investigator  |   |     Reviewer       |   |   > Slide Review |
+|     Generation  |   |   > Validation               |   |   > Chart Maker    |   |   > Close the    |
+|                 |-->|   > Opportunity Sizer        |-->|   > Design Critic  |-->|     Loop         |
++-----------------+   +-----------------------------+   +--------------------+   +------------------+
 ```
 
 **Phase 1 — Frame:** Structures your business question into analytical questions with testable hypotheses. Checkpoint: review the framing before analysis begins.
@@ -151,7 +150,7 @@ You don't have to run the whole thing. Five execution plans let you run just the
 | `deep_dive` | Analysis without presentation | Phases 1-2 only |
 | `quick_chart` | Just need one chart | Chart Maker + Design Critic |
 | `refresh_deck` | Re-do the presentation layer | Phases 3-4 (reuses analysis) |
-| `validate_only` | Check existing work | Validation + Source Tie-Out |
+| `validate_only` | Check existing work | Validation only |
 
 ```
 /run-pipeline data_path=data/your_dataset/ question="..." plan=deep_dive
@@ -176,11 +175,12 @@ Preview what would run without executing:
 The pipeline doesn't run agents one at a time. It resolves dependencies automatically and runs independent agents in parallel:
 
 ```
-Tier 0 (parallel)    Question Framing -----> Hypothesis
-                     Data Explorer --------> Source Tie-Out
-                                                  |
-Tier 2 (parallel)              Descriptive Analytics  /  Overtime Trend  /  Cohort Analysis
-                                        |
+Tier 0                Question Framing
+                            |
+Tier 1                Data Explorer
+                            |
+Tier 2 (parallel)     Hypothesis  /  Descriptive Analytics  /  Overtime Trend  /  Cohort Analysis
+                                              |
 Tier 3 (sequential)           Root Cause --> Validation --> Opportunity Sizer
                                                                 |
 Tier 4 (sequential)           Story Architect --> Coherence Review
@@ -191,9 +191,9 @@ Tier 6 (sequential)           Storytelling --> Deck Creator --> Slide Review -->
 ```
 
 - **Parallel execution:** Agents in the same tier run concurrently (up to 3 at once). Tier 0 starts Question Framing and Data Explorer simultaneously.
-- **Automatic dependency resolution:** The engine reads `agents/registry.yaml` and computes execution tiers using topological sort.
+- **Automatic dependency resolution:** The engine reads `.github/agents/registry.yaml` and computes execution tiers using topological sort.
 - **Circuit breaker:** If 3 agents fail in the same tier, the pipeline halts with a diagnostic report.
-- **Timeouts:** Each agent gets 5 minutes. One retry on timeout. Critical agents (source tie-out, validation) halt the pipeline; non-critical agents (design critic) degrade gracefully.
+- **Timeouts:** Each agent gets 5 minutes. One retry on timeout. Critical agents (validation) halt the pipeline; non-critical agents (design critic) degrade gracefully.
 - **Checkpoints:** Quality gates between phases. Two are automated (analysis verification, final deck lint). Two are user-facing (frame review, storyboard review). Say "just do it" to skip the user-facing ones.
 
 ---
@@ -326,18 +326,18 @@ working/                                # Intermediate files (safe to delete)
 | Change the AI persona | Edit `.github/copilot-instructions.md` (VS Code) or `CLAUDE.md` (Claude Code) |
 | Add a new skill | Create `.github/skills/my-skill/SKILL.md` with YAML frontmatter, reference it in `copilot-instructions.md` |
 | Add a new slash command | Create `.github/skills/my-command/SKILL.md` with `disable-model-invocation: true` |
-| Add a new agent | Create `agents/my-agent.md` using `agents/CONTRACT_TEMPLATE.md` as a starting point |
+| Add a new agent | Create `.github/agents/my-agent.agent.md` using `.github/agents/CONTRACT_TEMPLATE.md` as a starting point |
 | Change the slide theme | Create a YAML theme in `themes/brands/` (see [docs/theming.md](docs/theming.md)) |
 | Add deck components | Edit `templates/marp_components.md` (snippet library) |
 | Modify the pipeline | Edit `.github/skills/run-pipeline/SKILL.md` (rules, checkpoints, execution) |
-| Add to the agent DAG | Edit `agents/registry.yaml` (dependencies, execution order) |
+| Add to the agent DAG | Edit `.github/agents/registry.yaml` (dependencies, execution order) |
 
 ---
 
 <details>
 <summary><strong>All 18 Agents</strong> (click to expand)</summary>
 
-Agents are markdown prompt templates in the `agents/` directory. Each defines a multi-step workflow with `{{VARIABLES}}` that get filled in at runtime. Ask the assistant to run one, or use the `run-pipeline` prompt to orchestrate all of them.
+Agents are markdown prompt templates in the `.github/agents/` directory. Each defines a multi-step workflow with `{{VARIABLES}}` that get filled in at runtime. Ask the assistant to run one, or use the `run-pipeline` prompt to orchestrate all of them.
 
 ### Framing
 
@@ -351,7 +351,6 @@ Agents are markdown prompt templates in the `agents/` directory. Each defines a 
 | Agent | What It Does | Pipeline Step |
 |-------|-------------|---------------|
 | data-explorer | Profiles a dataset: schema, distributions, quality, gaps, supported analyses | 4 |
-| source-tieout | Verifies data loaded correctly by comparing pandas vs DuckDB on row counts, nulls, and sums. Halts on mismatch. | 4.5 |
 
 ### Analysis
 
@@ -483,7 +482,7 @@ Python modules in `helpers/` that agents call during execution:
 | `sql_helpers.py` | SQL sanity checks: join cardinality, percentage sums, date bounds, duplicates, temporal coverage |
 | `sql_dialect.py` | SQL dialect router for Postgres, BigQuery, Snowflake, DuckDB |
 | `connection_manager.py` | Unified interface for multi-warehouse connections |
-| `tieout_helpers.py` | Source tie-out: dual-path comparison (pandas vs DuckDB) with tolerances |
+| `tieout_helpers.py` | Data comparison utilities: null concentration checks, outlier detection, dual-path verification with tolerances |
 | `schema_profiler.py` | Automated schema discovery and documentation |
 
 ### Analytics and Statistics

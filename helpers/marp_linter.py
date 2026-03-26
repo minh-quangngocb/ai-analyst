@@ -17,25 +17,24 @@ import re
 from pathlib import Path
 
 
-# --- Known valid classes per theme ---
-VALID_CLASSES_LIGHT = {
-    "title", "section-opener", "insight", "impact", "two-col",
-    "chart-left", "chart-right", "diagram",
-    "chart-full", "kpi", "takeaway", "recommendation", "appendix",
-}
-
-VALID_CLASSES_DARK = {
-    "dark-title", "dark-impact", "section-opener", "insight", "two-col",
-    "chart-left", "chart-right", "diagram",
+# --- Known valid classes for Coolblue theme ---
+VALID_CLASSES = {
+    "cb-title", "cb-agenda", "section-opener", "impact", "two-col",
+    "chart-left", "chart-right",
     "chart-full", "kpi", "takeaway", "recommendation", "appendix",
 }
 
 # Classes that exist in no theme — common mistakes
 INVALID_CLASSES = {
     "breathing": "impact",
-    "hero": "title",
+    "hero": "cb-title",
+    "title": "cb-title",
+    "insight": "chart-full or takeaway",
+    "dark-title": "cb-title",
+    "dark-impact": "impact",
     "break": "impact",
     "transition": "section-opener",
+    "diagram": "chart-full",
 }
 
 # Required frontmatter keys and their expected values
@@ -158,12 +157,9 @@ def lint_deck(deck_path):
                     "slide": 0,
                 })
 
-    # --- Determine theme for class validation ---
-    theme = fm.get("theme", "analytics")
-    if "dark" in str(theme):
-        valid_classes = VALID_CLASSES_DARK
-    else:
-        valid_classes = VALID_CLASSES_LIGHT
+    # --- Determine valid classes ---
+    theme = fm.get("theme", "coolblue")
+    valid_classes = VALID_CLASSES
 
     # --- (b) HTML component usage ---
     components_found = set()
@@ -186,7 +182,7 @@ def lint_deck(deck_path):
         slide_class = has_class.group(1).strip() if has_class else None
 
         # Skip title, section-opener, impact slides — they don't need components
-        non_content_classes = {"title", "section-opener", "impact", "dark-title", "dark-impact"}
+        non_content_classes = {"cb-title", "cb-agenda", "section-opener", "impact"}
         is_content_slide = slide_class not in non_content_classes
 
         if is_content_slide and not slide_components and len(slide) > 50:
@@ -280,7 +276,7 @@ def lint_deck(deck_path):
         class_match = re.search(r"<!--\s*_class:\s*(\S+)", slide)
         cls = class_match.group(1).strip() if class_match else None
 
-        pacing_classes = {"impact", "dark-impact", "section-opener", "takeaway"}
+        pacing_classes = {"impact", "section-opener", "takeaway"}
         if cls in pacing_classes:
             consecutive_content = 0
         else:

@@ -2,7 +2,7 @@
 name: analyst
 description: "AI Product Analyst — analyzes data, builds charts, creates slide decks, and answers business questions using a structured analytical pipeline."
 tools: ['agent', 'read', 'search', 'edit', 'terminalLastCommand', 'todo']
-agents: ['run-pipeline', 'question-framing', 'hypothesis', 'data-explorer', 'source-tieout', 'descriptive-analytics', 'overtime-trend', 'cohort-analysis', 'root-cause-investigator', 'validation', 'opportunity-sizer', 'story-architect', 'narrative-coherence-reviewer', 'chart-maker', 'visual-design-critic', 'storytelling', 'deck-creator', 'comms-drafter', 'experiment-designer']
+agents: ['run-pipeline', 'question-framing', 'hypothesis', 'data-explorer', 'descriptive-analytics', 'overtime-trend', 'cohort-analysis', 'root-cause-investigator', 'validation', 'opportunity-sizer', 'story-architect', 'narrative-coherence-reviewer', 'chart-maker', 'visual-design-critic', 'storytelling', 'deck-creator', 'comms-drafter', 'experiment-designer']
 handoffs:
   - label: Run Full Pipeline
     agent: run-pipeline
@@ -23,7 +23,7 @@ questions using data. You work with PMs, data scientists, and engineers who
 need insights fast — not in days, but in minutes.
 
 Read `.github/copilot-instructions.md` for the full system instructions,
-including the 19-step analytical pipeline, data source configuration, rules,
+including the 18-step analytical pipeline, data source configuration, rules,
 and agent workflow templates.
 
 ## Core Capabilities
@@ -55,7 +55,7 @@ For end-to-end analysis, delegate to the **run-pipeline** orchestrator agent.
 It manages the full DAG-based pipeline:
 
 - **Phase 1 — Framing:** question-framing → hypothesis
-- **Phase 2 — Analysis:** data-explorer → source-tieout → analysis → root-cause → validation → sizing
+- **Phase 2 — Analysis:** data-explorer → analysis → root-cause → validation → sizing
 - **Phase 3 — Story:** story-architect → coherence-review → chart-maker → design-critic
 - **Phase 4 — Deck:** storytelling → deck-creator → slide-review → comms
 
@@ -65,7 +65,7 @@ to the user.
 ## Key Files
 
 - Skills: `.github/skills/*/SKILL.md` (auto-applied and slash commands)
-- Agent templates: `agents/*.md` (see `agents/INDEX.md` for the full list)
+- Agent templates: `.github/agents/*.agent.md` (see `.github/agents/INDEX.md` for the full list)
 - Orchestrator: `.github/agents/run-pipeline.agent.md`
 - Helpers: `helpers/` (chart styling, data loading, SQL dialects)
 - Data config: `.knowledge/active.yaml`, `.knowledge/datasets/`
