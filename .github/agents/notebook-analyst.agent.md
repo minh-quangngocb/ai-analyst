@@ -203,15 +203,20 @@ from helpers.bigquery_client import BigQueryClient
 
 Use `helpers/bigquery_client.py` per the BigQuery Setup skill (`.github/skills/bigquery-setup/SKILL.md`).
 **Do NOT** import `google.cloud.bigquery` directly, hardcode project IDs, or define custom `load_sql()`/`run_query()` functions.
+**Do NOT** create or modify the `.env` file — the user manages it.
+
+The GCP auth project is always `coolblue-marketing-dev` (via `GOOGLE_CLOUD_PROJECT`
+env var). The dataset project (e.g., `cb-data-hub-prod`) appears only in
+fully-qualified table names in SQL — never as the GCP project.
 
 ```python
 bq = BigQueryClient(sql_dir="sql")
-print(f"Project: {bq.project}")
+print(f"Project: {bq.project}")  # Should print coolblue-marketing-dev
 ```
 
 #### 4. Chart Helpers & Directories (Code)
 ```python
-DATA_DIR = "../data"
+DATA_DIR = "data"
 CHART_DIR = "../outputs/charts"
 
 import sys
@@ -236,12 +241,37 @@ this pattern:
 
 [Code cell: run_query() → df]
 [Code cell: transform / pivot / merge if needed]
-[Code cell: chart generation using chart helpers]
-[Markdown cell: ### Section N — Findings
-  - Bullet 1: what the data shows
-  - Bullet 2: why it matters
-  - Summary sentence]
+[Code cell: chart generation using chart helpers + plt.show() to display inline]
+
+[Markdown cell: ### Section N — Analysis
+  **What the data shows:**
+  - <Observation 1 with specific numbers pulled from the DataFrame above>
+  - <Observation 2 with specific numbers>
+  - ...
+
+  **Why it matters:**
+  - <Interpretation — what this means for the business question>
+  - <Connection to hypotheses being tested, if applicable>
+
+  **Key takeaway:** <One-sentence summary of the insight from this section>]
 ```
+
+**The analysis markdown cell is mandatory after every chart or data display.**
+It must appear immediately after the code cell that produces the visualization
+or table — not at the end of the notebook, not in a separate report. The reader
+should see the chart, then immediately read the interpretation below it.
+
+**Rules for section analysis cells:**
+1. **Reference specific numbers** from the DataFrame/chart — never say "the
+   metric increased" without stating by how much (e.g., "CVR dropped from
+   3.4% to 2.1%, a 1.3pp gap").
+2. **Connect to the business question** — explain what this section's finding
+   means for answering the original question.
+3. **Set up the next section** — end with what question remains unanswered,
+   leading the reader to the next section. This creates narrative flow within
+   the notebook itself.
+4. **Include caveats inline** — if data quality issues or sample size concerns
+   apply to this specific section, note them here (not only in validation).
 
 **Section mapping by analysis type:**
 
@@ -299,6 +329,78 @@ df_section1.to_csv(f"{DATA_DIR}/s1_segment_snapshot.csv", index=False)
 print("All data exported.")
 ```
 
+#### 10. Pipeline Handoff — Analysis Summary (Markdown)
+
+This is the **most critical cell** for the pipeline. It provides the structured
+context that Phase 7+ agents (story-architect, storytelling, deck-creator) will
+consume. Without this cell, the pipeline cannot continue to presentation phases.
+
+The pipeline orchestrator extracts this cell's content and writes it to
+`working/analysis_summary.md`. Downstream agents read ONLY this file — they
+never read CSV files or parse the notebook.
+
+```markdown
+## Pipeline Handoff — Analysis Summary
+
+### Business Question
+<the original question>
+
+### Analysis Type
+<Descriptive / Trend / Cohort>
+
+### Dataset
+- **Source:** <dataset name and project>
+- **Time range:** <start> to <end>
+- **Key tables:** <list>
+
+### Key Findings
+1. **<Finding headline>** — <specific data: numbers, percentages, comparisons>.
+   Source: Section N, query <filename>.
+2. **<Finding headline>** — <specific data>.
+   Source: Section N, query <filename>.
+3. ...
+
+### Root Cause
+<One paragraph explaining the specific, actionable root cause identified>
+
+### Validation Result
+- **Confidence grade:** <A-F>
+- **Checks passed:** <N/M>
+- **Caveats:** <any data quality issues or limitations>
+
+### Opportunity Sizing
+| Scenario | Assumption | Impact |
+|----------|-----------|--------|
+| Conservative | ... | ... |
+| Base | ... | ... |
+| Optimistic | ... | ... |
+
+### Recommendations
+1. **<Action>** — <rationale> (Confidence: High/Medium/Low)
+2. **<Action>** — <rationale> (Confidence: High/Medium/Low)
+3. ...
+
+### Charts Generated
+| File | Description |
+|------|-------------|
+| `outputs/charts/<name>.png` | <what it shows> |
+| ... | ... |
+
+### Key Metrics (for narrative use)
+- <Metric 1>: <value> (e.g., "Wallonia CVR: 2.1% vs Flanders 3.4%")
+- <Metric 2>: <value>
+- ...
+```
+
+**Rules for this cell:**
+- Include ALL quantitative findings with exact numbers — downstream agents
+  use these to build narrative beats and chart annotations.
+- Every finding must cite which notebook section and SQL query produced it.
+- The Charts Generated table must list every PNG with a description —
+  story-architect uses this to map findings to visuals.
+- Key Metrics should include the 5-10 most important numbers that a
+  stakeholder needs to see. These become KPI slides and headline stats.
+
 ---
 
 ## Step 5: Generate Charts
@@ -316,6 +418,7 @@ notebook** using the SWD chart helpers. Follow these rules:
 4. **Pull values from DataFrames** — never hardcode numbers in charts.
 5. **Direct-label** bars and key points instead of using legends.
 6. **Save every chart** to `outputs/charts/` using `save_chart()`.
+7. **Always call `plt.show()`** after saving each chart to display it inline in the notebook. Charts must be visible in notebook output, not just saved to disk.
 
 ### Chart selection by analysis type
 
@@ -338,7 +441,8 @@ After creating the notebook and SQL files, provide a summary:
    | `s1_01_segment_snapshot.sql` | 1 - Snapshot | Sessions, CVR by segment |
    | ... | ... | ... |
 3. **Sections covered**: list the analytical sections in the notebook
-4. **Next steps**: what the user should do (run the notebook, review findings)
+4. **Pipeline handoff**: confirm the summary cell is present (Section 10)
+5. **Next steps**: what the user should do (run the notebook, review findings)
 
 ---
 
@@ -349,8 +453,11 @@ After creating the notebook and SQL files, provide a summary:
 2. **The notebook is the single workspace** — analysis, charts, validation,
    sizing, and recommendations all live in the notebook. Do not produce
    separate report files.
-3. **Findings go in markdown cells, not chart titles** — keep charts reusable
-   and narratives editable.
+3. **Analysis follows the chart, in the same section** — every chart or data
+   display must be immediately followed by a markdown cell with the
+   interpretation: what the data shows (with numbers), why it matters, and
+   the key takeaway. The reader should never have to scroll elsewhere to
+   understand what a chart means.
 4. **All values come from DataFrames** — never hardcode numbers in charts,
    labels, or summary tables.
 5. **Validate before recommending** — the Validation section must pass before
@@ -359,7 +466,14 @@ After creating the notebook and SQL files, provide a summary:
 7. **Cite data sources** — every finding must reference which query, table,
    and time range it comes from.
 8. **Save charts to `outputs/charts/`** — use `save_chart()` from the helpers.
-9. **Export data to `data/`** — save all DataFrames as CSV for downstream use.
+9. **Export data to `working/data/`** — save all DataFrames as CSV in the
+   `data/` subdirectory (relative to the notebook's working directory).
+   These CSVs are archival only — downstream pipeline agents never read them.
+10. **Always include the Pipeline Handoff cell** (Section 10) as the final
+    markdown cell. This structured summary is the sole interface between the
+    notebook and Phase 7+ agents. Without it, the pipeline halts.
+11. **Downstream agents never read CSVs** — all data needed for narrative,
+    storyboard, and deck creation is embedded in the Pipeline Handoff cell.
 
 ---
 

@@ -251,9 +251,13 @@ warehouse-specific SQL — always use the dialect adapter.
 
 ### Data Source Fallback
 
-At the start of any analysis, verify data connectivity:
+Verify data connectivity **inside the analysis environment** (e.g., the first
+code cell of a Jupyter notebook), NOT during pipeline orchestration or Phase 0
+bootstrap. The orchestrator only reads metadata files — it never opens live
+database connections.
+
 1. Read `.knowledge/datasets/{active}/manifest.yaml` for connection details
-2. Try the primary connection (e.g., BigQuery, cloud warehouse via MCP) — run a simple `SELECT 1` query
+2. Inside the notebook/script, try the primary connection (e.g., BigQuery via `BigQueryClient`) — run a simple `SELECT 1` query
 3. If primary fails → try local DuckDB via `manifest.local_data.duckdb` path
 4. If local DuckDB fails → use CSV files via pandas from `manifest.local_data.path`
 5. Always inform the user which source is active
@@ -310,9 +314,12 @@ These are non-negotiable. They protect analytical quality.
    chart-building functions. See `helpers/chart_style_guide.md` for the full
    reference.
 
-9. **Always verify data connectivity at analysis start.** Before running any
-   query, confirm which data source is active (cloud warehouse, local DuckDB, or
-   CSV). If a connection fails, fall back automatically and inform the user.
+9. **Always verify data connectivity at analysis start — inside the analysis
+   environment (notebook or script), not during pipeline orchestration.**
+   Before running any query, confirm which data source is active (cloud
+   warehouse, local DuckDB, or CSV). If a connection fails, fall back
+   automatically and inform the user. The pipeline orchestrator must NOT
+   open live database connections — it only reads metadata files.
 
 10. **Adapt to the user's expertise.** Detect role from vocabulary: PM (OKRs,
     roadmap) → decisions/impact; DS (p-value, regression) → methodology;
@@ -341,6 +348,24 @@ These are non-negotiable. They protect analytical quality.
     analysis, check `.knowledge/corrections/index.yaml` for logged corrections
     matching the current dataset and table. Apply known fixes proactively — never
     repeat the same SQL mistake twice.
+
+16. **Never create or modify the `.env` file.** The `.env` file is managed by
+    the user. If `GOOGLE_CLOUD_PROJECT` is not set, instruct the user to export
+    it — do not write it yourself.
+
+17. **Distinguish dataset project from GCP auth project.** The BigQuery dataset
+    project (e.g., `cb-data-hub-prod`) is where the data lives — it appears
+    only in fully-qualified table names in SQL. The GCP auth/billing project
+    is **always `coolblue-marketing-dev`** — set via `GOOGLE_CLOUD_PROJECT`
+    env var. Never confuse these two. Never set `GOOGLE_CLOUD_PROJECT` to
+    `cb-data-hub-prod` or any dataset project.
+
+18. **Pipeline agents never read CSV files for context.** Phase 7+ agents
+    (story-architect, chart-maker, storytelling, deck-creator, etc.) consume
+    only `working/analysis_summary.md` and chart PNGs from `outputs/charts/`.
+    They never read `.csv` files. All quantitative data needed for narrative,
+    storyboard, and deck is embedded in the analysis summary produced by the
+    Notebook Analyst's Pipeline Handoff cell.
 
 ---
 

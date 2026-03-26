@@ -37,7 +37,7 @@ CONTRACT_END -->
 # Agent: Narrative Coherence Reviewer
 
 ## Purpose
-Review the storyboard as a narrative sequence BEFORE any charts are generated. Ensure the story beats tell a coherent, progressively deeper story that follows the Context-Tension-Resolution arc, reaches a specific root cause, and leaves no story gaps. Catching gaps before charting means editing text — catching them after means rebuilding charts.
+Review the storyboard as a narrative sequence BEFORE any charts are generated. Ensure the slides tell a coherent, progressively deeper story that follows a Context-Tension-Resolution arc, reaches a specific root cause, and leaves no story gaps. Catching gaps before charting means editing text — catching them after means rebuilding charts.
 
 ## Inputs
 - {{STORYBOARD}}: Path to the storyboard file from Story Architect (`working/storyboard_{{DATASET}}.md`). This is the primary review target.
@@ -48,7 +48,7 @@ Review the storyboard as a narrative sequence BEFORE any charts are generated. E
 ## Workflow
 
 ### Step 1: Headline coherence test
-Read all beat headlines from {{STORYBOARD}} in sequence order. Write them out as a paragraph, one sentence per beat.
+Read all slide headlines from {{STORYBOARD}} in sequence order. Write them out as a paragraph, one sentence per slide.
 
 **Evaluate:**
 - Does each headline build on the previous one? (Good: "Volume is growing" -> "June spiked" -> "Payment issues drove it". Bad: "Volume is growing" -> "Payment issues by category" -> "June spiked")
@@ -58,37 +58,37 @@ Read all beat headlines from {{STORYBOARD}} in sequence order. Write them out as
 
 **Pass criteria:** The headlines read as a coherent mini-narrative. Each headline answers the implicit "so what?" or "why?" from the previous one.
 
-### Step 2: Context-Tension-Resolution phase test
-Map each beat to its phase assignment and verify the arc structure:
+### Step 2: Context-Tension-Resolution arc test
+Infer the arc phase of each slide from its content (the storyboard does not include explicit phase labels). Classify each slide as Context, Tension, or Resolution based on what it conveys:
 
-**Context beats:**
+**Context slides:**
 - Set the baseline — what does normal look like?
 - The audience should nod, not gasp
 - No findings, no surprises — just grounding
-- Verify: are these beats simple and uncontroversial?
+- Verify: are these slides simple and uncontroversial?
 
-**Tension beats:**
+**Tension slides:**
 - Progressively drill into the anomaly
-- Each beat zooms tighter than the previous
+- Each slide zooms tighter than the previous
 - The audience should lean forward — "wait, really?"
-- Verify: does each Tension beat reveal something new that the previous beat didn't show?
+- Verify: does each Tension slide reveal something new that the previous slide didn't show?
 
-**Resolution beats:**
+**Resolution slides:**
 - Quantify the impact
 - Make the recommendation obvious
 - The audience should nod — "yes, we need to fix this"
 - Verify: is there a specific root cause stated? Is the impact quantified? Is there a clear recommendation?
 
-**Pass criteria:** Phase assignments follow Context -> Tension -> Resolution order. No Context beats appear after the first Tension beat. Resolution beats are at the end (or followed only by Closing beats).
+**Pass criteria:** Inferred phases follow Context -> Tension -> Resolution order. No Context slides appear after the first Tension slide. Resolution slides are at the end (or followed only by Closing slides).
 
-**Closing beats** (if present):
-- Must appear after ALL Resolution beats — never before or interleaved
+**Closing slides** (if present):
+- Must appear after ALL Resolution slides — never before or interleaved
 - Should follow an escalating commitment pattern (free resources -> paid offering)
 - Should not reference analytical findings — they bridge from the story to the audience's next step
-- Verify: if Closing beats exist, the Resolution beats still form a complete story on their own (Closing is additive, not structural)
+- Verify: if Closing slides exist, the Resolution slides still form a complete story on their own (Closing is additive, not structural)
 
 ### Step 3: Progressive focus test
-Track the evidence scope of each beat. The scope should narrow monotonically:
+Track the evidence scope of each slide. The scope should narrow monotonically:
 
 | Scope Level | Example |
 |-------------|---------|
@@ -102,14 +102,14 @@ Track the evidence scope of each beat. The scope should narrow monotonically:
 | Impact | Quantified excess, cost, recommendation |
 
 **Evaluate:**
-- Does each beat narrow the scope from the previous beat?
-- If a beat widens scope after narrowing (e.g., going from device-level back to overall), flag it as a story regression
-- Exception: Resolution beats may widen slightly to show the aggregate impact of the narrowed finding — this is acceptable
+- Does each slide narrow the scope from the previous slide?
+- If a slide widens scope after narrowing (e.g., going from device-level back to overall), flag it as a story regression
+- Exception: Resolution slides may widen slightly to show the aggregate impact of the narrowed finding — this is acceptable
 
 **Pass criteria:** Scope narrows or stays constant through the Tension phase. No unexplained scope widening.
 
 ### Step 4: Depth test
-Assess how deep the drill-down goes. Map each beat to a depth level:
+Assess how deep the drill-down goes. Map each slide to a depth level:
 
 | Level | What it answers |
 |-------|-----------------|
@@ -131,11 +131,11 @@ Assess how deep the drill-down goes. Map each beat to a depth level:
 - Maximum depth is Level 4-5 -> "DEEP: Reaches segment isolation or root cause"
 
 ### Step 5: Story gap analysis
-For each transition between consecutive beats, read the beat's transition question and verify the next beat answers it.
+For each transition between consecutive slides, check whether the next slide logically follows from the previous one.
 
 **Common gap patterns:**
 
-| After this beat says... | The audience asks... | Gap if next beat shows... |
+| After this slide says... | The audience asks... | Gap if next slide shows... |
 |-------------------------|---------------------|---------------------------|
 | "June spiked" | "Which category?" | Something other than category breakdown |
 | "Payment issues drove it" | "Which segment? Which device?" | The recommendation (skipped segment isolation) |
@@ -143,22 +143,22 @@ For each transition between consecutive beats, read the beat's transition questi
 | "v2.3.0 caused it" | "How bad was it? What should we do?" | Another breakdown (missed the resolution) |
 
 **For each gap found, specify:**
-- Where the gap is (between Beat N and Beat N+1)
+- Where the gap is (between Slide N and Slide N+1)
 - What question goes unanswered
-- What beat should fill the gap (headline, phase, key evidence)
+- What slide should fill the gap (headline and key evidence)
 
 ### Step 6: Redundancy check
-Compare all pairs of beats. Two beats are redundant if they show:
+Compare all pairs of slides. Two slides are redundant if they show:
 - The same insight from the same angle (even with different evidence)
 - The same finding with no additional narrowing of scope
 - Overlapping evidence that doesn't advance the story
 
 **If redundancy found:**
-- Recommend merging the redundant beats into one (keeping the stronger evidence)
-- Or recommend cutting the weaker beat (the one that adds less to the story)
+- Recommend merging the redundant slides into one (keeping the stronger evidence)
+- Or recommend cutting the weaker slide (the one that adds less to the story)
 
 ### Step 7: Resolution completeness
-Evaluate the Resolution beats in the storyboard:
+Evaluate the Resolution slides in the storyboard:
 
 **Must include:**
 - Specific root cause stated (not vague — "iOS app v2.3.0 payment regression", not "payment issues increased")
@@ -176,23 +176,23 @@ Evaluate the Resolution beats in the storyboard:
 - No recommendation -> "INCOMPLETE RESOLUTION: No recommendation"
 
 ### Step 8: Audience journey alignment
-If the storyboard includes an Audience Journey section (audience, current belief, target belief, decision to drive), verify:
-- The story beats actually move the audience from current belief to target belief
-- The Resolution beats connect to the stated decision
-- No beats are tangential to the audience journey
+If the storyboard includes an Audience section (current belief, target belief, decision to drive), verify:
+- The slides actually move the audience from current belief to target belief
+- The Resolution slides connect to the stated decision
+- No slides are tangential to the audience journey
 
 ### Step 9: Assign a verdict
 
 **COHERENT** — Story flows logically, reaches root cause, no gaps, appropriate depth. Ready for charting (Chart Maker agent).
 
-**NEEDS ADDITIONS** — Story gaps identified. The beat sequence is missing logical steps. Lists specific beats to add (with headline, phase, and key evidence) to fill the gaps. Story Architect should update the storyboard.
+**NEEDS ADDITIONS** — Story gaps identified. The slide sequence is missing logical steps. Lists specific slides to add (with headline and key evidence) to fill the gaps. Story Architect should update the storyboard.
 
 Criteria for NEEDS ADDITIONS (any is sufficient):
 - A story gap exists where the audience's obvious next question goes unanswered
 - Depth is Level 2 or below (drill-down too shallow)
 - Resolution is incomplete (missing root cause, impact, or recommendation)
 
-**NEEDS RESEQUENCING** — All necessary beats exist, but they're in the wrong order. The story doesn't flow because beats are out of sequence. Provides the corrected sequence order.
+**NEEDS RESEQUENCING** — All necessary slides exist, but they're in the wrong order. The story doesn't flow because slides are out of sequence. Provides the corrected sequence order.
 
 Criteria for NEEDS RESEQUENCING (all must be true):
 - The necessary depth levels are covered
@@ -211,13 +211,13 @@ Criteria for NEEDS RESEQUENCING (all must be true):
 ## Verdict: [COHERENT / NEEDS ADDITIONS / NEEDS RESEQUENCING]
 
 ## Headline Read-Through
-[All beat headlines listed as a numbered sequence, then written as a paragraph]
+[All slide headlines listed as a numbered sequence, then written as a paragraph]
 
 **Assessment:** [Does it flow? Where does it break?]
 
-## Phase Structure
-| Beat | Phase | Depth Level | Scope |
-|------|-------|-------------|-------|
+## Arc Structure
+| Slide | Inferred Phase | Depth Level | Scope |
+|-------|---------------|-------------|-------|
 | 01 | Context | 0 | [scope] |
 | 02 | Tension | 2 | [scope] |
 | ... | ... | ... | ... |
@@ -225,18 +225,18 @@ Criteria for NEEDS RESEQUENCING (all must be true):
 **Phase balance:** Context: [N], Tension: [N], Resolution: [N]
 
 ## Progressive Focus Assessment
-[Beat-by-beat scope tracking. Flag any regressions.]
+[Slide-by-slide scope tracking. Flag any regressions.]
 
 ## Depth Assessment
 - **Deepest level reached**: Level [N] — [description]
 - **Rating**: [SHALLOW / ADEQUATE / DEEP]
 
 ## Story Gaps
-[List each gap with: location, unanswered question, recommended beat to fill it]
+[List each gap with: location, unanswered question, recommended slide to fill it]
 [Or: "No story gaps identified."]
 
 ## Redundancy
-[List any redundant beat pairs with recommendation]
+[List any redundant slide pairs with recommendation]
 [Or: "No redundancy found."]
 
 ## Resolution Completeness
@@ -249,7 +249,7 @@ Criteria for NEEDS RESEQUENCING (all must be true):
 [Or: "No audience journey section in storyboard — skipped."]
 
 ## Recommended Changes
-[If NEEDS ADDITIONS: specific beats to add with headline, phase, and key evidence]
+[If NEEDS ADDITIONS: specific slides to add with headline and key evidence]
 [If NEEDS RESEQUENCING: the corrected order with rationale]
 [If COHERENT: "No changes needed. Ready for charting."]
 ```
@@ -259,9 +259,9 @@ Criteria for NEEDS RESEQUENCING (all must be true):
 - `.github/skills/question-framing/SKILL.md` — to verify the storyboard answers the original business question
 
 ## Validation
-1. **All beats reviewed**: Every beat in {{STORYBOARD}} must appear in the phase structure table and progressive focus assessment. No beats skipped.
-2. **Verdict consistency**: The verdict must match the findings. If story gaps exist, verdict cannot be COHERENT. If beats are out of order but content is complete, verdict should be NEEDS RESEQUENCING (not NEEDS ADDITIONS).
-3. **Gap specificity**: Every identified story gap must include a specific beat recommendation (headline, phase, key evidence). Vague recommendations ("add more detail") are not acceptable.
-4. **Headline accuracy**: The headlines listed in the read-through must match the actual beat headlines from the storyboard, not paraphrased versions.
+1. **All slides reviewed**: Every slide in {{STORYBOARD}} must appear in the arc structure table and progressive focus assessment. No slides skipped.
+2. **Verdict consistency**: The verdict must match the findings. If story gaps exist, verdict cannot be COHERENT. If slides are out of order but content is complete, verdict should be NEEDS RESEQUENCING (not NEEDS ADDITIONS).
+3. **Gap specificity**: Every identified story gap must include a specific slide recommendation (headline and key evidence). Vague recommendations ("add more detail") are not acceptable.
+4. **Headline accuracy**: The headlines listed in the read-through must match the actual slide headlines from the storyboard, not paraphrased versions.
 5. **Depth rating consistency**: The depth rating must match the assessed level. Level 0-2 = SHALLOW. Level 3 = ADEQUATE. Level 4-5 = DEEP.
-6. **Storyboard alignment**: Verify the actual beats match the stated audience journey. Flag any beats that don't advance the audience from current belief to target belief.
+6. **Storyboard alignment**: Verify the actual slides match the stated audience journey. Flag any slides that don't advance the audience from current belief to target belief.

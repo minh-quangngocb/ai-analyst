@@ -129,6 +129,46 @@ Before any execution, validate the registry:
 
 6. **Apply execution plan:** Load the plan from `plans.md` (or use the default `full_presentation`). Filter the DAG to include only agents in the plan's allow-list. Agents not in the plan are marked `skipped`. If a plan agent depends on a skipped agent, warn: `"Agent {name} depends on skipped agent {dep}. Ensure required context exists."`
 
+7. **Knowledge bootstrap — resolve active dataset:**
+   This step is **mandatory** before any agent runs. It ensures
+   every agent receives the correct project, dataset, and table names.
+
+   a. Read `.knowledge/active.yaml` → extract `active_dataset` (e.g., `pfa`).
+      If missing, prompt user: `"No active dataset. Run /connect-data first."`
+
+   b. Load the dataset manifest:
+      `.knowledge/datasets/{active_dataset}/manifest.yaml`
+      Extract: `project`, `dataset`, `warehouse`, `connection_type`, table
+      `full_name` values, partition columns, and key filters.
+
+   c. Load the dataset schema and quirks:
+      `.knowledge/datasets/{active_dataset}/schema.md`
+      `.knowledge/datasets/{active_dataset}/quirks.md`
+
+   d. **Resolve dataset-specific skill.** Match the active dataset to a skill:
+      | Dataset keyword | Skill file |
+      |----------------|------------|
+      | `privacy_friendly_analytics` or `pfa` | `.github/skills/pfa-dataset/SKILL.md` |
+      | `google_analytics_4` or `ga4` | `.github/skills/ga4-dataset/SKILL.md` |
+      | `transaction_margin` | `.github/skills/transaction-margin-dataset/SKILL.md` |
+
+      Read the matching SKILL.md and include its schema, quirks, and query
+      patterns as context for all subsequent agents. If no skill matches, rely
+      on manifest + schema.md only.
+
+   e. Store resolved values as pipeline variables for context assembly:
+      - `{{PROJECT}}` → `manifest.project` (e.g., `cb-data-hub-prod`)
+      - `{{DATASET_ID}}` → `manifest.dataset` (e.g., `privacy_friendly_analytics`)
+      - `{{ACTIVE_DATASET}}` → active dataset name (e.g., `pfa`)
+      - `{{TABLE_*}}` → fully-qualified table names from manifest
+
+   f. **BigQuery access rule (enforced in Phase 2, NOT here):** All BigQuery
+      access MUST use `helpers/bigquery_client.py` (`BigQueryClient`). Never
+      import `google.cloud.bigquery` directly or hardcode project IDs.
+      **Do NOT open any live database connections during pre-flight.** This
+      step only records the rule for downstream agents. The actual BigQuery
+      connection is established inside the Jupyter notebook (Phase 2).
+
 ### Phase 1: Initialize Run Directory & Pipeline State
 
 **Per-run directory setup:** Every pipeline run gets an isolated directory under `working/runs/`.
@@ -178,9 +218,11 @@ Execute agents tier by tier:
 ```
 FOR each tier in execution_tiers:
   1. READY_SET = agents in this tier that satisfy BOTH:
-     - ALL `depends_on` agents have completed (AND-gate)
-     - At least ONE `depends_on_any` agent has completed, if specified (OR-gate)
+     - ALL `depends_on` agents have status `completed` or `degraded` (AND-gate)
+     - At least ONE `depends_on_any` agent has status `completed` or `degraded`, if specified (OR-gate)
      (after plan filtering and skipping)
+     NOTE: `degraded` (non-critical agent failure with stub output) counts as
+     satisfied for dependency resolution. Downstream agents can proceed.
 
   2. If READY_SET is empty AND pending agents remain → deadlock → HALT
 
@@ -219,23 +261,122 @@ FOR each tier in execution_tiers:
   10. ADVANCE to next tier
 ```
 
+### Notebook Analyst Bridge (Analysis Tiers)
+
+The registry defines individual agents for each analysis step
+(descriptive-analytics, root-cause-investigator, validation, opportunity-sizer).
+However, in practice these steps are executed together by the **Notebook Analyst**
+agent (`.github/agents/notebook-analyst.agent.md`), which creates a single
+Jupyter notebook containing all analysis, charts, validation, and recommendations.
+
+**When the DAG walker reaches the analysis tier** (the first tier after
+hypothesis completes — typically containing descriptive-analytics,
+overtime-trend, or cohort-analysis):
+
+1. **Pause the DAG walker.** Do not run the individual analysis agents from
+   the registry.
+
+2. **Invoke the Notebook Analyst** as a subagent. Pass it:
+   - All Phase 1 output files (question brief, data feasibility, hypothesis doc)
+   - Dataset context from Phase 0 (manifest, schema, quirks, dataset skill)
+   - Pipeline arguments (question, data_path, dataset_name)
+
+3. **Wait for Notebook Analyst to complete.** The Notebook Analyst will:
+   - Choose the analysis type (descriptive, trend, cohort)
+   - Write SQL files to `working/sql/`
+   - Create and execute a Jupyter notebook in `working/`
+   - Generate charts saved to `outputs/charts/`
+   - Save DataFrames to `working/data/` (archival only — not used by downstream agents)
+   - Include validation, opportunity sizing, and recommendations in the notebook
+   - Produce a **structured summary cell** (final markdown cell, see notebook-analyst agent Step 7)
+
+4. **Extract analysis context from the notebook** for downstream agents.
+   After the Notebook Analyst completes, read the notebook and extract:
+
+   a. **Findings summary:** Read the final markdown cell of the notebook
+      (the structured summary cell marked `## Pipeline Handoff — Analysis Summary`).
+      This cell contains all findings, recommendations, metrics, and chart
+      references in a structured format that Phase 7+ agents can consume directly.
+
+   b. **Chart inventory:** List all `.png` files in `outputs/charts/` generated
+      during notebook execution.
+
+   c. **Write `working/analysis_summary.md`** by copying the content of the
+      structured summary cell. This file becomes the primary `output_file` for
+      all analysis agents in `pipeline_state.json`. Phase 7+ agents read this
+      file — they never need to read CSV files or parse the notebook directly.
+
+   > **Rule: No CSV reading by downstream agents.** Phase 7+ agents
+   > (story-architect, chart-maker, storytelling, deck-creator, etc.) consume
+   > ONLY the `working/analysis_summary.md` file and chart PNGs from
+   > `outputs/charts/`. They never read `.csv` files. All quantitative data
+   > needed for narrative, storyboard, and deck is embedded in the summary.
+
+5. **After extraction**, mark the following agents as `completed`
+   in `pipeline_state.json`:
+   - The selected analysis agent (`descriptive-analytics`, `overtime-trend`, or
+     `cohort-analysis` — whichever the Notebook Analyst chose)
+   - `root-cause-investigator`
+   - `validation`
+   - `opportunity-sizer`
+   - Mark the other two analysis agents (not selected) as `skipped`
+   - Record `working/analysis_summary.md` as the primary `output_file` for
+     all completed agents. Also record the notebook path and chart list as
+     secondary outputs.
+
+6. **Record notebook outputs** in pipeline_state.json agent entries:
+   - Summary: `working/analysis_summary.md` (PRIMARY — read by Phase 7+ agents)
+   - Notebook: `working/<analysis_slug>.ipynb` (source of truth for the analysis)
+   - Charts: `outputs/charts/*.png` (used by chart-maker and deck-creator)
+   - Data: `working/data/*.csv` (archival — NOT read by downstream agents)
+   - SQL: `working/sql/*.sql` (archival)
+
+7. **Run Checkpoint 2** (Analysis Verification) against the notebook outputs.
+
+8. **Resume the DAG walker** from the next tier. The story-architect agent
+   (which depends on opportunity-sizer) will now see its dependency satisfied
+   and enter the READY set. The pipeline continues through Phase 3
+   (Storytelling & Charts) and Phase 4 (Deck & Delivery) normally.
+
+> **Why this matters:** Without this bridge, the DAG walker would try to run
+> individual analysis agents that don't update pipeline_state.json collectively.
+> Phase 7+ agents would never trigger because their dependencies on individual
+> analysis agents (especially opportunity-sizer) would never be satisfied.
+> Additionally, downstream agents must never have to read CSV files — the
+> analysis_summary.md contains all context they need.
+
 ### Dynamic Context Assembly
 
 Before launching each agent, resolve its runtime context:
 
-1. **System variables:**
+1. **System variables** (resolved from Phase 0 knowledge bootstrap):
    - `{{DATE}}` → current date YYYY-MM-DD
    - `{{DATASET_NAME}}` → from `dataset_name` argument or derived from data_path
    - `{{ACTIVE_DATASET}}` → from `.knowledge/active.yaml`
+   - `{{PROJECT}}` → from manifest `project` field (e.g., `cb-data-hub-prod`)
+   - `{{DATASET_ID}}` → from manifest `dataset` field (e.g., `privacy_friendly_analytics`)
    - `{{BUSINESS_CONTEXT_TITLE}}` → derived from question
 
-2. **Knowledge context:** For each path in the agent's `knowledge_context` from registry:
-   - Replace `{active}` with the active dataset name
+2. **Dataset-specific skill context:** Include the dataset skill content resolved
+   in Phase 0 step 7d (e.g., PFA schema, quirks, query patterns). This provides
+   every agent with the correct table names, column types, and known gotchas.
+
+3. **Knowledge context:** For each path in the agent's `knowledge_context` from registry:
+   - Replace `{active}` with the active dataset name from `.knowledge/active.yaml`
    - Read the file and include its content as context for the agent
 
-3. **Dependency outputs:** For each completed dependency agent, gather its `output_files` from pipeline_state.json. These become available inputs for the current agent.
+4. **Dependency outputs:** For each completed dependency agent, gather its `output_files` from pipeline_state.json. These become available inputs for the current agent.
+   - For Phase 7+ agents, the primary dependency output is `working/analysis_summary.md`
+     (the structured findings extracted from the notebook). Pass this as
+     `{{ANALYSIS_RESULTS}}`. Never pass CSV file paths as analysis results.
+   - Chart files from `outputs/charts/` are passed as `{{CHARTS}}` to agents
+     that need them (chart-maker, deck-creator, visual-design-critic).
 
-4. **Pipeline arguments:** Pass through `context`, `theme`, `audience`, `data_path` as relevant to the agent's `inputs` list.
+5. **Pipeline arguments:** Pass through `context`, `theme`, `audience`, `data_path` as relevant to the agent's `inputs` list.
+
+6. **BigQuery access:** Include the instruction that all BigQuery access must use
+   `helpers/bigquery_client.py` (`BigQueryClient`). Never import `google.cloud.bigquery`
+   directly or hardcode project IDs.
 
 ### Dry-Run Mode
 
@@ -464,8 +605,8 @@ At the start and end of each tier (mapped to phases), emit progress:
 
 | Phase | Agents | Name |
 |-------|--------|------|
-| 1 | question-framing, hypothesis | Framing |
-| 2 | data-explorer, descriptive-analytics, root-cause-investigator, validation, opportunity-sizer | Exploration & Analysis |
+| 1 | question-framing, data-explorer, hypothesis | Framing & Exploration |
+| 2 | Notebook Analyst (wraps: descriptive-analytics / overtime-trend / cohort-analysis, root-cause-investigator, validation, opportunity-sizer) | Analysis (Notebook) |
 | 3 | story-architect, narrative-coherence-reviewer, chart-maker, visual-design-critic | Storytelling & Charts |
 | 4 | storytelling, deck-creator, visual-design-critic-slides, close-the-loop | Deck & Delivery |
 
@@ -497,6 +638,8 @@ At the start and end of each tier (mapped to phases), emit progress:
 | Stale pipeline state | Previous run crashed mid-execution | Step 0 cleanup | Pre-flight |
 | Chart text overlap | Labels collide at rendered size | R7 | Checkpoint 3 + chart-maker HALT |
 | Chart overflows slide | Bare `![](...)` image not in `.chart-container` | R10 | Checkpoint 4 (lint: IMG-BARE-MD) |
+| Phase 7+ never runs | Notebook Analyst completed but individual agents not marked in pipeline_state | Notebook Analyst Bridge | Phase 2 → 3 transition |
+| Phase 7+ never runs | Non-critical agent `degraded` not treated as dependency-satisfied | READY_SET treats `degraded` as satisfied | Phase 2 loop |
 
 ---
 

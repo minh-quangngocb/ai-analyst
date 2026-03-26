@@ -95,7 +95,7 @@ class BigQueryClient:
 
         self._project = project or os.getenv(
             "GOOGLE_CLOUD_PROJECT",
-            os.getenv("GCP_PROJECT", "coolblue-webandapp-dev"),
+            os.getenv("GCP_PROJECT", "coolblue-marketing-dev"),
         )
         self._client = bigquery.Client(project=self._project)
         self.sql_dir = sql_dir

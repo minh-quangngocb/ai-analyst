@@ -2,10 +2,46 @@
 # Auto-managed by the archive-analysis skill after pipeline runs.
 # Each entry is a completed analysis with metadata for recall.
 
-last_updated: null
-total_analyses: 0
+last_updated: "2026-03-26"
+total_analyses: 1
 
-analyses: []
+analyses:
+  - id: "analysis_20260326_wallonia_cvr"
+    title: "Wallonia conversion gap — product type breakdown"
+    date: "2026-03-26"
+    dataset: pfa
+    question: "Why does Wallonia underperform in conversion rate and add-to-cart, and which product types stand out in the delta?"
+    question_level: L4
+    status: completed
+    findings:
+      - "Wallonia CVR 1.71% vs Flanders 3.18% (-46%); ATC 3.62% vs 5.45% (-34%)"
+      - "ATC-from-PDP nearly identical (9.01% vs 9.10%) — gap is upstream of product pages, not product-specific"
+      - "87% of product types (465/533) underperform — the gap is broad-based, not concentrated"
+      - "Top 5 weighted product types explain 21% of cumulative CVR gap"
+      - "Weekly trends show the gap is persistent, not seasonal (CVR delta stable at ~1.5pp)"
+    confidence: "B"
+    agents_used:
+      - question-framing
+      - data-explorer
+      - descriptive-analytics
+      - validation
+      - story-architect
+      - storytelling
+      - deck-creator
+    artifacts:
+      - outputs/deck_pfa_2026-03-26.marp.md
+      - outputs/narrative_pfa_2026-03-26.md
+      - outputs/charts/weekly_cvr_atc_trend.png
+      - outputs/charts/product_type_cvr_delta.png
+      - outputs/charts/product_type_atc_delta.png
+      - outputs/charts/product_type_weighted_contribution.png
+      - working/wallonia_product_type_analysis.ipynb
+    tags: [wallonia, conversion, add-to-cart, product-type, belgium, regional]
+    follow_up:
+      - "Investigate upstream traffic quality — are Wallonia visitors arriving with lower intent?"
+      - "Compare marketing channel mix between Wallonia and Flanders"
+      - "Analyze pricing competitiveness for top 5 product types in French-speaking market"
+      - "Check whether category page and search experience differs by language"
 # Format for each entry:
 #   - id: "analysis_YYYYMMDD_HHMMSS"
 #     title: "Why Q3 activation dropped"

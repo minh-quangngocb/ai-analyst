@@ -9,7 +9,7 @@ footer: "{{DATE}}"
 
 <!-- _class: cb-title -->
 
-<div class="logo"><img src="templates/coolblue_logo.png" alt="Coolblue"></div>
+<div class="logo"><img src="../templates/coolblue_logo.png" alt="Coolblue"></div>
 
 # {{DECK_TITLE}}
 
@@ -24,7 +24,7 @@ Speaker Notes:
 
 <!-- _class: cb-agenda -->
 
-<div class="logo"><img src="templates/coolblue_logo.png" alt="Coolblue"></div>
+<div class="logo"><img src="../templates/coolblue_logo.png" alt="Coolblue"></div>
 
 ## Agenda
 
@@ -88,7 +88,7 @@ Speaker Notes:
 ## Conversion declined steadily across all segments
 
 <div class="chart-container">
-  <img src="charts/beat1_example.png" alt="Line chart showing conversion decline by segment">
+  <img src="../outputs/charts/beat1_example.png" alt="Line chart showing conversion decline by segment">
 </div>
 
 <!--

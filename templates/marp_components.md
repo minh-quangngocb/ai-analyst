@@ -49,7 +49,7 @@ of** `title` and add `cb-agenda` as slide 2.
 ```html
 <!-- _class: cb-title -->
 
-<div class="logo"><img src="templates/coolblue_logo.png" alt="Coolblue"></div>
+<div class="logo"><img src="../templates/coolblue_logo.png" alt="Coolblue"></div>
 
 # Deck Title Here
 
@@ -65,7 +65,7 @@ of** `title` and add `cb-agenda` as slide 2.
 ```html
 <!-- _class: cb-agenda -->
 
-<div class="logo"><img src="templates/coolblue_logo.png" alt="Coolblue"></div>
+<div class="logo"><img src="../templates/coolblue_logo.png" alt="Coolblue"></div>
 
 ## Agenda
 
@@ -98,7 +98,7 @@ different charts.
 ## Android Tablet app is the smallest segment
 
 <div class="chart-container">
-  <img src="outputs/charts/segment_comparison.png" alt="Segment comparison chart">
+  <img src="../outputs/charts/segment_comparison.png" alt="Segment comparison chart">
 </div>
 ```
 

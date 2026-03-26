@@ -35,7 +35,7 @@
    ============================================ */
 
 section {
-  background: var(--cb-white);
+  background: linear-gradient(to top, var(--cb-blue) var(--cb-bar-height), var(--cb-white) var(--cb-bar-height));
   color: var(--cb-text);
   font-family: var(--font-body);
   font-size: 24px;
@@ -47,16 +47,10 @@ section {
   position: relative;
 }
 
-/* --- Blue bottom bar (1/5 of slide height) on content slides --- */
+/* --- Blue bottom bar (1/5 of slide height) on content slides ---
+     Created via background gradient for reliable Marp rendering --- */
 section::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: var(--cb-bar-height);
-  background: var(--cb-blue);
-  z-index: 0;
+  display: none;
 }
 
 /* --- Slide title positioned in the blue bar --- */
@@ -71,7 +65,7 @@ section h2 {
   padding: 0 80px;
   margin: 0;
   font-family: var(--font-heading);
-  font-size: 32px;
+  font-size: 40px;
   font-weight: 700;
   color: var(--cb-white);
   z-index: 1;
@@ -91,10 +85,10 @@ section img {
 /* --- Typography --- */
 section h1 {
   font-family: var(--font-heading);
-  font-size: 44px;
+  font-size: 36px;
   font-weight: 700;
-  color: var(--cb-text);
-  margin-bottom: 24px;
+  color: var(--cb-blue-dark);
+  margin-bottom: 20px;
   line-height: 1.2;
 }
 
@@ -102,7 +96,7 @@ section h3 {
   font-family: var(--font-heading);
   font-size: 28px;
   font-weight: 600;
-  color: var(--cb-text);
+  color: var(--cb-blue-dark);
   margin-bottom: 16px;
 }
 
@@ -114,9 +108,10 @@ section p {
 }
 
 section li {
-  font-size: 22px;
+  font-size: 20px;
   margin-bottom: 8px;
   color: var(--cb-text);
+  line-height: 1.5;
 }
 
 section strong {
@@ -127,6 +122,24 @@ section strong {
 section a {
   color: var(--cb-blue);
   text-decoration: underline;
+}
+
+/* --- Nested Ordered Lists --- */
+section ol {
+  padding-left: 40px;
+  margin-top: 8px;
+}
+
+section ol ol {
+  list-style-type: lower-alpha;
+  padding-left: 36px;
+  margin-top: 4px;
+}
+
+section ol ol ol {
+  list-style-type: lower-roman;
+  padding-left: 36px;
+  margin-top: 4px;
 }
 
 /* --- Page Numbers --- */
@@ -140,7 +153,7 @@ section footer {
   font-size: 12px;
   color: var(--cb-text-muted);
   letter-spacing: 0.03em;
-  bottom: 24px;
+  bottom: calc(var(--cb-bar-height) + 12px);
   left: 85px;
   width: auto;
   z-index: 2;
@@ -152,18 +165,18 @@ section footer a {
 }
 
 /* ============================================
-   TITLE SLIDE — Blue background, white text, logo top-right
-   Used for Slide 1 (Title) and Slide 2 (Agenda)
+   TITLE SLIDE — White background, logo top-left, dark text
+   Used for Slide 1 (Title)
    ============================================ */
 
 section.cb-title {
-  background: var(--cb-blue);
-  color: var(--cb-white);
+  background: var(--cb-white);
+  color: var(--cb-text);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  padding: 80px 100px;
+  padding: 60px 80px;
 }
 
 /* Remove the blue bottom bar on title slides */
@@ -172,10 +185,11 @@ section.cb-title::before {
 }
 
 section.cb-title h1 {
-  font-size: 52px;
-  color: var(--cb-white);
-  margin-bottom: 16px;
-  line-height: 1.15;
+  font-size: 36px;
+  color: var(--cb-text);
+  font-weight: 700;
+  margin-bottom: 8px;
+  line-height: 1.2;
 }
 
 section.cb-title h2 {
@@ -183,16 +197,16 @@ section.cb-title h2 {
   height: auto;
   display: block;
   padding: 0;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--cb-text);
   margin-bottom: 12px;
   background: transparent;
 }
 
 section.cb-title p {
-  font-size: 22px;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 20px;
+  color: var(--cb-text-secondary);
 }
 
 /* Logo positioning — top-right on title slides */
@@ -200,25 +214,25 @@ section.cb-title .logo {
   position: absolute;
   top: 40px;
   right: 60px;
-  width: 180px;
+  width: 200px;
   height: auto;
 }
 
 section.cb-title .logo img {
   max-height: none;
-  width: 180px;
+  width: 200px;
   height: auto;
   margin: 0;
 }
 
-/* Footer on title slides: white text */
+/* Footer on title slides */
 section.cb-title footer {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--cb-text-muted);
 }
 
 /* Page number on title slides */
 section.cb-title::after {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--cb-text-muted);
 }
 
 /* ============================================
@@ -226,12 +240,12 @@ section.cb-title::after {
    ============================================ */
 
 section.cb-agenda {
-  background: var(--cb-blue);
-  color: var(--cb-white);
+  background: var(--cb-white);
+  color: var(--cb-text);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: 80px 100px;
+  padding: 60px 80px;
 }
 
 section.cb-agenda::before {
@@ -239,9 +253,9 @@ section.cb-agenda::before {
 }
 
 section.cb-agenda h1 {
-  font-size: 44px;
-  color: var(--cb-white);
-  margin-bottom: 32px;
+  font-size: 36px;
+  color: var(--cb-text);
+  margin-bottom: 24px;
 }
 
 section.cb-agenda h2 {
@@ -249,64 +263,55 @@ section.cb-agenda h2 {
   height: auto;
   display: block;
   padding: 0;
-  font-size: 44px;
+  font-size: 36px;
   font-weight: 700;
-  color: var(--cb-white);
-  margin-bottom: 32px;
+  color: var(--cb-text);
+  margin-bottom: 24px;
   background: transparent;
 }
 
 section.cb-agenda ol,
 section.cb-agenda ul {
-  padding-left: 0;
-  list-style: none;
-  counter-reset: agenda;
+  padding-left: 24px;
+  list-style: decimal;
+  counter-reset: none;
 }
 
 section.cb-agenda li {
-  font-size: 26px;
-  color: rgba(255, 255, 255, 0.9);
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  counter-increment: agenda;
-  padding-left: 40px;
-  position: relative;
+  font-size: 22px;
+  color: var(--cb-text);
+  padding: 8px 0;
+  border-bottom: none;
+  padding-left: 0;
+  position: static;
 }
 
 section.cb-agenda li::before {
-  content: counter(agenda) ".";
-  position: absolute;
-  left: 0;
-  font-weight: 700;
-  color: var(--cb-white);
+  content: none;
 }
 
-section.cb-agenda li:last-child {
-  border-bottom: none;
-}
-
-/* Logo on agenda slides */
+/* Logo on agenda slides — top-right */
 section.cb-agenda .logo {
   position: absolute;
   top: 40px;
   right: 60px;
-  width: 180px;
+  width: 200px;
   height: auto;
 }
 
 section.cb-agenda .logo img {
   max-height: none;
-  width: 180px;
+  width: 200px;
   height: auto;
   margin: 0;
 }
 
 section.cb-agenda footer {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--cb-text-muted);
 }
 
 section.cb-agenda::after {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--cb-text-muted);
 }
 
 /* ============================================
@@ -350,13 +355,13 @@ section.section-opener p {
 
 /* --- Chart Full (one chart, maximum space) --- */
 section.chart-full {
-  padding: 40px 60px 160px 60px;
+  padding: 32px 60px 160px 60px;
   display: flex;
   flex-direction: column;
 }
 
 section.chart-full h2 {
-  font-size: 28px;
+  font-size: 40px;
 }
 
 section.chart-full .chart-container {
@@ -386,6 +391,12 @@ section.chart-full img {
   object-fit: contain;
 }
 
+section.chart-full h1 {
+  font-size: 24px;
+  color: var(--cb-blue-dark);
+  margin-bottom: 4px;
+}
+
 /* --- Insight Slide --- */
 section.insight {
   padding: 50px 80px 160px 80px;
@@ -397,12 +408,13 @@ section.insight img {
 
 /* --- Impact / Statement Slide --- */
 section.impact {
+  background: var(--cb-white);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 60px 140px 160px 140px;
+  padding: 60px 140px;
 }
 
 section.impact h2 {
@@ -411,7 +423,7 @@ section.impact h2 {
   display: block;
   padding: 0;
   font-size: 44px;
-  color: var(--cb-text);
+  color: var(--cb-blue-dark);
   line-height: 1.2;
   margin-bottom: 24px;
   background: transparent;
@@ -477,23 +489,25 @@ section.kpi {
   justify-content: center;
 }
 
+section.kpi h1 {
+  font-size: 32px;
+  color: var(--cb-blue-dark);
+  margin-bottom: 12px;
+}
+
 /* --- Takeaway Slide --- */
 section.takeaway {
-  padding: 60px 100px 160px 100px;
+  background: var(--cb-white);
+  padding: 60px 100px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-section.takeaway h2 {
-  position: static;
-  height: auto;
-  display: block;
-  padding: 0;
-  font-size: 36px;
-  color: var(--cb-text);
-  margin-bottom: 24px;
-  background: transparent;
+section.takeaway h1 {
+  font-size: 32px;
+  color: var(--cb-blue-dark);
+  margin-bottom: 16px;
 }
 
 /* --- Recommendation Slide --- */
@@ -503,14 +517,26 @@ section.recommendation {
   flex-direction: column;
 }
 
+section.recommendation h1 {
+  font-size: 28px;
+  color: var(--cb-blue-dark);
+  margin-bottom: 12px;
+}
+
 /* --- Appendix Slide --- */
 section.appendix {
   padding: 50px 80px 160px 80px;
 }
 
 section.appendix h2 {
-  font-size: 28px;
+  font-size: 32px;
   color: var(--cb-white);
+}
+
+section.appendix h1 {
+  font-size: 28px;
+  color: var(--cb-blue-dark);
+  margin-bottom: 12px;
 }
 
 section.appendix p,

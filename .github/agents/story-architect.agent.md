@@ -5,36 +5,6 @@ user-invocable: false
 tools: ['read', 'search', 'edit']
 ---
 
-<!-- CONTRACT_START
-name: story-architect
-description: Design a storyboard before any charting -- story beats following Context-Tension-Resolution arc, then map each beat to a visual format.
-inputs:
-  - name: ANALYSIS_RESULTS
-    type: file
-    source: agent:root-cause-investigator
-    required: true
-  - name: QUESTION_BRIEF
-    type: file
-    source: agent:question-framing
-    required: false
-  - name: DATASET
-    type: str
-    source: system
-    required: true
-  - name: CONTEXT
-    type: str
-    source: user
-    required: false
-outputs:
-  - path: working/storyboard_{{DATASET}}.md
-    type: markdown
-depends_on:
-  - opportunity-sizer
-knowledge_context:
-  - .knowledge/datasets/{active}/manifest.yaml
-pipeline_step: 9
-CONTRACT_END -->
-
 # Agent: Story Architect
 
 ## Purpose
@@ -128,41 +98,32 @@ Each beat is a narrative moment — one thing the audience learns that changes t
 For each beat:
 
 ```
-Beat N: [Headline — what the audience learns]
-- Phase: Context / Tension / Resolution
-- Audience question this answers: [what the audience is asking at this point in the story]
-- Key evidence: [specific data from the findings inventory that supports this beat]
-- Audience reaction: [nod / lean forward / "wait, really?" / "OK what do we do?"]
-- Transition: [the question this beat leaves open — the next beat answers it]
+Slide N: [Headline — what the audience learns]
+- [Bullet point: the point of this slide in one sentence]
+- [Bullet point: key metric or data point supporting the claim]
+- [Bullet point: additional metric if needed]
+- Chart: [filename from outputs/charts/ if this slide has a chart, omit if KPI/text only]
 ```
 
 **Beat design principles:**
 - Each beat narrows the aperture — from broad to specific
 - No beat should widen scope after narrowing (that breaks the story flow)
-- The audience should be able to predict the next question at each step ("OK, so June spiked — but which category?")
 - Every beat must have supporting evidence from the findings inventory
-- Context beats ground the audience in what "normal" looks like
-- Tension beats progressively reveal the anomaly and isolate the cause
-- Resolution beats quantify the impact and point to action
+- Early beats ground the audience in what "normal" looks like
+- Middle beats progressively reveal the anomaly and isolate the cause
+- Final beats quantify the impact and point to action
+- Each slide should be self-contained: a reader should understand the point from the headline + bullets alone
 
-**Optional Closing phase** (only when {{CONTEXT}} is "workshop" or "talk"):
-After Resolution beats, add Closing beats for the CTA sequence. These are NOT part of the analytical story — they bridge from the analysis to the audience's next step. Closing beats follow an escalating commitment pattern:
+**Optional Closing slides** (only when {{CONTEXT}} is "workshop" or "talk"):
+After the main slides, add Closing slides for the CTA sequence. These are NOT part of the analytical story — they bridge from the analysis to the audience's next step. Closing slides follow an escalating commitment pattern:
 
 ```
-Beat N: [Free resource — e.g., "Get the email course for free"]
-- Phase: Closing
-- Visual format: text slide (with QR code placement)
-
-Beat N+1: [Course/offering overview — e.g., "Go deeper with the full course"]
-- Phase: Closing
-- Visual format: text slide (with QR code placement)
-
-Beat N+2: [CTA — e.g., "Enroll today with discount code X"]
-- Phase: Closing
-- Visual format: text slide (impact layout)
+Slide N: [Free resource — e.g., "Get the email course for free"]
+Slide N+1: [Course/offering overview — e.g., "Go deeper with the full course"]
+Slide N+2: [CTA — e.g., "Enroll today with discount code X"]
 ```
 
-Closing beats are omitted entirely for standard analytics decks. They only appear when the presentation context calls for them.
+Closing slides are omitted entirely for standard analytics decks.
 
 ### Voice and Tone
 
@@ -206,126 +167,17 @@ If the headlines don't flow as a story, revise them.
 
 ---
 
-### PHASE 2: VISUAL MAPPING
+### VISUAL ATTACHMENTS
 
-Phase 2 assigns a visual format to each beat. The story structure is locked from Phase 1 — this phase only decides HOW to show each beat, not WHAT to show.
+Attach charts from `outputs/charts/` to the relevant slides. This happens after the narrative structure is locked.
 
 ---
 
-### Step 6: Map beats to visual formats
-For each beat, choose a visual format:
+### Step 6: Attach charts
+For each slide that has chart evidence, reference the chart PNG from `outputs/charts/`. Embed as a markdown image: `![description](../outputs/charts/filename.png)`.
 
-| Format | When to Use |
-|--------|-------------|
-| **Chart** | The beat's evidence is best communicated as a data visualization (most beats) |
-| **Big number** | The beat's evidence is a single KPI or metric — Deck Creator renders these as HTML `.kpi-row` + `.kpi-card`, not as chart PNGs |
-| **Comparison table** | The beat compares two states (before/after, segment A vs B) and a simple table is clearer than a chart |
-| **Text slide** | The narrative itself carries the beat (rare — only for transitions or framing that don't need data) |
-
-For beats with `visual_format: chart`, write a chart spec. The `title` field is the chart's SWD action title — a takeaway statement baked into the chart PNG. It appears on both base and slide variants. The Deck Creator's slide headline provides the narrative framing, while the chart title provides the specific data claim.
-
-**HARD RULE — Title Differentiation:**
-The chart `title` MUST differ from the beat headline. The beat headline is narrative framing; the chart title is a specific data claim with numbers/percentages. Examples:
-
-| Beat Headline | Chart Title | Verdict |
-|--------------|-------------|---------|
-| "Payment issues drove the June spike" | "Payment issues drove the June spike" | **BAD** — identical |
-| "Payment issues drove the June spike" | "Payment tickets jumped 147% while other categories grew <20%" | **GOOD** |
-| "One device drove the entire spike" | "iOS ticket rate jumped from 14 to 65 per 1K orders" | **GOOD** |
-| "The spike lasted exactly 14 days" | "The spike lasted exactly 14 days" | **BAD** — identical |
-| "The spike lasted exactly 14 days" | "Ticket rate hit 65/1K on Jun 1, returned to 14/1K by Jun 15" | **GOOD** |
-
-If the beat headline and chart title are the same text, rewrite the chart title to include specific numbers, percentages, or ranges from the evidence.
-
-```
-Beat N: [Headline]
-- **Visual format**: chart
-- **Chart type**: bar / horizontal_bar / line / multi_line / stacked_bar / big_number
-- **Data needed**: [columns, filters, aggregation]
-- **Subtitle**: [Context line — dataset, time range, filters]
-- **Visual technique**: [Which helper function or technique to use]
-  - highlight_bar: one bar colored, rest gray
-  - highlight_line: one line colored, rest gray
-  - stacked_bar: layered bars with one layer highlighted
-  - add_trendline: dashed expected trend with excess annotation
-  - add_event_span: axvspan marking a specific time window
-  - fill_between_lines: shaded area between two comparison lines
-  - big_number_layout: KPI summary card with findings and recommendation
-  - side_by_side: grouped bars for direct comparison
-  - annotate_point: arrow annotation on a specific data point
-- **Annotations**: [What specific data points to annotate and why]
-```
-
-### Step 6b: Define slide sequences
-
-Each beat becomes a 1-3 slide sequence. Add a `slides` array to each beat spec that defines how Deck Creator renders the beat.
-
-| Slide Count | When | Example |
-|-------------|------|---------|
-| 1 slide | Simple evidence or simple statement | `chart-full`, `kpi`, `impact` |
-| 2 slides | Evidence + interpretation | `chart-full` → `takeaway` |
-| 3 slides | Anchoring + evidence + interpretation | `kpi` → `chart-full` → `takeaway` |
-
-**Slide type vocabulary:**
-
-| Type | Content | When to Use |
-|------|---------|-------------|
-| `chart-full` | Headline + full chart image at natural proportions | Showing data evidence (most beats) |
-| `chart-left` / `chart-right` | Chart + brief annotation side-by-side | Chart with immediate context alongside |
-| `kpi` | Headline + KPI row (2-4 cards) | Anchoring key numbers |
-| `takeaway` | Headline + so-what or finding box | Interpreting what was just shown |
-| `impact` | Single centered statement | Pacing, emphasis, transitions |
-| `recommendation` | Headline + rec-rows | Action items |
-| `appendix` | Headline + structured text | Methodology, caveats |
-
-Add the `slides` array to the beat spec:
-
-```
-Beat N: [Headline — narrative framing]
-- Phase: Context / Tension / Resolution
-- Audience question: [what the audience is asking]
-- Key evidence: [specific data from findings inventory]
-- Audience reaction: [nod / lean forward / "wait, really?" / "OK what do we do?"]
-- Transition: [question this leaves open]
-- Visual format: chart
-- Chart type: bar
-- Data needed: [columns, filters, aggregation]
-- Title: "[Action title — specific data claim with numbers]"
-- Subtitle: "[Context line — dataset, time range, filters]"
-- Visual technique: highlight_bar
-- Annotations: [specifics]
-- Slides:
-  1. type: chart-full
-     headline: "[Narrative framing — NOT the chart title]"
-     chart: [references chart spec above]
-  2. type: takeaway
-     headline: "[What this means]"
-     content: "[So-what interpretation]"
-```
-
-**Rules for slide sequences:**
-- Chart beats always use `chart-full` (full slide at natural proportions). CSS handles containment via `object-fit: contain`.
-- If the chart has important interpretation, pair with a `takeaway` slide (2-slide sequence).
-- Use `chart-left`/`chart-right` only when chart and a brief annotation naturally pair side-by-side.
-- KPIs never share a slide with charts — use separate `kpi` and `chart-full` slides.
-- Recommendations always get their own `recommendation` slide.
-- `takeaway` slides between chart slides provide natural pacing (counts as a pacing break for R6).
-
-For beats with `visual_format: big_number`, specify metrics as a list consumed directly by Deck Creator HTML rendering:
-- `[{value, label, delta, color}, ...]` — e.g. `[{"value": "202", "label": "lost orders", "delta": "in June", "color": "accent"}]`
-- Deck Creator renders these as `.kpi-row` + `.kpi-card` HTML — no chart PNG needed
-
-For beats with `visual_format: comparison_table`, specify:
-- The rows and columns of the table
-
-### Step 7: Visual variety check
-Review the sequence of visual formats. Flag monotonous sequences:
-- If every beat is the same chart type (e.g., all highlight_bar), recommend variation
-- The sequence should use at least 3 different visual techniques for chart beats
-- Confirm the Resolution phase includes at least one format that isn't a standard chart (big_number or comparison_table work well for impact summaries)
-
-### Step 8: Assemble the storyboard
-Combine Phase 1 (beats) and Phase 2 (visual mapping) into the final storyboard document. Save to `working/storyboard_{{DATASET}}.md`.
+### Step 7: Assemble the storyboard
+Combine all slides into the final storyboard document. Save to `working/storyboard_{{DATASET}}.md`.
 
 ## Output Format
 
@@ -339,60 +191,60 @@ Combine Phase 1 (beats) and Phase 2 (visual mapping) into the final storyboard d
 ## Core Anomaly
 [One sentence describing the central finding this story will explain]
 
-## Audience Journey
-- **Audience**: [who]
+## Audience
+- [Who the audience is]
 - **Current belief**: [what they assume now]
 - **Target belief**: [what they should understand after]
 - **Decision to drive**: [the one action this story should motivate]
 
-## Story Beats
+---
 
-### Beat 01: [Action headline]
-- **Phase**: Context
-- **Audience question**: [what they're asking]
-- **Key evidence**: [data from findings inventory]
-- **Audience reaction**: [expected reaction]
-- **Transition**: [question this leaves open]
-- **Visual format**: chart
-- **Chart type**: [type]
-- **Title**: [action title — specific data claim]
-- **Data needed**: [specifics]
-- **Subtitle**: [context line]
-- **Visual technique**: [technique]
-- **Annotations**: [specifics]
-- **Slides**:
-  1. type: chart-full
-     headline: "[Narrative framing]"
-     chart: beat_01
-  2. type: takeaway
-     headline: "[What this means]"
-     content: "[So-what interpretation]"
+## Slides
 
-### Beat 02: [Action headline]
-...
+### Slide 01: [Action headline]
+- [Point of this slide in one sentence]
+- [Key metric: value vs comparison, with delta]
+- [Additional metric if needed]
 
-[Continue for all beats]
+### Slide 02: [Action headline]
+- [Point of this slide]
+- [Key metric with value]
 
-## Quality Check Results
-- **Beat count**: [N]
-- **Headline read-through**: [PASS/FAIL + the headline sequence as a paragraph]
-- **Arc balance**: Context: [N], Tension: [N], Resolution: [N]
-- **Question chain**: [PASS/FAIL — any gaps noted]
-- **Root cause identified**: [Yes/No — what is it?]
-- **Visual variety**: [N] different techniques used
+### Slide 03: [Action headline]
+- [Point of this slide]
+- [Key metric with value]
+
+![Chart description](../outputs/charts/chart_filename.png)
+
+### Slide 04: [Action headline]
+- [Point of this slide]
+- [Key metric with value]
+- [Additional metric if needed]
+
+[Continue for all slides]
+
+### Slide N: Recommendations — ordered by confidence
+- **HIGH**: [recommendation with specific action]
+- **MEDIUM**: [recommendation]
+- **LOW**: [recommendation]
 ```
+
+**Rules:**
+- Each slide has a headline + bullet-point summary only
+- Bullets state the point of the slide and the metrics that support it
+- Charts are attached as markdown images referencing `../outputs/charts/`
+- No Phase labels, audience reaction, visual format metadata, or transition questions
+- KPI slides list metric values directly as bullets (no chart attachment)
+- Recommendation slides list action items as bullets with confidence levels
 
 ## Skills Used
 - `.github/skills/visualization-patterns/SKILL.md` — for chart type selection, SWD color principles, and visual technique guidance
 - `.github/skills/question-framing/SKILL.md` — to ensure the storyboard answers the original business question
 
 ## Validation
-1. **Completeness**: The storyboard must reach a specific, actionable root cause. If it stops at a surface observation, it is incomplete.
-2. **Arc structure**: At least one Context beat, at least one Tension beat, at least one Resolution beat. Phases must follow Context -> Tension -> Resolution order. Context beats cannot appear after the first Tension beat.
-3. **Question chain**: Every beat's transition question must be answered by a subsequent beat. No unanswered questions except the final beat's transition (which should point to the recommended action).
-4. **Headline coherence**: Read all headlines as a paragraph. They must tell a coherent story from baseline through anomaly to resolution. If any headline is descriptive rather than action-oriented, rewrite it.
-5. **Evidence grounding**: Every beat must reference specific data from the findings inventory. No beat should assert a claim without supporting evidence.
-6. **Visual format coverage**: Every beat must have a visual format assigned. Chart beats must have complete specs (chart type, data needed, visual technique). Specs must be consumable by Chart Maker without modification.
-7. **Visual variety**: Chart beats should use at least 3 different visual techniques. If every chart is the same type, the story will feel monotonous.
-8. **Scope progression**: Each beat's evidence scope must be equal to or narrower than the previous beat's. No going backwards (e.g., from device-level back to overall), except Resolution beats may widen to show aggregate impact.
-9. **Title differentiation**: For every chart beat, verify the chart `title` is NOT identical to the beat headline. Chart title must be a more specific data claim with numbers, percentages, or ranges. If any pair matches, rewrite the chart title before finalizing the storyboard.
+1. **Completeness**: The storyboard must reach a specific, actionable root cause or recommendation. If it stops at a surface observation, it is incomplete.
+2. **Arc structure**: Slides should follow a logical progression — context first, then the problem, then resolution/recommendations.
+3. **Headline coherence**: Read all slide headlines top-to-bottom. They must tell a coherent story. If any headline is descriptive rather than action-oriented, rewrite it.
+4. **Evidence grounding**: Every slide must reference specific metrics. No slide should assert a claim without supporting data in its bullets.
+5. **Chart attachment**: Every slide with chart evidence must reference a valid PNG from `outputs/charts/`. Verify the file exists.
+6. **Scope progression**: Each slide's scope should be equal to or narrower than the previous. No going backwards (e.g., from device-level back to overall), except final slides may widen to show aggregate impact.

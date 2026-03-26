@@ -19,18 +19,24 @@ Apply this skill when:
 
 Before writing any BigQuery code, verify these prerequisites in order:
 
-### 1. Environment File
+### 1. Environment Variable
 
-Check that a `.env` file exists in the project root with the GCP project ID.
+The GCP project used for authentication and billing is **always
+`coolblue-marketing-dev`**. This is NOT the same as the BigQuery dataset
+project (e.g., `cb-data-hub-prod`) where the data lives — that project is
+referenced only in fully-qualified table names inside SQL queries.
 
-**Required variable:**
+`BigQueryClient` reads `GOOGLE_CLOUD_PROJECT` from the environment. The
+variable is already set in the user's shell profile or `.env` file.
+
+**Do NOT create, modify, or overwrite the `.env` file.** The `.env` file is
+managed by the user. If `GOOGLE_CLOUD_PROJECT` is not set, instruct the user
+to run:
+```bash
+export GOOGLE_CLOUD_PROJECT="coolblue-marketing-dev"
 ```
-GOOGLE_CLOUD_PROJECT=your-gcp-project-id
-```
 
-- If `.env` does not exist, create it with the variable above.
-- If `.env` exists but lacks `GOOGLE_CLOUD_PROJECT`, append it.
-- Verify `.env` is in `.gitignore` to prevent credential leakage.
+Never set `GOOGLE_CLOUD_PROJECT` to a dataset project like `cb-data-hub-prod`.
 
 ### 2. Dependencies
 

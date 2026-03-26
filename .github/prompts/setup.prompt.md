@@ -26,9 +26,9 @@ fully configured analytical environment.
    probably care about GMV and take rate. Let me ask about your data next.").
 2. **2-3 questions at a time, max.** Never dump a wall of questions. Group
    them thematically and wait for a response before continuing.
-3. **Validate responses.** If a role sounds unusual or a path does not exist,
-   confirm before recording. ("You said your CSV directory is `data/sales/`.
-   I do not see that directory — did you mean `data/`?")
+3. **Validate responses.** If a role sounds unusual or a value seems off,
+   confirm before recording. ("You said your team is 'Growth' —
+   is that Growth Marketing or Growth Product?")
 4. **Allow skipping.** Mark optional fields clearly. If the user says "skip"
    or "I'll do this later", record `null` and move on. Never block progress
    on optional fields.
@@ -58,7 +58,7 @@ phases:
   data_connection:
     status: "complete" | "partial" | "skipped" | "pending"
     completed_at: "YYYY-MM-DDTHH:MM:SS" | null
-    partial_reason: null | "warehouse_mcp_needed"
+    partial_reason: null | "gcloud_not_installed" | "auth_failed"
   business_context:
     status: "complete" | "skipped" | "pending"
     completed_at: "YYYY-MM-DDTHH:MM:SS" | null
@@ -141,56 +141,80 @@ Next up: Phase 2 — Data Connection
 
 ---
 
-## Phase 2: Data Connection
+## Phase 2: Environment & Data Connection
 
-**Goal:** Get the user's data connected so analyses can run.
+**Goal:** Set up the Python virtual environment and connect to BigQuery so
+analyses can run.
 
-### Questions
+### Step 1: Python Virtual Environment
 
-**Group 1:**
-1. "Let's connect your data. What do you have?
-   - **CSV files** in a local directory
-   - **DuckDB** database file
-   - **Cloud warehouse** (MotherDuck, Postgres, BigQuery, Snowflake)
-   - **Nothing yet** — I want to use a sample dataset"
+Guide the user through creating and activating a virtual environment:
 
-### Branch Logic
+1. "First, let's set up a Python virtual environment for this project."
+2. Run the following commands (or instruct the user to run them):
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+3. Once activated, install project dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Confirm the virtual environment is active (the shell prompt should show
+   `(.venv)`).
 
-**If CSV:**
-- Ask: "What's the path to your CSV directory? (relative to this repo root)"
-- Verify the directory exists and list .csv files found.
-- If directory not found, suggest alternatives (check `data/`, `data/examples/`).
-- If confirmed, invoke the Connect Data skill internally (`/connect-data type=csv`)
-  to create the dataset brain and profile schema.
+If the `.venv/` directory already exists, ask: "A virtual environment already
+exists. Want to recreate it, or use the existing one?"
 
-**If DuckDB:**
-- Ask: "What's the path to your .duckdb file?"
-- Verify it exists.
-- If confirmed, invoke `/connect-data type=duckdb` to set up the connection.
+### Step 2: BigQuery Connection via Google Cloud SDK
 
-**If Cloud warehouse:**
-- Explain: "Cloud warehouses connect via MCP (Model Context Protocol). This
-  requires configuring MCP server credentials (e.g., in your editor's MCP settings)."
-- Route to `/connect-data` for full setup.
-- Mark this phase as `partial` with `partial_reason: warehouse_mcp_needed`.
-- **Do not block Phase 3.** Continue the interview — data connection can be
-  completed separately.
+This project connects to **BigQuery** using the Google Cloud SDK. The user
+should already have the `gcloud` CLI installed.
 
-**If Nothing yet / sample dataset:**
-- Check `data/examples/` for available sample datasets.
-- List them with brief descriptions.
-- If user picks one, copy/link it and invoke `/connect-data type=csv`.
-- If user wants to skip: mark phase as `skipped`, note that `/connect-data`
-  is available later.
+1. "Next, let's connect to BigQuery. You'll need the Google Cloud SDK
+   (`gcloud`) installed. If you haven't installed it yet, follow the
+   instructions at https://cloud.google.com/sdk/docs/install."
+2. Instruct the user to authenticate:
+   ```bash
+   gcloud auth application-default login
+   ```
+   This opens a browser window for Google account authentication. The
+   resulting credentials are stored locally and used by the BigQuery
+   client automatically.
+3. Instruct the user to set the default project:
+   ```bash
+   export GOOGLE_CLOUD_PROJECT="coolblue-marketing-dev"
+   ```
+   Recommend the user also add this to their shell profile (`.zshrc`,
+   `.bashrc`, etc.) so it persists across sessions:
+   ```bash
+   echo 'export GOOGLE_CLOUD_PROJECT="coolblue-marketing-dev"' >> ~/.zshrc
+   ```
+4. Verify the connection by running a simple test query:
+   ```bash
+   python -c "from helpers.bigquery_client import get_client; c = get_client(); print('Connected to', c.project)"
+   ```
+   Expected output: `Connected to coolblue-marketing-dev`
+
+### Validation
+
+- If `gcloud` is not installed, provide the install link and pause. Do not
+  block Phase 3 — mark phase as `partial` with
+  `partial_reason: gcloud_not_installed`.
+- If authentication fails, suggest `gcloud auth application-default login`
+  again and check network access.
+- If the test query fails, check that `GOOGLE_CLOUD_PROJECT` is set and
+  that the user has BigQuery access to `coolblue-marketing-dev`.
 
 ### Fork Decision
 
 After Phase 2:
-- If `data_connection.status == "complete"`: data is available. Continue to
-  Phase 3.
-- If `data_connection.status == "partial"` (warehouse MCP needed): continue
-  to Phase 3 anyway. The user can finish data connection separately.
-- If `data_connection.status == "skipped"`: continue to Phase 3.
+- If both virtual env and BigQuery connection succeed:
+  `data_connection.status == "complete"`. Continue to Phase 3.
+- If BigQuery connection fails but virtual env is set up:
+  `data_connection.status == "partial"`. Continue to Phase 3 anyway — the
+  user can fix authentication separately.
+- If user wants to skip: mark phase as `skipped`, continue to Phase 3.
 
 ### Outputs
 
@@ -206,11 +230,11 @@ Update `.knowledge/setup-state.yaml`:
 
 Display:
 ```
-Phase 2 complete — Data Connection
+Phase 2 complete — Environment & Data Connection
 
-  Source:     {type} ({path or "pending MCP setup"})
-  Tables:     {N} tables found  (or "N/A — skipped")
-  Status:     {connected | partial — warehouse setup needed | skipped}
+  Python env: .venv activated, dependencies installed
+  BigQuery:   coolblue-marketing-dev ({connected | partial | skipped})
+  Status:     {connected | partial — see notes above | skipped}
 
 Next up: Phase 3 — Business Context
 ```
@@ -505,9 +529,9 @@ When `/setup` is invoked and `.knowledge/setup-state.yaml` already exists:
    ```
 5. If a phase is `partial`, offer to complete it or skip:
    ```
-   Phase 2 (Data Connection) is partially complete — your warehouse
-   needs MCP configuration. Want to finish that now, or continue
-   to Phase 3?
+   Phase 2 (Environment & Data Connection) is partially complete —
+   BigQuery authentication needs to be finished. Want to complete
+   that now, or continue to Phase 3?
    ```
 
 ---
@@ -539,8 +563,10 @@ When `/setup` is invoked and `.knowledge/setup-state.yaml` already exists:
 | Scenario | Handling |
 |----------|----------|
 | User runs `/setup` but profile.md already exists | Warn and ask to confirm overwrite before proceeding |
-| CSV path does not exist | Suggest alternatives, check `data/` and `data/examples/` |
-| User provides warehouse type but no MCP | Mark Phase 2 as partial, continue interview |
+| `.venv/` directory already exists | Ask user whether to recreate or reuse the existing virtual environment |
+| `gcloud` CLI not installed | Provide install link, mark Phase 2 as partial, continue interview |
+| BigQuery authentication fails | Suggest re-running `gcloud auth application-default login`, mark Phase 2 as partial |
+| `GOOGLE_CLOUD_PROJECT` not set | Instruct user to export the variable and add to shell profile |
 | User skips all optional fields | That is fine. Record nulls and proceed. |
 | User wants to jump to a specific phase | Allow it: "/setup phase 3" resumes from Phase 3 |
 | Session ends mid-interview | State is saved per-phase. Next `/setup` resumes. |
